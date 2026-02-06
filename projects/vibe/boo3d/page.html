@@ -123,9 +123,103 @@
             height: 100%;
             border: none;
         }
+        
+        /* Loading Progress Bar */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--color-bg);
+            pointer-events: none;
+            z-index: 10001;
+        }
+        
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: visible;
+        }
+        
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #ffffff;
+            transition: width 0.1s ease-out;
+            position: relative;
+        }
+        
+        .particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .particle.small {
+            width: 4px;
+            height: 4px;
+        }
+        
+        .particle.large {
+            width: 10px;
+            height: 10px;
+        }
+        
+        body.light-mode .loading {
+            background: #ffffff;
+        }
+        
+        body.light-mode .progress-bar {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        body.light-mode .progress-fill {
+            background: #000000;
+        }
+        
+        body.light-mode .particle {
+            background: #000000 !important;
+        }
+        
+        /* Hide content until loaded */
+        body.is-loading .top-bar,
+        body.is-loading .project-frame {
+            opacity: 0;
+        }
+        
+        body.loaded .loading {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
     </style>
 </head>
-<body>
+<body class="is-loading">
+    <!-- Loading Progress Bar -->
+    <div class="loading">
+        <div class="progress-bar">
+            <div class="progress-fill"></div>
+        </div>
+        <div class="particle-container"></div>
+    </div>
+    
     <header class="top-bar">
         <div class="nav-left">
             <a href="../../../" class="nav-back">← back</a>
@@ -139,15 +233,141 @@
     <script>
         const navBack = document.querySelector('.nav-back');
         const topBar = document.querySelector('.top-bar');
+        const loading = document.querySelector('.loading');
+        const progressFill = document.querySelector('.progress-fill');
+        const particleContainer = document.querySelector('.particle-container');
+        let lastParticleTime = 0;
+        let currentProgress = 0;
+        let loadingFinished = false;
         
+        // Particle System
+        function createParticle(x) {
+            if (!particleContainer) return;
+            
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            const rand = Math.random();
+            if (rand > 0.8) particle.classList.add('large');
+            else if (rand < 0.3) particle.classList.add('small');
+            
+            const opacity = 0.3 + Math.random() * 0.7;
+            const isLight = document.body.classList.contains('light-mode');
+            particle.style.background = isLight ? '#000000' : '#ffffff';
+            particle.style.opacity = opacity;
+            
+            particle.style.left = x + 'px';
+            particle.style.top = '2px';
+            
+            const vx = (Math.random() - 0.5) * 8;
+            const vy = Math.random() * 6 + 2;
+            const rotation = Math.random() * 360;
+            const scale = 0.5 + Math.random() * 1;
+            const lifetime = 800 + Math.random() * 1200;
+            
+            particle.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+            particleContainer.appendChild(particle);
+            
+            let startTime = Date.now();
+            let posX = x;
+            let posY = 2;
+            let velocityX = vx;
+            let velocityY = vy;
+            
+            function animateParticle() {
+                const elapsed = Date.now() - startTime;
+                const prog = elapsed / lifetime;
+                
+                if (prog >= 1) {
+                    particle.remove();
+                    return;
+                }
+                
+                velocityY += 0.15;
+                posX += velocityX;
+                posY += velocityY;
+                
+                const fadeOpacity = (1 - prog) * opacity;
+                const currentScale = scale * (1 - prog * 0.5);
+                
+                particle.style.left = posX + 'px';
+                particle.style.top = posY + 'px';
+                particle.style.opacity = fadeOpacity;
+                particle.style.transform = `scale(${currentScale}) rotate(${rotation + elapsed * 0.2}deg)`;
+                
+                requestAnimationFrame(animateParticle);
+            }
+            
+            requestAnimationFrame(animateParticle);
+        }
+        
+        function createParticleBurst(x, count) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => createParticle(x), i * 20);
+            }
+        }
+        
+        function updateProgress(value) {
+            currentProgress = Math.min(value, 100);
+            if (progressFill) {
+                progressFill.style.width = currentProgress + '%';
+                
+                const now = Date.now();
+                if (now - lastParticleTime > 30) {
+                    const x = (window.innerWidth * currentProgress) / 100;
+                    createParticle(x);
+                    if (Math.random() > 0.7) createParticle(x);
+                    lastParticleTime = now;
+                }
+            }
+        }
+        
+        function finishLoading() {
+            if (loadingFinished) return;
+            loadingFinished = true;
+            
+            createParticleBurst(window.innerWidth, 20);
+            
+            setTimeout(() => {
+                document.body.classList.remove('is-loading');
+                document.body.classList.add('loaded');
+                
+                setTimeout(() => {
+                    loading.style.display = 'none';
+                }, 500);
+            }, 300);
+        }
+        
+        // Gradual progress while loading
+        let progressInterval = setInterval(() => {
+            if (currentProgress < 90 && !loadingFinished) {
+                updateProgress(currentProgress + 1);
+            }
+        }, 30);
+        
+        // Listen for loading complete message from iframe
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'loadingComplete') {
+                clearInterval(progressInterval);
+                
+                const completeInterval = setInterval(() => {
+                    if (currentProgress < 100) {
+                        updateProgress(currentProgress + 2);
+                    } else {
+                        clearInterval(completeInterval);
+                        finishLoading();
+                    }
+                }, 20);
+            }
+        });
+        
+        // Navigation
         navBack.addEventListener('click', (e) => {
             e.preventDefault();
             const href = navBack.getAttribute('href');
             
-            // Add transitioning class for reverse animation
             topBar.classList.add('transitioning');
             
-            // Navigate after animation
             setTimeout(() => {
                 window.location.href = href;
             }, 400);

@@ -1,20 +1,154 @@
 // Portfolio Script
 
+// Loading Progress Bar - Wait for all resources
+let loadingFinished = false;
+
+(function() {
+    const progressFill = document.querySelector('.progress-fill');
+    const particleContainer = document.querySelector('.particle-container');
+    let progress = 0;
+    let lastParticleTime = 0;
+    
+    // Create particle
+    function createParticle(x) {
+        if (!particleContainer) return;
+        
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // Random size
+        const rand = Math.random();
+        if (rand > 0.8) particle.classList.add('large');
+        else if (rand < 0.3) particle.classList.add('small');
+        
+        // White with random opacity
+        const opacity = 0.3 + Math.random() * 0.7;
+        particle.style.background = '#ffffff';
+        particle.style.opacity = opacity;
+        
+        // Position at progress bar edge
+        particle.style.left = x + 'px';
+        particle.style.top = '2px';
+        
+        // Random velocity
+        const vx = (Math.random() - 0.5) * 8;
+        const vy = Math.random() * 6 + 2;
+        const rotation = Math.random() * 360;
+        const scale = 0.5 + Math.random() * 1;
+        const lifetime = 800 + Math.random() * 1200;
+        
+        particle.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+        particleContainer.appendChild(particle);
+        
+        // Animate particle
+        let startTime = Date.now();
+        let posX = x;
+        let posY = 2;
+        let velocityX = vx;
+        let velocityY = vy;
+        
+        function animateParticle() {
+            const elapsed = Date.now() - startTime;
+            const prog = elapsed / lifetime;
+            
+            if (prog >= 1) {
+                particle.remove();
+                return;
+            }
+            
+            // Physics
+            velocityY += 0.15;
+            posX += velocityX;
+            posY += velocityY;
+            
+            // Fade out
+            const fadeOpacity = (1 - prog) * opacity;
+            const currentScale = scale * (1 - prog * 0.5);
+            
+            particle.style.left = posX + 'px';
+            particle.style.top = posY + 'px';
+            particle.style.opacity = fadeOpacity;
+            particle.style.transform = `scale(${currentScale}) rotate(${rotation + elapsed * 0.2}deg)`;
+            
+            requestAnimationFrame(animateParticle);
+        }
+        
+        requestAnimationFrame(animateParticle);
+    }
+    
+    // Create burst of particles
+    function createParticleBurst(x, count) {
+        for (let i = 0; i < count; i++) {
+            setTimeout(() => createParticle(x), i * 20);
+        }
+    }
+    
+    // Update progress
+    function updateProgress(value) {
+        progress = Math.min(value, 100);
+        if (progressFill) {
+            progressFill.style.width = progress + '%';
+            
+            // Create particles at the edge
+            const now = Date.now();
+            if (now - lastParticleTime > 30) {
+                const x = (window.innerWidth * progress) / 100;
+                createParticle(x);
+                if (Math.random() > 0.7) createParticle(x);
+                lastParticleTime = now;
+            }
+        }
+    }
+    
+    // Gradual progress while loading
+    let progressInterval = setInterval(() => {
+        if (progress < 90 && !loadingFinished) {
+            updateProgress(progress + 1);
+        }
+    }, 30);
+    
+    // When all resources are loaded
+    window.addEventListener('load', () => {
+        clearInterval(progressInterval);
+        
+        // Complete to 100%
+        const completeInterval = setInterval(() => {
+            if (progress < 100) {
+                updateProgress(progress + 2);
+            } else {
+                clearInterval(completeInterval);
+                
+                // Final burst of particles
+                createParticleBurst(window.innerWidth, 20);
+                
+                // Reveal content
+                setTimeout(() => {
+                    document.body.classList.remove('is-loading');
+                    document.body.classList.add('loaded');
+                    loadingFinished = true;
+                    
+                    if (typeof startEntranceAnimations === 'function') {
+                        startEntranceAnimations();
+                    }
+                    
+                    setTimeout(() => {
+                        const loading = document.querySelector('.loading');
+                        if (loading) loading.style.display = 'none';
+                    }, 500);
+                }, 300);
+            }
+        }, 20);
+    });
+})();
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Adjust font size first, then animate
-    adjustTitleSize();
-    adjustSubTextSize();
+    // Adjust font size (without animation)
+    adjustTitleSize(false);
+    adjustSubTextSize(false);
     window.addEventListener('resize', () => {
-        adjustTitleSize();
-        adjustSubTextSize();
+        adjustTitleSize(false);
+        adjustSubTextSize(false);
     });
-    
-    // Enable transitions after page load to prevent flash
-    setTimeout(() => {
-        const topBar = document.querySelector('.top-bar');
-        if (topBar) topBar.classList.add('ready');
-    }, 100);
     
     // Restore scroll position if returning from project
     restoreScrollPosition();
@@ -23,8 +157,30 @@ document.addEventListener('DOMContentLoaded', () => {
     loadProjects();
 });
 
+// Start all entrance animations after loading
+function startEntranceAnimations() {
+    // Enable top bar transitions
+    const topBar = document.querySelector('.top-bar');
+    if (topBar) topBar.classList.add('ready');
+    
+    // Animate title
+    animateTitle();
+    
+    // Animate sub text
+    const subLines = document.querySelectorAll('.sub-line');
+    subLines.forEach((line, index) => {
+        setTimeout(() => {
+            line.classList.add('animate');
+        }, 300 + (index * 150));
+    });
+    
+    // Mark SVG as loaded
+    const svg = document.querySelector('.sub-text-svg');
+    if (svg) svg.classList.add('loaded');
+}
+
 // Adjust title font size to fit screen width - 2.5vw (1.25vw padding each side)
-function adjustTitleSize() {
+function adjustTitleSize(shouldAnimate = false) {
     const titleWrapper = document.querySelector('.title-wrapper');
     const chars = document.querySelectorAll('.char');
     
@@ -64,17 +220,11 @@ function adjustTitleSize() {
             const titleHeight = titleWrapper.getBoundingClientRect().height;
             scrollSpacer.style.height = titleHeight + 'px';
         }
-        
-        // Animate only on first load
-        if (!titleWrapper.classList.contains('animated')) {
-            titleWrapper.classList.add('animated');
-            animateTitle();
-        }
     });
 }
 
 // Adjust sub text SVG viewBox
-function adjustSubTextSize() {
+function adjustSubTextSize(shouldAnimate = false) {
     const svg = document.querySelector('.sub-text-svg');
     const line1 = document.querySelector('.sub-line-1');
     const line2 = document.querySelector('.sub-line-2');
@@ -109,17 +259,6 @@ function adjustSubTextSize() {
                 
                 // Set viewBox
                 svg.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
-                
-                // Show SVG after viewBox is set
-                svg.classList.add('loaded');
-                
-                // Animate sub lines
-                const subLines = document.querySelectorAll('.sub-line');
-                subLines.forEach((line, index) => {
-                    setTimeout(() => {
-                        line.classList.add('animate');
-                    }, index * 250); // 250ms delay between each line
-                });
             });
         });
     });

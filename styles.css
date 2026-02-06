@@ -1,4 +1,4 @@
-ㅓㄱ/* Reset & Base */
+/* Reset & Base */
 * {
     margin: 0;
     padding: 0;
@@ -54,6 +54,81 @@ body {
     height: 100%;
     pointer-events: none;
     z-index: 9999;
+}
+
+/* Loading Progress Bar */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--color-bg);
+    pointer-events: none;
+    z-index: 10001;
+}
+
+.progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    overflow: visible;
+}
+
+.progress-fill {
+    width: 0%;
+    height: 100%;
+    background: #ffffff;
+    transition: width 0.1s ease-out;
+    position: relative;
+}
+
+/* Particle container */
+.particle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.particle.small {
+    width: 4px;
+    height: 4px;
+}
+
+.particle.large {
+    width: 10px;
+    height: 10px;
+}
+
+/* Hide content until loaded */
+body.is-loading .cursor-dot,
+body.is-loading .cursor-trail,
+body.is-loading .top-bar,
+body.is-loading .hero,
+body.is-loading .scroll-spacer,
+body.is-loading .cover-section {
+    opacity: 0;
+}
+
+body.loaded .loading {
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
 }
 
 

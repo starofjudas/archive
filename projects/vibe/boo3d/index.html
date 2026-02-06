@@ -52,7 +52,7 @@
     }
 
     .title {
-      font-size: 2.85vw;
+      font-size: 0.9vw;
       font-weight: 800;
       letter-spacing: -0.02em;
       color: #fff;
@@ -80,6 +80,7 @@
 
     .description {
       font-size: 0.75vw;
+      font-weight: 300;
       line-height: 1.5;
       color: rgba(255, 255, 255, 0.6);
       letter-spacing: -0.01em;
@@ -207,19 +208,88 @@
 
     .loading {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: 0.1vw;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000000;
       pointer-events: none;
-      z-index: 50;
-      text-align: center;
-      background: rgba(0,0,0,0.8);
-      padding: 1.25vw;
-      border-radius: 0.5vw;
-      font-size: 0.75vw;
+      z-index: 200;
+    }
+    
+    .progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: visible;
+    }
+    
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: #ffffff;
+      transition: width 0.1s ease-out;
+      position: relative;
+    }
+    
+    .particle-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    
+    .particle.small {
+      width: 4px;
+      height: 4px;
+    }
+    
+    .particle.large {
+      width: 10px;
+      height: 10px;
+    }
+    
+    body.light-mode .loading {
+      background: #ffffff;
+    }
+    
+    body.light-mode .progress-bar {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    
+    body.light-mode .progress-fill {
+      background: #000000;
+    }
+    
+    body.light-mode .particle {
+      background: #000000 !important;
+    }
+    
+    /* Hide content until loaded */
+    body.is-loading .title-container,
+    body.is-loading .ui-container,
+    body.is-loading #canvas-container,
+    body.is-loading .drag-indicator {
+      opacity: 0;
+    }
+    
+    body.loaded .loading {
+      opacity: 0;
+      transition: opacity 0.5s ease;
     }
 
     /* Drag Indicator */
@@ -275,7 +345,7 @@
     }
   </style>
 </head>
-<body>
+<body class="is-loading">
   <div id="flash-overlay"></div>
   
   <div class="title-container">
@@ -296,7 +366,12 @@
   </script>
   
   <div id="canvas-container"></div>
-  <div class="loading">Loading Model...</div>
+  <div class="loading">
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+    <div class="particle-container"></div>
+  </div>
   
   <!-- Drag Indicator -->
   <div class="drag-indicator">
@@ -376,6 +451,121 @@
     const container = document.getElementById('canvas-container');
     const loading = document.querySelector('.loading');
     const flashOverlay = document.getElementById('flash-overlay');
+    const particleContainer = document.querySelector('.particle-container');
+    const progressFill = loading.querySelector('.progress-fill');
+    let lastParticleTime = 0;
+    let currentProgress = 0;
+    
+    // Particle System
+    function createParticle(x) {
+      if (!particleContainer) return;
+      
+      const particle = document.createElement('div');
+      particle.className = 'particle';
+      
+      const rand = Math.random();
+      if (rand > 0.8) particle.classList.add('large');
+      else if (rand < 0.3) particle.classList.add('small');
+      
+      const opacity = 0.3 + Math.random() * 0.7;
+      const isLight = document.body.classList.contains('light-mode');
+      particle.style.background = isLight ? '#000000' : '#ffffff';
+      particle.style.opacity = opacity;
+      
+      particle.style.left = x + 'px';
+      particle.style.top = '2px';
+      
+      const vx = (Math.random() - 0.5) * 8;
+      const vy = Math.random() * 6 + 2;
+      const rotation = Math.random() * 360;
+      const scale = 0.5 + Math.random() * 1;
+      const lifetime = 800 + Math.random() * 1200;
+      
+      particle.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
+      particleContainer.appendChild(particle);
+      
+      let startTime = Date.now();
+      let posX = x;
+      let posY = 2;
+      let velocityX = vx;
+      let velocityY = vy;
+      
+      function animateParticle() {
+        const elapsed = Date.now() - startTime;
+        const prog = elapsed / lifetime;
+        
+        if (prog >= 1) {
+          particle.remove();
+          return;
+        }
+        
+        velocityY += 0.15;
+        posX += velocityX;
+        posY += velocityY;
+        
+        const fadeOpacity = (1 - prog) * opacity;
+        const currentScale = scale * (1 - prog * 0.5);
+        
+        particle.style.left = posX + 'px';
+        particle.style.top = posY + 'px';
+        particle.style.opacity = fadeOpacity;
+        particle.style.transform = `scale(${currentScale}) rotate(${rotation + elapsed * 0.2}deg)`;
+        
+        requestAnimationFrame(animateParticle);
+      }
+      
+      requestAnimationFrame(animateParticle);
+    }
+    
+    function createParticleBurst(x, count) {
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => createParticle(x), i * 20);
+      }
+    }
+    
+    function updateLoadingProgress(value) {
+      currentProgress = Math.min(value, 100);
+      if (progressFill) {
+        progressFill.style.width = currentProgress + '%';
+        
+        const now = Date.now();
+        if (now - lastParticleTime > 30) {
+          const x = (window.innerWidth * currentProgress) / 100;
+          createParticle(x);
+          if (Math.random() > 0.7) createParticle(x);
+          lastParticleTime = now;
+        }
+      }
+    }
+    
+    // Check if in iframe
+    const isInIframe = window !== window.parent;
+    
+    // If in iframe, hide loading immediately and let parent handle it
+    if (isInIframe) {
+      document.body.classList.remove('is-loading');
+      document.body.classList.add('loaded');
+      loading.style.display = 'none';
+    }
+    
+    function finishLoading() {
+      // Notify parent window that loading is complete
+      if (isInIframe) {
+        window.parent.postMessage({ type: 'loadingComplete' }, '*');
+        return;
+      }
+      
+      createParticleBurst(window.innerWidth, 20);
+      
+      setTimeout(() => {
+        document.body.classList.remove('is-loading');
+        document.body.classList.add('loaded');
+        
+        setTimeout(() => {
+          loading.style.display = 'none';
+        }, 500);
+      }, 300);
+    }
     
     // Setup Base Scene
     function initBase() {
@@ -443,16 +633,25 @@
         originalModel.rotation.set(0, 0, 0);
         originalModel.scale.set(1, 1, 1);
 
-        loading.style.display = 'none';
-        switchMode('default'); 
+        // Complete to 100% then finish
+        const completeInterval = setInterval(() => {
+          if (currentProgress < 100) {
+            updateLoadingProgress(currentProgress + 2);
+          } else {
+            clearInterval(completeInterval);
+            finishLoading();
+            switchMode('default');
+          }
+        }, 20);
       }, 
       (xhr) => {
+        if (xhr.total > 0) {
           const percent = Math.floor((xhr.loaded / xhr.total) * 100);
-          loading.textContent = `Loading... ${percent}%`;
+          updateLoadingProgress(percent);
+        }
       },
       (err) => {
         console.error(err);
-        loading.innerHTML = `Error Loading Model<br><br><small>${err.message || 'Check console'}</small>`;
       });
     }
 
