@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BOO 3D CHARACTER — Han Donghoon</title>
+    <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
     <style>
         * {
             margin: 0;
@@ -198,16 +199,89 @@
             background: #000000 !important;
         }
         
-        /* Hide content until loaded */
-        body.is-loading .top-bar,
+        /* Hide content until loaded (keep header visible) */
         body.is-loading .project-frame {
             opacity: 0;
+        }
+        
+        /* Header stays above loading */
+        .top-bar {
+            z-index: 10002;
         }
         
         body.loaded .loading {
             opacity: 0;
             transition: opacity 0.5s ease;
             pointer-events: none;
+        }
+        
+        /* Responsive - Tablet */
+        @media (max-width: 1024px) {
+            .top-bar {
+                padding: 3vw;
+            }
+            
+            .nav-back {
+                font-size: 2vw;
+            }
+            
+            .nav-home {
+                font-size: 2vw;
+                transform: translateX(8vw);
+            }
+            
+            .top-bar.transitioning .nav-back {
+                transform: translateX(-1.5vw);
+            }
+            
+            .location {
+                font-size: 2vw;
+            }
+        }
+        
+        /* Responsive - Mobile */
+        @media (max-width: 768px) {
+            .top-bar {
+                padding: 4vw;
+            }
+            
+            .nav-back {
+                font-size: 3.5vw;
+            }
+            
+            .nav-home {
+                font-size: 3.5vw;
+                transform: translateX(14vw);
+            }
+            
+            .top-bar.transitioning .nav-back {
+                transform: translateX(-2vw);
+            }
+            
+            .location {
+                font-size: 3.5vw;
+                gap: 2vw;
+            }
+        }
+        
+        /* Responsive - Small Mobile */
+        @media (max-width: 480px) {
+            .top-bar {
+                padding: 5vw;
+            }
+            
+            .nav-back {
+                font-size: 4vw;
+            }
+            
+            .nav-home {
+                font-size: 4vw;
+                transform: translateX(16vw);
+            }
+            
+            .location {
+                font-size: 4vw;
+            }
         }
     </style>
 </head>
@@ -361,8 +435,10 @@
             }
         });
         
-        // Navigation
-        navBack.addEventListener('click', (e) => {
+        // Navigation - both back and home links
+        const navHome = document.querySelector('.nav-home');
+        
+        function navigateBack(e) {
             e.preventDefault();
             const href = navBack.getAttribute('href');
             
@@ -371,7 +447,10 @@
             setTimeout(() => {
                 window.location.href = href;
             }, 400);
-        });
+        }
+        
+        navBack.addEventListener('click', navigateBack);
+        navHome.addEventListener('click', navigateBack);
         
         // Listen for theme changes from iframe
         window.addEventListener('message', (e) => {

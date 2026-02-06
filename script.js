@@ -289,9 +289,12 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Custom cursor
-const cursorDot = document.querySelector('.cursor-dot');
-const canvas = document.querySelector('.cursor-trail');
+// Detect touch device
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
+
+// Custom cursor (skip on touch devices)
+const cursorDot = isTouchDevice ? null : document.querySelector('.cursor-dot');
+const canvas = isTouchDevice ? null : document.querySelector('.cursor-trail');
 const ctx = canvas ? canvas.getContext('2d') : null;
 
 // Trail points
@@ -618,8 +621,11 @@ function initThumbnailFallback() {
     });
 }
 
-// 3D Tilt Effect for Project Thumbnails
+// 3D Tilt Effect for Project Thumbnails (desktop only)
 function initTiltEffect() {
+    // Skip tilt effect on touch devices
+    if (isTouchDevice) return;
+    
     const projectItems = document.querySelectorAll('.project-item');
     
     projectItems.forEach(item => {

@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AstroDither - 10 Styles</title>
+  <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
   <style>
     * {
       margin: 0;
@@ -279,12 +280,16 @@
       background: #000000 !important;
     }
     
-    /* Hide content until loaded */
+    /* Hide content until loaded (keep header visible via parent page) */
     body.is-loading .title-container,
     body.is-loading .ui-container,
     body.is-loading #canvas-container,
     body.is-loading .drag-indicator {
       opacity: 0;
+    }
+    
+    .loading {
+      z-index: 150;
     }
     
     body.loaded .loading {
@@ -342,6 +347,142 @@
 
     body.light-mode .drag-text {
       color: rgba(0, 0, 0, 0.8);
+    }
+    
+    /* Mobile - Hide drag indicator on touch devices */
+    @media (hover: none) and (pointer: coarse) {
+      .drag-indicator {
+        display: none !important;
+      }
+      
+      #canvas-container {
+        cursor: auto;
+      }
+    }
+    
+    /* Responsive - Tablet */
+    @media (max-width: 1024px) {
+      .title-container {
+        top: 10vw;
+        left: 3vw;
+        right: 3vw;
+        max-width: none;
+        width: auto;
+      }
+      
+      .title {
+        font-size: 2.5vw;
+        margin-bottom: 1.5vw;
+      }
+      
+      .description {
+        font-size: 1.5vw;
+        width: 100%;
+      }
+      
+      .ui-container {
+        left: auto;
+        right: 0;
+        top: auto;
+        bottom: 0;
+        transform: none;
+        flex-direction: row;
+        width: 100%;
+        padding: 3vw;
+        gap: 2vw;
+        overflow-x: auto;
+        justify-content: flex-start;
+        background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      body.light-mode .ui-container {
+        background: linear-gradient(to top, rgba(255,255,255,0.3), transparent);
+      }
+      
+      .btn {
+        font-size: 1.8vw;
+        padding: 1.5vw 2vw;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      
+      .drag-circle {
+        width: 20vw;
+        height: 20vw;
+      }
+      
+      .drag-text {
+        font-size: 1.5vw;
+      }
+    }
+    
+    /* Responsive - Mobile */
+    @media (max-width: 768px) {
+      .title-container {
+        top: 13vw;
+        left: 4vw;
+        right: 4vw;
+        max-width: none;
+        width: auto;
+      }
+      
+      .title {
+        font-size: 3.5vw;
+        margin-bottom: 2vw;
+      }
+      
+      .description {
+        font-size: 2.3vw;
+        line-height: 1.6;
+        width: 100%;
+      }
+      
+      .description .desc-line {
+        white-space: normal;
+      }
+      
+      
+      .ui-container {
+        padding: 4vw;
+        gap: 1vw;
+      }
+      
+      .btn {
+        font-size: 3vw;
+        padding: 2vw 3vw;
+      }
+    }
+    
+    /* Responsive - Small Mobile */
+    @media (max-width: 480px) {
+      .title-container {
+        top: 17vw;
+        left: 5vw;
+        right: 5vw;
+        max-width: none;
+        width: auto;
+      }
+      
+      .title {
+        font-size: 4.5vw;
+        margin-bottom: 2.5vw;
+      }
+      
+      .description {
+        font-size: 2.8vw;
+        width: 100%;
+      }
+      
+      .ui-container {
+        padding: 5vw;
+        gap: 1vw;
+      }
+      
+      .btn {
+        font-size: 3.5vw;
+        padding: 2.5vw 3.5vw;
+      }
     }
   </style>
 </head>
@@ -2219,25 +2360,48 @@
       });
     });
     
+    // Touch support - character only (same as desktop)
+    function checkTouchCharacterIntersection(touch) {
+      mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      
+      if (currentObject) {
+        const intersects = raycaster.intersectObject(currentObject, true);
+        return intersects.length > 0;
+      }
+      return false;
+    }
+    
     document.addEventListener('touchstart', (e) => {
-      isDragging = true;
-      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-    });
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        // Only start dragging if touching the character
+        if (checkTouchCharacterIntersection(touch)) {
+          isDragging = true;
+          previousMousePosition = { x: touch.clientX, y: touch.clientY };
+          e.preventDefault(); // Prevent scrolling when dragging character
+        }
+      }
+    }, { passive: false });
     
     document.addEventListener('touchmove', (e) => {
-      if (isDragging) {
+      if (isDragging && e.touches.length === 1) {
+        const touch = e.touches[0];
         const deltaMove = {
-          x: e.touches[0].clientX - previousMousePosition.x,
-          y: e.touches[0].clientY - previousMousePosition.y
+          x: touch.clientX - previousMousePosition.x,
+          y: touch.clientY - previousMousePosition.y
         };
         
         targetRotationY += deltaMove.x * 0.005;
         targetRotationX += deltaMove.y * 0.005;
         targetRotationX = Math.max(-0.5, Math.min(0.5, targetRotationX));
         
-        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        previousMousePosition = { x: touch.clientX, y: touch.clientY };
+        e.preventDefault(); // Prevent scrolling while dragging
       }
-    });
+    }, { passive: false });
     
     document.addEventListener('touchend', () => {
       isDragging = false;
