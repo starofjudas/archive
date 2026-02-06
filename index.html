@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio — Han Donghoon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <canvas class="cursor-trail"></canvas>
+    
+    <!-- Top Navigation Bar -->
+    <header class="top-bar">
+        <div class="nav-left">
+            <span class="nav-back">back</span>
+            <a href="/" class="logo" onclick="window.location.href = window.location.pathname + '?t=' + Date.now(); return false;">home</a>
+        </div>
+        <div class="location">han donghoon</div>
+    </header>
+
+    <!-- Hero Section (Fixed) -->
+    <section class="hero">
+        <div class="title-wrapper">
+            <div class="char-container"><span class="char">a</span></div>
+            <div class="char-container"><span class="char">r</span></div>
+            <div class="char-container"><span class="char">c</span></div>
+            <div class="char-container"><span class="char">h</span></div>
+            <div class="char-container"><span class="char">i</span></div>
+            <div class="char-container"><span class="char">v</span></div>
+            <div class="char-container"><span class="char">e</span></div>
+        </div>
+    </section>
+
+    <!-- Scroll Spacer -->
+    <div class="scroll-spacer"></div>
+
+    <!-- Cover Section -->
+    <section class="cover-section">
+        <div class="sub-text-wrapper">
+            <svg class="sub-text-svg" viewBox="0 0 1000 200" preserveAspectRatio="xMinYMin meet">
+                <text class="sub-line sub-line-1" x="0" y="85">there is no such thing as small change.</text>
+                <text class="sub-line sub-line-2" x="0" y="185">everything begins with a single, intentional line.</text>
+            </svg>
+        </div>
+        
+        <!-- Filter Menu -->
+        <nav class="filter-menu">
+            <button class="filter-btn active" data-filter="all">all</button>
+            <button class="filter-btn" data-filter="vibe">vibe</button>
+            <button class="filter-btn" data-filter="moment">moment</button>
+        </nav>
+        
+        <!-- Project List (loaded from JSON) -->
+        <div class="project-list" id="project-list">
+            <!-- Projects will be loaded dynamically -->
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>

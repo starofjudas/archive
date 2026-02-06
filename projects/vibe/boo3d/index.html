@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<!-- Updated: force refresh v2 -->
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstroDither - 10 Styles</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    }
+
+    #canvas-container {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      cursor: default;
+    }
+
+    /* Flash Overlay */
+    #flash-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 200;
+      mix-blend-mode: overlay;
+    }
+
+    .title-container {
+      position: fixed;
+      top: 3.75vw;
+      left: 1.25vw;
+      z-index: 100;
+      max-width: 40vw;
+    }
+
+    .title {
+      font-size: 2.85vw;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 1vw;
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    
+    .title .char {
+      display: inline-block;
+      opacity: 0;
+      animation: charRevealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes charRevealUp {
+      from {
+        transform: translateY(110%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .description {
+      font-size: 0.75vw;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: -0.01em;
+      margin-top: -0.3vw;
+    }
+    
+    .description .desc-line {
+      display: block;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: descLineReveal 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    .description .desc-line:nth-child(1) {
+      animation-delay: 0.3s;
+    }
+    
+    .description .desc-line:nth-child(2) {
+      animation-delay: 0.4s;
+    }
+    
+    @keyframes descLineReveal {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .ui-container {
+      position: fixed;
+      left: 1.25vw;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.1vw;
+      z-index: 100;
+      background: transparent;
+      padding: 0;
+      border: none;
+    }
+
+    .btn {
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.4);
+      padding: 0.4vw 0;
+      font-family: inherit;
+      font-size: 0.6vw;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateX(-20px);
+      animation: menuReveal 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    .btn:nth-child(1) { animation-delay: 0.4s; }
+    .btn:nth-child(2) { animation-delay: 0.45s; }
+    .btn:nth-child(3) { animation-delay: 0.5s; }
+    .btn:nth-child(4) { animation-delay: 0.55s; }
+    .btn:nth-child(5) { animation-delay: 0.6s; }
+    .btn:nth-child(6) { animation-delay: 0.65s; }
+    .btn:nth-child(7) { animation-delay: 0.7s; }
+    .btn:nth-child(8) { animation-delay: 0.75s; }
+    .btn:nth-child(9) { animation-delay: 0.8s; }
+    .btn:nth-child(10) { animation-delay: 0.85s; }
+    .btn:nth-child(11) { animation-delay: 0.9s; }
+    .btn:nth-child(12) { animation-delay: 0.95s; }
+    .btn:nth-child(13) { animation-delay: 1.0s; }
+    .btn:nth-child(14) { animation-delay: 1.05s; }
+    .btn:nth-child(15) { animation-delay: 1.1s; }
+    .btn:nth-child(16) { animation-delay: 1.15s; }
+    
+    @keyframes menuReveal {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .btn:hover {
+      color: #fff;
+      text-decoration: line-through;
+    }
+
+    .btn.active {
+      color: #fff;
+      text-decoration: line-through;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+    }
+
+    /* Sketch mode - dark text for white background */
+    body.light-mode .title {
+      color: #000;
+    }
+    
+    body.light-mode .description {
+      color: rgba(0, 0, 0, 0.6);
+    }
+    
+    body.light-mode .btn {
+      color: rgba(0, 0, 0, 0.4);
+    }
+    
+    body.light-mode .btn:hover,
+    body.light-mode .btn.active {
+      color: #000;
+      text-decoration: line-through;
+    }
+
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 0.1vw;
+      pointer-events: none;
+      z-index: 50;
+      text-align: center;
+      background: rgba(0,0,0,0.8);
+      padding: 1.25vw;
+      border-radius: 0.5vw;
+      font-size: 0.75vw;
+    }
+
+    /* Drag Indicator */
+    .drag-indicator {
+      position: fixed;
+      pointer-events: none;
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      transform: translate(-50%, -50%);
+    }
+
+    .drag-indicator.visible {
+      opacity: 1;
+    }
+
+    .drag-indicator.hidden {
+      opacity: 0;
+    }
+
+    .drag-circle {
+      position: absolute;
+      width: 12vw;
+      height: 12vw;
+      border: 1px solid #ffffff;
+      border-radius: 50%;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .drag-indicator.dragging .drag-circle {
+      transform: scale(0.9);
+      opacity: 0.5;
+    }
+
+    .drag-text {
+      font-size: 0.7vw;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      color: rgba(255, 255, 255, 0.9);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    body.light-mode .drag-circle {
+      border-color: #000000;
+    }
+
+    body.light-mode .drag-text {
+      color: rgba(0, 0, 0, 0.8);
+    }
+  </style>
+</head>
+<body>
+  <div id="flash-overlay"></div>
+  
+  <div class="title-container">
+    <h1 class="title" id="page-title">BOO 3D CHARACTER</h1>
+    <p class="description">
+      <span class="desc-line">a ghostly character rendered through 12 unique visual styles.</span>
+      <span class="desc-line">from ethereal glass to cyberpunk glitch, explore different artistic expressions.</span>
+    </p>
+  </div>
+  
+  <script>
+    // Character animation for title
+    const title = document.getElementById('page-title');
+    const text = title.textContent;
+    title.innerHTML = text.split('').map((char, i) => 
+      `<span class="char" style="animation-delay: ${i * 0.03}s">${char === ' ' ? '&nbsp;' : char}</span>`
+    ).join('');
+  </script>
+  
+  <div id="canvas-container"></div>
+  <div class="loading">Loading Model...</div>
+  
+  <!-- Drag Indicator -->
+  <div class="drag-indicator">
+    <div class="drag-circle"></div>
+    <span class="drag-text">HOLD AND DRAG</span>
+  </div>
+  
+  <div class="ui-container">
+    <button class="btn active" data-mode="default">Default</button>
+    <button class="btn" data-mode="points">Point Cloud</button>
+    <button class="btn" data-mode="wireframe">Wireframe</button>
+    <button class="btn" data-mode="ascii">ASCII</button>
+    <button class="btn" data-mode="toon">Toon</button>
+    <button class="btn" data-mode="voxel">Voxel</button>
+    <button class="btn" data-mode="glitch">Glitch</button>
+    <button class="btn" data-mode="sketch">Sketch</button>
+    <button class="btn" data-mode="glass">Glass</button>
+    <button class="btn" data-mode="liquid">Liquid</button>
+    <button class="btn" data-mode="polygon">Polygon</button>
+    <button class="btn" data-mode="thermal">Thermal</button>
+    <button class="btn" data-mode="hologram">Hologram</button>
+    <button class="btn" data-mode="pixelation">Pixelation</button>
+    <button class="btn" data-mode="xray">X-Ray</button>
+    <button class="btn" data-mode="dissolve">Dissolve</button>
+  </div>
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://esm.sh/three@0.160.0",
+        "three/addons/": "https://esm.sh/three@0.160.0/examples/jsm/",
+        "postprocessing": "https://esm.sh/postprocessing@6.35.0?external=three",
+        "gsap": "https://esm.sh/gsap@3.12.5"
+      }
+    }
+  </script>
+  
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { AsciiEffect } from 'three/addons/effects/AsciiEffect.js';
+    import { MeshSurfaceSampler } from 'three/addons/math/MeshSurfaceSampler.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    import { SimplifyModifier } from 'three/addons/modifiers/SimplifyModifier.js';
+    import { EffectComposer, RenderPass, EffectPass, BloomEffect, FXAAEffect } from 'postprocessing';
+    import gsap from 'gsap';
+
+    // Global Variables
+    let scene, camera, renderer, composer;
+    let originalModel = null; 
+    let currentMode = 'default';
+    let currentObject = null; 
+    let asciiEffect = null;
+    let clock = new THREE.Clock();
+    
+    // Pixelation mode variables
+    let pixelRenderTarget = null;
+    let pixelScene = null;
+    let pixelQuad = null;
+    
+    // Voxel mode AA (face/edge shimmer fix)
+    let voxelFXAAEffect = null;
+    
+    // Mouse Interaction Variables
+    let isDragging = false;
+    let previousMousePosition = { x: 0, y: 0 };
+    let targetRotationY = 0;
+    let targetRotationX = 0;
+    let currentRotationY = 0;
+    let currentRotationX = 0;
+    
+    // Raycaster for character detection
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let isOverCharacter = false;
+    
+    const container = document.getElementById('canvas-container');
+    const loading = document.querySelector('.loading');
+    const flashOverlay = document.getElementById('flash-overlay');
+    
+    // Setup Base Scene
+    function initBase() {
+      scene = new THREE.Scene();
+      
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+      camera.position.set(0, 0, 8.5); 
+      camera.lookAt(0, 0, 0);       
+      
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      // renderer.outputColorSpace = THREE.SRGBColorSpace; // PBR을 위해
+      container.appendChild(renderer.domElement);
+      
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+      scene.add(ambientLight);
+      
+      const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+      dirLight.position.set(5, 5, 5);
+      scene.add(dirLight);
+      
+      const backLight = new THREE.DirectionalLight(0xffffff, 1);
+      backLight.position.set(-5, 5, -5);
+      scene.add(backLight);
+    }
+
+    // Load Model
+    function loadModel() {
+      const loader = new GLTFLoader();
+      
+      loader.load('Boo.glb', (gltf) => {
+        originalModel = gltf.scene;
+        
+        const box = new THREE.Box3().setFromObject(originalModel);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z);
+        const scale = 5.1 / maxDim; // 15% Reduced
+        
+        originalModel.traverse((child) => {
+          if (child.isMesh) {
+            child.geometry.scale(scale, scale, scale);
+            
+            // 중앙 이동 + Y축 강제 보정 (2.3) + 왼쪽 이동 (0.5)
+            child.geometry.translate(
+                -center.x * scale - 0.3, 
+                -center.y * scale + 2.1, 
+                -center.z * scale
+            );
+            
+            child.position.set(0, 0, 0);
+            child.rotation.set(0, 0, 0);
+            child.scale.set(1, 1, 1);
+            
+            // Save original material for restoration
+            child.userData.originalMaterial = child.material.clone();
+            
+            child.updateMatrix();
+          }
+        });
+        
+        originalModel.position.set(0, 0, 0);
+        originalModel.rotation.set(0, 0, 0);
+        originalModel.scale.set(1, 1, 1);
+
+        loading.style.display = 'none';
+        switchMode('default'); 
+      }, 
+      (xhr) => {
+          const percent = Math.floor((xhr.loaded / xhr.total) * 100);
+          loading.textContent = `Loading... ${percent}%`;
+      },
+      (err) => {
+        console.error(err);
+        loading.innerHTML = `Error Loading Model<br><br><small>${err.message || 'Check console'}</small>`;
+      });
+    }
+
+    // ==========================================
+    // CLEAR SCENE
+    // ==========================================
+    function clearScene() {
+      if (currentObject) {
+        // Clean up lights if any (Glass mode)
+        if (currentObject.userData.lights) {
+            currentObject.userData.lights.forEach(light => scene.remove(light));
+        }
+        scene.remove(currentObject);
+        currentObject = null;
+      }
+      
+      if (asciiEffect) {
+        container.removeChild(asciiEffect.domElement);
+        asciiEffect = null;
+        renderer.domElement.style.display = 'block';
+      }
+      
+      if (composer) {
+        composer.dispose();
+        composer = null;
+      }
+      voxelFXAAEffect = null;
+      
+      // Clean up pixel mode resources
+      if (pixelRenderTarget) {
+        pixelRenderTarget.dispose();
+        pixelRenderTarget = null;
+      }
+      if (pixelScene) {
+        pixelScene = null;
+      }
+      if (pixelQuad) {
+        pixelQuad.geometry.dispose();
+        pixelQuad.material.dispose();
+        pixelQuad = null;
+      }
+      
+      scene.background = new THREE.Color(0x000000);
+      scene.environment = null;
+    }
+    
+    function updateVoxelFXAAResolution() {
+      if (!voxelFXAAEffect || !renderer) return;
+      const pr = renderer.getPixelRatio ? renderer.getPixelRatio() : 1;
+      const w = Math.max(1, Math.floor(window.innerWidth * pr));
+      const h = Math.max(1, Math.floor(window.innerHeight * pr));
+      
+      if (typeof voxelFXAAEffect.setSize === 'function') {
+        voxelFXAAEffect.setSize(w, h);
+        return;
+      }
+      
+      // Fallback for implementations that expose a "resolution" uniform (inverse size)
+      const u = voxelFXAAEffect.uniforms && typeof voxelFXAAEffect.uniforms.get === 'function'
+        ? voxelFXAAEffect.uniforms.get('resolution')
+        : null;
+      if (u && u.value) {
+        if (typeof u.value.set === 'function') u.value.set(1 / w, 1 / h);
+        else {
+          u.value.x = 1 / w;
+          u.value.y = 1 / h;
+        }
+      }
+    }
+
+    // ==========================================
+    // MODE 0: Default
+    // ==========================================
+    function setupDefault() {
+      scene.background = new THREE.Color(0x1a1a2e);
+      
+      const group = new THREE.Group();
+      
+      originalModel.traverse((child) => {
+        if (child.isMesh) {
+          const mesh = new THREE.Mesh(child.geometry, child.userData.originalMaterial);
+          group.add(mesh);
+        }
+      });
+      
+      currentObject = group;
+      scene.add(currentObject);
+    }
+
+    // ==========================================
+    // MODE 1: Point Cloud (Minimal)
+    // ==========================================
+    function setupPoints() {
+      scene.background = new THREE.Color(0x050508);
+      const group = new THREE.Group();
+      
+      originalModel.traverse((child) => {
+        if (child.isMesh) {
+          const origMat = child.userData.originalMaterial;
+          const color = (origMat && origMat.color) ? origMat.color.clone() : new THREE.Color(1, 1, 1);
+          
+          // 1) 반투명 솔리드 메시 (안쪽 가리기용) - 먼저 추가
+          const solidMat = new THREE.MeshBasicMaterial({
+            color: color.clone().multiplyScalar(0.08), // 원본 색의 아주 어두운 버전
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.FrontSide
+          });
+          const solidMesh = new THREE.Mesh(child.geometry, solidMat);
+          solidMesh.renderOrder = 0;
+          group.add(solidMesh);
+          
+          // 2) 포인트 클라우드 (위에 그리기) - Additive Blending으로 겹치면 더 밝아짐
+          const brightColor = color.clone().multiplyScalar(2.2);
+          const pointMat = new THREE.PointsMaterial({
+            color: brightColor,
+            map: (origMat && origMat.map) ? origMat.map : null,
+            size: 0.02,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 1.0,
+            blending: THREE.AdditiveBlending,  // 포인트 겹치면 더 밝아짐 (네온 효과)
+            depthWrite: false  // Additive 블렌딩이 제대로 동작하도록
+          });
+          const points = new THREE.Points(child.geometry, pointMat);
+          points.renderOrder = 1;
+          group.add(points);
+        }
+      });
+      
+      currentObject = group;
+      scene.add(currentObject);
+      
+      composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      // Bloom 강화: 포인트가 강하게 빛나는 효과
+      composer.addPass(new EffectPass(camera, new BloomEffect({ 
+          intensity: 2.0,
+          luminanceThreshold: 0.15,
+          radius: 0.8
+      })));
+    }
+
+    // ==========================================
+    // MODE 2: Wireframe
+    // ==========================================
+    function setupWireframe() {
+      scene.background = new THREE.Color(0x000000);
+      const group = new THREE.Group();
+
+      originalModel.traverse((child) => {
+        if (child.isMesh) {
+          const origMat = child.userData.originalMaterial;
+          const color = (origMat && origMat.color) ? origMat.color.clone() : new THREE.Color(1, 1, 1);
+          
+          // 1) 반투명 솔리드 메시 (안쪽 가리기용) - 블랙
+          const solidMat = new THREE.MeshBasicMaterial({
+            color: 0x000000,
+            transparent: true,
+            opacity: 0.9,
+            side: THREE.FrontSide
+          });
+          const solidMesh = new THREE.Mesh(child.geometry, solidMat);
+          solidMesh.renderOrder = 0;
+          group.add(solidMesh);
+          
+          // 2) 와이어프레임 라인 - 더 밝고 채도 높게
+          const brightColor = color.clone();
+          const hsl = {};
+          brightColor.getHSL(hsl);
+          hsl.s = Math.min(1.0, hsl.s * 1.8);  // 채도 80% 증가
+          hsl.l = Math.min(1.0, hsl.l * 1.5);  // 밝기도 50% 증가
+          brightColor.setHSL(hsl.h, hsl.s, hsl.l);
+          const wireMat = new THREE.LineBasicMaterial({
+            color: brightColor
+          });
+          const wiregeo = new THREE.WireframeGeometry(child.geometry);
+          const lines = new THREE.LineSegments(wiregeo, wireMat);
+          lines.renderOrder = 1;
+          group.add(lines);
+        }
+      });
+      
+      currentObject = group;
+      scene.add(currentObject);
+      // Bloom 없이 기본 렌더링
+    }
+
+    // ==========================================
+    // MODE 3: ASCII
+    // ==========================================
+    function setupAscii() {
+      scene.background = new THREE.Color(0x000000);
+      const group = new THREE.Group();
+      
+      originalModel.traverse((child) => {
+        if (child.isMesh) {
+          const material = new THREE.MeshPhongMaterial({
+            map: child.userData.originalMaterial.map || null,
+            color: child.userData.originalMaterial.color || 0xffffff,
+            flatShading: true
+          });
+          const mesh = new THREE.Mesh(child.geometry, material);
+          group.add(mesh);
+        }
+      });
+      
+      currentObject = group;
+      scene.add(currentObject);
+      
+      renderer.domElement.style.display = 'none';
+      asciiEffect = new AsciiEffect(renderer, ' .:-+*=%@#', { invert: true });
+      asciiEffect.setSize(window.innerWidth, window.innerHeight);
+      asciiEffect.domElement.style.color = 'white';
+      asciiEffect.domElement.style.backgroundColor = 'black';
+      asciiEffect.domElement.style.position = 'absolute';
+      asciiEffect.domElement.style.top = '0';
+      asciiEffect.domElement.style.left = '0';
+      container.appendChild(asciiEffect.domElement);
+    }
+
+    // ==========================================
+    // MODE 4: Toon
+    // ==========================================
+    function setupToon() {
+      scene.background = new THREE.Color(0x87CEEB);
+      const group = new THREE.Group();
+      
+      const colors = new Uint8Array([200, 200, 200, 255]);
+      const gradientMap = new THREE.DataTexture(colors, 4, 1, THREE.RedFormat);
+      gradientMap.needsUpdate = true;
+      
+      originalModel.traverse((child) => {
+        if (child.isMesh) {
+          const material = new THREE.MeshToonMaterial({
+            map: child.userData.originalMaterial.map || null,
+            color: child.userData.originalMaterial.color || 0xffffff,
+            gradientMap: gradientMap
+          });
+          
+          const mesh = new THREE.Mesh(child.geometry, material);
+          const outlineMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+          const outlineMesh = new THREE.Mesh(child.geometry, outlineMat);
+          outlineMesh.scale.multiplyScalar(1.03);
+          mesh.add(outlineMesh);
+          
+          group.add(mesh);
+        }
+      });
+      
+      currentObject = group;
+      scene.add(currentObject);
+    }
+
+    // ==========================================
+    // MODE 5: Voxel
+    // ==========================================
+    function setupVoxel() {
+      scene.background = new THREE.Color(0x1a1a2e);
+      const group = new THREE.Group();
+      
+      // 복셀 설정: 해상도를 높이고 크기를 줄여서 촘촘하게 배치
+      const gridResolution = 20; // 기존 12 -> 20 (더 촘촘한 그리드)
+      const voxelSize = 0.06;    // 기존 0.085 -> 0.06 (그리드에 맞춘 크기)
+      const voxelGeo = new THREE.BoxGeometry(voxelSize, voxelSize, voxelSize);
+      
+      // 눈 주변은 대비가 커서 회전/이동 시 '떨림'이 더 도드라져 보임
+      // → 눈(흰자/동공) 파트만 더 촘촘하게(더 작은 복셀 + 더 높은 스냅 해상도 + 더 많은 샘플)
+      const eyeGridResolution = 34;
+      const eyeVoxelSize = 0.045;
+      const eyeVoxelGeo = new THREE.BoxGeometry(eyeVoxelSize, eyeVoxelSize, eyeVoxelSize);
+      const eyeSampleMultiplier = 10; // 기본(4) 대비 눈 파트는 더 촘촘히
+      const bodySampleMultiplier = 8; // 몸통/기타 파트 빈틈 보완용
+      
+      originalModel.traverse((child) => {
+        if (child.isMesh) {
+          const origMat = child.userData.originalMaterial;
+          const meshName = child.name.toLowerCase();
+          
+          // Determine color based on mesh name
+          let partColor = origMat.color ? origMat.color.clone() : new THREE.Color(0.6, 0.3, 0.8);
+          
+          // Eye whites
+          const isEyeWhite = (meshName.includes('eye') && !meshName.includes('pupil') && !meshName.includes('ball'));
+          if (isEyeWhite) {
+            partColor = new THREE.Color(1.0, 1.0, 1.0);
+          }
+          // Eye pupils
+          const isPupil = (meshName.includes('pupil') || meshName.includes('iris'));
+          if (isPupil) {
+            partColor = new THREE.Color(0.0, 0.0, 0.0);
+          }
+          // Teeth
+          if (meshName.includes('teeth') || meshName.includes('tooth')) {
+            partColor = new THREE.Color(1.0, 1.0, 1.0);
+          }
+          // Tongue / Mouth inside
+          if (meshName.includes('tongue') || meshName.includes('mouth')) {
+            partColor = new THREE.Color(0.2, 0.1, 0.25);
+          }
+          
+          const isEyePart = isEyeWhite || isPupil;
+          
+          // 눈은 고대비 경계에서 조명 변화/깊이 경쟁으로 떨림이 잘 보이므로
+          // - 조명 영향 제거(고정 색)
+          // - 동공은 depthWrite 끄고 renderOrder 올리고, 아주 미세하게 앞으로 띄워 겹침(z-fighting) 제거
+          const voxelMat = isEyePart
+            ? new THREE.MeshBasicMaterial({ color: partColor })
+            : new THREE.MeshLambertMaterial({ color: partColor });
+          
+          if (isPupil) {
+            voxelMat.depthWrite = false;
+          }
+          
+          const partGridResolution = isEyePart ? eyeGridResolution : gridResolution;
+          const partVoxelGeo = isEyePart ? eyeVoxelGeo : voxelGeo;
+          
+          // MeshSurfaceSampler를 사용하여 표면 전체에서 균일하게 샘플링
+          const sampler = new MeshSurfaceSampler(child)
+            .setWeightAttribute(null)
+            .build();
+            
+          // 기존 Vertex 수 기반 샘플링으로 빈틈 채우기
+          const vertexCount = child.geometry.attributes.position.count;
+          const sampleCount = Math.floor(vertexCount * (isEyePart ? eyeSampleMultiplier : bodySampleMultiplier)); 
+          
+          const instancedMesh = new THREE.InstancedMesh(partVoxelGeo, voxelMat, sampleCount);
+          if (isEyeWhite) instancedMesh.renderOrder = 9;
+          if (isPupil) instancedMesh.renderOrder = 10;
+          
+          const dummy = new THREE.Object3D();
+          const tempPosition = new THREE.Vector3();
+          const tempNormal = new THREE.Vector3();
+          
+          // 스냅된 같은 셀에 중복 배치되면 실제로는 빈틈이 채워지지 않으므로,
+          // 유니크한 스냅 셀만 모아서 인스턴스를 채움(특히 몸통 빈틈 개선)
+          const occupied = new Set();
+          let filled = 0;
+          const maxAttempts = sampleCount * 3;
+          
+          for (let attempt = 0; attempt < maxAttempts && filled < sampleCount; attempt++) {
+            // 표면에서 무작위 위치 샘플링
+            sampler.sample(tempPosition, tempNormal);
+            
+            const sx = Math.round(tempPosition.x * partGridResolution) / partGridResolution;
+            const sy = Math.round(tempPosition.y * partGridResolution) / partGridResolution;
+            const sz = Math.round(tempPosition.z * partGridResolution) / partGridResolution;
+            const key = `${sx},${sy},${sz}`;
+            if (occupied.has(key)) continue;
+            occupied.add(key);
+            
+            dummy.position.set(sx, sy, sz);
+            
+            // 동공은 흰자와 거의 같은 깊이에 있어서 겹치며 깜빡일 수 있음 → 아주 미세하게 앞으로 띄움
+            if (isPupil) {
+              dummy.position.addScaledVector(tempNormal.normalize(), 0.012);
+            }
+            
+            dummy.updateMatrix();
+            instancedMesh.setMatrixAt(filled, dummy.matrix);
+            filled++;
+          }
+          
+          // 실제 채운 개수만 그리기
+          instancedMesh.count = filled;
+          instancedMesh.instanceMatrix.needsUpdate = true;
+          
+          group.add(instancedMesh);
+        }
+      });
+      
+      currentObject = group;
+      scene.add(currentObject);
+      
+      composer = new EffectComposer(renderer);
+      composer.addPass(new RenderPass(scene, camera));
+      
+      // FXAA only for voxel mode to reduce face/edge shimmer without affecting other modes
+      voxelFXAAEffect = new FXAAEffect();
+      composer.addPass(new EffectPass(camera, voxelFXAAEffect));
+      updateVoxelFXAAResolution();
+    }
+
+    // ==========================================
+    // MODE 6: Glitch (Custom Shader)
+    // ==========================================
+    function setupGlitch() {
+      scene.background = new THREE.Color(0x0a0a0a);
+      const group = new THREE.Group();
+
+      const glitchShader = {
+        uniforms: {
+          tDiffuse: { value: null },
+          uTime: { value: 0 },
+          uColor: { value: new THREE.Color(1,1,1) },
+          uMap: { value: null },
+          useMap: { value: false }
+        },
+        vertexShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          uniform float uTime;
+          
+          // Random function
+          float random(vec2 st) {
+              return fract(sin(dot(st.xy, vec2(12.9898,78.233))) * 43758.5453123);
+          }
+
+          void main() {
+            vUv = uv;
+            vNormal = normal;
+            
+            vec3 pos = position;
+            
+            // Glitch Displacement
+            float noise = random(vec2(uTime * 0.5, pos.y * 0.1));
+            if (noise > 0.95) {
+                pos.x += (random(vec2(pos.y, uTime)) - 0.5) * 0.5;
+                pos.z += (random(vec2(pos.z, uTime)) - 0.5) * 0.5;
+            }
+            
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec2 vUv;
+          varying vec3 vNormal;
+          uniform sampler2D uMap;
+          uniform bool useMap;
+          uniform vec3 uColor;
+          uniform float uTime;
+
+          void main() {
+            vec4 baseColor = vec4(uColor, 1.0);
+            if (useMap) {
+                // RGB Split Glitch
+                float shift = sin(uTime * 10.0) * 0.01;
+                float r = texture2D(uMap, vUv + vec2(shift, 0.0)).r;
+                float g = texture2D(uMap, vUv).g;
+                float b = texture2D(uMap, vUv - vec2(shift, 0.0)).b;
+                float a = texture2D(uMap, vUv).a;
+                baseColor = vec4(r, g, b, a);
+            }
+            
+            // Scanlines
+            float scan = sin(vUv.y * 500.0 + uTime * 10.0);
+            if (scan > 0.5) baseColor.rgb *= 0.8;
+            
+            if (baseColor.a < 0.1) discard;
+            gl_FragColor = baseColor;
+          }
+        `,
+        side: THREE.DoubleSide
+      };
+
+      originalModel.traverse((child) => {
+        if (child.isMesh) {
+          const material = new THREE.ShaderMaterial({
+            uniforms: {
+                uTime: { value: 0 },
+                uColor: { value: child.userData.originalMaterial.color || new THREE.Color(1,1,1) },
+                uMap: { value: child.userData.originalMaterial.map || null },
+                useMap: { value: !!child.userData.originalMaterial.map }
+            },
+            vertexShader: glitchShader.vertexShader,
+            fragmentShader: glitchShader.fragmentShader,
+            side: THREE.DoubleSide
+          });
+          const mesh = new THREE.Mesh(child.geometry, material);
+          group.add(mesh);
+        }
+      });
+
+      currentObject = group;
+      scene.add(currentObject);
+    }
+
+    // ==========================================
+    // MODE 7: Sketch (Hatching)
+    // ==========================================
+    function setupSketch() {
+        scene.background = new THREE.Color(0xffffff); // 종이 색
+        const group = new THREE.Group();
+        
+        const sketchShader = {
+            uniforms: {
+                uTime: { value: 0 },
+                uLightDir: { value: new THREE.Vector3(1, 1, 1).normalize() }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vNormal;
+                void main() {
+                    vUv = uv;
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec2 vUv;
+                varying vec3 vNormal;
+                uniform vec3 uLightDir;
+                
+                void main() {
+                    float intensity = dot(vNormal, uLightDir);
+                    intensity = (intensity + 1.0) * 0.5; // 0~1
+                    
+                    vec3 color = vec3(1.0); // White paper
+                    
+                    // Hatching logic (Screen space)
+                    vec2 xy = gl_FragCoord.xy;
+                    
+                    if (intensity < 0.8) {
+                        if (mod(xy.x + xy.y, 10.0) < 2.0) color = vec3(0.0);
+                    }
+                    if (intensity < 0.5) {
+                        if (mod(xy.x - xy.y, 10.0) < 2.0) color = vec3(0.0);
+                    }
+                    if (intensity < 0.2) {
+                        if (mod(xy.x + xy.y - 5.0, 10.0) < 2.0) color = vec3(0.0);
+                    }
+                    
+                    // Outline
+                    // (fragment outline is hard without depth buffer access, skipping for simplicity)
+                    
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        };
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const material = new THREE.ShaderMaterial({
+                    uniforms: { uLightDir: { value: new THREE.Vector3(0.5, 1, 0.5).normalize() } },
+                    vertexShader: sketchShader.vertexShader,
+                    fragmentShader: sketchShader.fragmentShader
+                });
+                
+                const mesh = new THREE.Mesh(child.geometry, material);
+                
+                // Outline for Sketch
+                const outlineMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.BackSide });
+                const outlineMesh = new THREE.Mesh(child.geometry, outlineMat);
+                outlineMesh.scale.multiplyScalar(1.02);
+                mesh.add(outlineMesh);
+                
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+    }
+
+    // ==========================================
+    // MODE 8: Glass (Premium Crystal)
+    // ==========================================
+    function setupGlass() {
+        scene.background = new THREE.Color(0x101018); // Deep Navy
+        
+        // Environment Map 대신 강한 조명으로 반사 효과 유도
+        // (RoomEnvironment 로딩 문제 회피)
+        
+        const group = new THREE.Group();
+        
+        const glassMaterial = new THREE.MeshPhysicalMaterial({
+            color: 0xaaccff,      // 약간 푸른 틴트 (완전 흰색보다 잘 보임)
+            metalness: 0.1,
+            roughness: 0.05,
+            transmission: 0.9,    // 1.0 -> 0.9 (약간 불투명하게 해서 보이게 함)
+            thickness: 1.2,
+            ior: 1.5,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.1,
+            side: THREE.DoubleSide // 양면 렌더링으로 두께감 표현
+        });
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const mesh = new THREE.Mesh(child.geometry, glassMaterial);
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+        
+        // 유리를 돋보이게 할 강한 조명 추가 (씬에 직접 추가)
+        const spotLight = new THREE.SpotLight(0xffffff, 10);
+        spotLight.position.set(5, 10, 5);
+        spotLight.angle = Math.PI / 4;
+        spotLight.penumbra = 0.5;
+        scene.add(spotLight);
+        
+        const blueRim = new THREE.PointLight(0x0088ff, 5);
+        blueRim.position.set(-5, 0, 5);
+        scene.add(blueRim);
+        
+        const pinkRim = new THREE.PointLight(0xff0088, 5);
+        pinkRim.position.set(5, -5, -5);
+        scene.add(pinkRim);
+        
+        // Bloom
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        composer.addPass(new EffectPass(camera, new BloomEffect({ 
+            intensity: 1.0, 
+            luminanceThreshold: 0.6,
+            radius: 0.6 
+        })));
+        
+        // Clean up lights when switching mode
+        currentObject.userData.lights = [spotLight, blueRim, pinkRim];
+    }
+
+    // ==========================================
+    // MODE 9: Liquid (Chrome Mercury)
+    // ==========================================
+    function setupLiquid() {
+        scene.background = new THREE.Color(0x080810);
+        const group = new THREE.Group();
+        
+        const liquidShader = {
+            uniforms: {
+                uTime: { value: 0 }
+            },
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                varying vec3 vWorldNormal;
+                uniform float uTime;
+                
+                void main() {
+                    vec3 pos = position;
+                    
+                    // Liquid wave deformation
+                    float wave1 = sin(pos.y * 4.0 + uTime * 2.5) * 0.08;
+                    float wave2 = sin(pos.x * 3.0 + uTime * 2.0) * 0.06;
+                    float wave3 = cos(pos.z * 3.5 + uTime * 1.8) * 0.05;
+                    
+                    pos += normal * (wave1 + wave2 + wave3);
+                    
+                    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
+                    vViewPosition = -mvPosition.xyz;
+                    vNormal = normalize(normalMatrix * normal);
+                    vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+                    
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                varying vec3 vWorldNormal;
+                uniform float uTime;
+                
+                void main() {
+                    vec3 viewDir = normalize(vViewPosition);
+                    
+                    // Fresnel effect (edge glow)
+                    float fresnel = pow(1.0 - abs(dot(vNormal, viewDir)), 2.5);
+                    
+                    // Fake environment reflection using world normal
+                    vec3 reflectDir = reflect(-viewDir, vNormal);
+                    
+                    // Chrome gradient colors
+                    vec3 colorTop = vec3(0.6, 0.8, 1.0);    // Light blue
+                    vec3 colorMid = vec3(0.9, 0.4, 0.8);    // Pink/Purple
+                    vec3 colorBot = vec3(0.2, 0.3, 0.6);    // Dark blue
+                    
+                    // Gradient based on reflection
+                    float t = reflectDir.y * 0.5 + 0.5;
+                    vec3 envColor;
+                    if (t > 0.5) {
+                        envColor = mix(colorMid, colorTop, (t - 0.5) * 2.0);
+                    } else {
+                        envColor = mix(colorBot, colorMid, t * 2.0);
+                    }
+                    
+                    // Specular highlight
+                    vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+                    float spec = pow(max(0.0, dot(reflectDir, lightDir)), 64.0);
+                    
+                    // Iridescent color shift
+                    vec3 iridescence = vec3(
+                        sin(vWorldNormal.x * 5.0 + uTime * 2.0) * 0.15 + 0.85,
+                        sin(vWorldNormal.y * 5.0 + uTime * 2.5) * 0.15 + 0.85,
+                        sin(vWorldNormal.z * 5.0 + uTime * 3.0) * 0.15 + 0.85
+                    );
+                    
+                    vec3 finalColor = envColor * iridescence;
+                    finalColor += fresnel * vec3(0.5, 0.7, 1.0) * 0.6;
+                    finalColor += spec * vec3(1.0);
+                    
+                    gl_FragColor = vec4(finalColor, 1.0);
+                }
+            `,
+            side: THREE.DoubleSide
+        };
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const material = new THREE.ShaderMaterial({
+                    uniforms: { uTime: { value: 0 } },
+                    vertexShader: liquidShader.vertexShader,
+                    fragmentShader: liquidShader.fragmentShader,
+                    side: THREE.DoubleSide
+                });
+                const mesh = new THREE.Mesh(child.geometry, material);
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+        
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        composer.addPass(new EffectPass(camera, new BloomEffect({ 
+            intensity: 0.5, 
+            luminanceThreshold: 0.6,
+            radius: 0.5 
+        })));
+    }
+
+    // ==========================================
+    // MODE 10: Polygon (Low Poly Style)
+    // ==========================================
+    const simplifyModifier = new SimplifyModifier();
+    
+    function setupPolygon() {
+        scene.background = new THREE.Color(0x1a1a2e);
+        const group = new THREE.Group();
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const origMat = child.userData.originalMaterial;
+                const baseColor = origMat.color ? origMat.color.clone() : new THREE.Color(0.6, 0.3, 0.8);
+                
+                let geo = child.geometry.clone();
+                
+                // Simplify geometry - reduce to ~5% of original vertices
+                const vertexCount = geo.attributes.position.count;
+                const targetCount = Math.floor(vertexCount * 0.05);
+                const removeCount = vertexCount - targetCount;
+                
+                if (removeCount > 0 && vertexCount > 100) {
+                    try {
+                        geo = simplifyModifier.modify(geo, removeCount);
+                    } catch(e) {
+                        console.log('Simplify failed, using original geometry');
+                    }
+                }
+                
+                // Convert to non-indexed for flat shading
+                if (geo.index) {
+                    geo = geo.toNonIndexed();
+                }
+                geo.computeVertexNormals();
+                
+                // Flat shaded mesh with original color
+                const material = new THREE.MeshLambertMaterial({
+                    color: baseColor,
+                    flatShading: true
+                });
+                
+                const mesh = new THREE.Mesh(geo, material);
+                group.add(mesh);
+                
+                // Edge lines
+                const edges = new THREE.EdgesGeometry(geo, 15);
+                const lineMat = new THREE.LineBasicMaterial({ 
+                    color: 0x000000, 
+                    transparent: true, 
+                    opacity: 0.4
+                });
+                const edgeLines = new THREE.LineSegments(edges, lineMat);
+                group.add(edgeLines);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+    }
+
+    // ==========================================
+    // MODE 11: Thermal
+    // ==========================================
+    function setupThermal() {
+        scene.background = new THREE.Color(0x000000);
+        const group = new THREE.Group();
+        
+        const thermalShader = {
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    vViewPosition = -mvPosition.xyz;
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                
+                // Thermal Color Map function
+                vec3 thermalColor(float t) {
+                    // Blue -> Green -> Red
+                    return mix(vec3(0,0,1), vec3(0,1,0), t) * step(t, 0.5) +
+                           mix(vec3(0,1,0), vec3(1,0,0), (t-0.5)*2.0) * step(0.5, t);
+                }
+
+                void main() {
+                    vec3 viewDir = normalize(vViewPosition);
+                    float fresnel = dot(vNormal, viewDir); // 0 (edge) ~ 1 (center)
+                    
+                    // Invert: Center is Hot (Red), Edge is Cold (Blue)
+                    float temp = fresnel; 
+                    
+                    vec3 color = thermalColor(temp);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `
+        };
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const material = new THREE.ShaderMaterial(thermalShader);
+                const mesh = new THREE.Mesh(child.geometry, material);
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+        
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        composer.addPass(new EffectPass(camera, new BloomEffect({ intensity: 1.0, luminanceThreshold: 0.2 })));
+    }
+
+    // ==========================================
+    // MODE 12: Hologram
+    // ==========================================
+    function setupHologram() {
+        scene.background = new THREE.Color(0x000508);
+        const group = new THREE.Group();
+        
+        const hologramShader = {
+            uniforms: {
+                uTime: { value: 0 },
+                uColor: { value: new THREE.Color(0x00ffff) }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                varying vec3 vNormal;
+                uniform float uTime;
+                
+                void main() {
+                    vUv = uv;
+                    vPosition = position;
+                    vNormal = normalize(normalMatrix * normal);
+                    
+                    vec3 pos = position;
+                    
+                    // Glitch displacement
+                    float glitch = step(0.98, fract(sin(uTime * 50.0 + position.y * 10.0) * 43758.5453));
+                    pos.x += glitch * (fract(sin(uTime * 100.0) * 43758.5453) - 0.5) * 0.3;
+                    
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                varying vec3 vNormal;
+                uniform float uTime;
+                uniform vec3 uColor;
+                
+                void main() {
+                    // Fresnel effect
+                    vec3 viewDir = normalize(cameraPosition - vPosition);
+                    float fresnel = pow(1.0 - abs(dot(vNormal, viewDir)), 2.0);
+                    
+                    // Scanlines
+                    float scanline = sin(vPosition.y * 100.0 + uTime * 10.0) * 0.5 + 0.5;
+                    scanline = pow(scanline, 1.5);
+                    
+                    // Horizontal glitch lines
+                    float glitchLine = step(0.97, fract(sin(floor(vPosition.y * 50.0 + uTime * 20.0)) * 43758.5453));
+                    
+                    // Flicker
+                    float flicker = 0.95 + 0.05 * sin(uTime * 30.0);
+                    
+                    // Base hologram color
+                    vec3 color = uColor;
+                    color += fresnel * vec3(0.0, 0.5, 1.0);
+                    color *= scanline * 0.5 + 0.5;
+                    color *= flicker;
+                    color += glitchLine * vec3(1.0, 0.0, 0.5) * 0.5;
+                    
+                    // Alpha based on fresnel for edge glow
+                    float alpha = 0.3 + fresnel * 0.7;
+                    alpha *= scanline * 0.3 + 0.7;
+                    
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
+        };
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        uTime: { value: 0 },
+                        uColor: { value: new THREE.Color(0x00ffff) }
+                    },
+                    vertexShader: hologramShader.vertexShader,
+                    fragmentShader: hologramShader.fragmentShader,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    depthWrite: false,
+                    blending: THREE.AdditiveBlending
+                });
+                const mesh = new THREE.Mesh(child.geometry, material);
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+        
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        composer.addPass(new EffectPass(camera, new BloomEffect({ 
+            intensity: 1.5, 
+            luminanceThreshold: 0.1,
+            radius: 0.8 
+        })));
+    }
+
+    // ==========================================
+    // MODE 13: Pixelation (True Pixel Art - Low Res Render)
+    // ==========================================
+    function setupPixelation() {
+        scene.background = new THREE.Color(0xf0d878); // Bright yellow background
+        const group = new THREE.Group();
+        
+        // Toon shader with texture support for eyes
+        const toonShader = {
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                varying vec2 vUv;
+                
+                void main() {
+                    vUv = uv;
+                    vNormal = normalize(normalMatrix * normal);
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    vViewPosition = -mvPosition.xyz;
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                varying vec2 vUv;
+                
+                uniform sampler2D uMap;
+                uniform bool useMap;
+                uniform vec3 uPartColor;
+                uniform bool uIsSpecial;
+                
+                // Color palette matching default model
+                vec3 palette[10];
+                
+                void initPalette() {
+                    // Purple body tones (matching original)
+                    palette[0] = vec3(0.25, 0.10, 0.35);    // Dark purple shadow
+                    palette[1] = vec3(0.40, 0.15, 0.55);    // Medium dark purple
+                    palette[2] = vec3(0.55, 0.25, 0.70);    // Purple
+                    palette[3] = vec3(0.65, 0.35, 0.80);    // Bright purple
+                    palette[4] = vec3(0.75, 0.50, 0.90);    // Light purple
+                    palette[5] = vec3(0.85, 0.65, 0.95);    // Lavender highlight
+                    // Special colors
+                    palette[6] = vec3(0.0, 0.0, 0.0);       // Black (eyes)
+                    palette[7] = vec3(1.0, 1.0, 1.0);       // White (eyes, teeth)
+                    palette[8] = vec3(0.15, 0.08, 0.25);    // Dark mouth
+                    palette[9] = vec3(0.20, 0.12, 0.30);    // Mouth shadow
+                }
+                
+                vec3 findClosest(vec3 c) {
+                    initPalette();
+                    vec3 closest = palette[0];
+                    float minD = 999.0;
+                    for (int i = 0; i < 10; i++) {
+                        float d = distance(c, palette[i]);
+                        if (d < minD) { minD = d; closest = palette[i]; }
+                    }
+                    return closest;
+                }
+                
+                void main() {
+                    vec3 lightDir = normalize(vec3(0.5, 1.0, 0.5));
+                    float NdotL = dot(vNormal, lightDir);
+                    
+                    // Use part color (set per mesh based on name)
+                    vec3 baseColor = uPartColor;
+                    
+                    // Special parts (eyes, teeth, tongue) - render as solid color
+                    if (uIsSpecial) {
+                        gl_FragColor = vec4(baseColor, 1.0);
+                        return;
+                    }
+                    
+                    // 4-level cel shading for body (brighter)
+                    float shade;
+                    if (NdotL > 0.6) shade = 1.2;
+                    else if (NdotL > 0.3) shade = 1.0;
+                    else if (NdotL > 0.0) shade = 0.85;
+                    else shade = 0.7;
+                    
+                    vec3 shadedColor = baseColor * shade;
+                    
+                    // Outline - slightly darker
+                    vec3 viewDir = normalize(vViewPosition);
+                    float edge = 1.0 - abs(dot(vNormal, viewDir));
+                    if (edge > 0.7) {
+                        shadedColor = baseColor * 0.6;
+                    }
+                    
+                    vec3 finalColor = findClosest(shadedColor);
+                    gl_FragColor = vec4(finalColor, 1.0);
+                }
+            `
+        };
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const origMat = child.userData.originalMaterial;
+                const meshName = child.name.toLowerCase();
+                
+                console.log('Mesh name:', child.name);
+                
+                // Determine color based on mesh name
+                let partColor = new THREE.Color(0.6, 0.3, 0.8); // Default purple body
+                let isSpecialPart = false;
+                
+                // Eye whites
+                if (meshName.includes('eye') && !meshName.includes('pupil') && !meshName.includes('ball')) {
+                    partColor = new THREE.Color(1.0, 1.0, 1.0); // White
+                    isSpecialPart = true;
+                }
+                // Eye pupils / dark parts
+                if (meshName.includes('pupil') || meshName.includes('iris')) {
+                    partColor = new THREE.Color(0.0, 0.0, 0.0); // Black
+                    isSpecialPart = true;
+                }
+                // Teeth
+                if (meshName.includes('teeth') || meshName.includes('tooth')) {
+                    partColor = new THREE.Color(1.0, 1.0, 1.0); // White
+                    isSpecialPart = true;
+                }
+                // Tongue / Mouth inside
+                if (meshName.includes('tongue') || meshName.includes('mouth')) {
+                    partColor = new THREE.Color(0.15, 0.08, 0.2); // Dark purple
+                    isSpecialPart = true;
+                }
+                
+                // Use original material color if available
+                if (!isSpecialPart && origMat.color) {
+                    partColor = origMat.color.clone();
+                }
+                
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        uMap: { value: null },
+                        useMap: { value: false },
+                        uPartColor: { value: partColor },
+                        uIsSpecial: { value: isSpecialPart }
+                    },
+                    vertexShader: toonShader.vertexShader,
+                    fragmentShader: toonShader.fragmentShader
+                });
+                const mesh = new THREE.Mesh(child.geometry, material);
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+        
+        // Create low-resolution render target for pixelation
+        const pixelSize = 8; // Each "pixel" will be 8x8 screen pixels
+        const lowResWidth = Math.floor(window.innerWidth / pixelSize);
+        const lowResHeight = Math.floor(window.innerHeight / pixelSize);
+        
+        pixelRenderTarget = new THREE.WebGLRenderTarget(lowResWidth, lowResHeight, {
+            minFilter: THREE.NearestFilter,
+            magFilter: THREE.NearestFilter,
+            format: THREE.RGBAFormat
+        });
+        
+        // Fullscreen quad to display the pixelated result
+        const quadGeo = new THREE.PlaneGeometry(2, 2);
+        const quadMat = new THREE.ShaderMaterial({
+            uniforms: {
+                tDiffuse: { value: pixelRenderTarget.texture }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = vec4(position.xy, 0.0, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D tDiffuse;
+                varying vec2 vUv;
+                void main() {
+                    gl_FragColor = texture2D(tDiffuse, vUv);
+                }
+            `,
+            depthTest: false,
+            depthWrite: false
+        });
+        
+        pixelQuad = new THREE.Mesh(quadGeo, quadMat);
+        
+        // Create a separate scene for the fullscreen quad
+        pixelScene = new THREE.Scene();
+        pixelScene.add(pixelQuad);
+        
+        // Store pixel size for resize handling
+        currentObject.userData.pixelSize = pixelSize;
+        currentObject.userData.isPixelMode = true;
+    }
+
+    // ==========================================
+    // MODE 15: X-Ray
+    // ==========================================
+    function setupXray() {
+        scene.background = new THREE.Color(0x000000);
+        const group = new THREE.Group();
+        
+        const xrayShader = {
+            uniforms: {
+                uTime: { value: 0 }
+            },
+            vertexShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                
+                void main() {
+                    vNormal = normalize(normalMatrix * normal);
+                    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                    vViewPosition = -mvPosition.xyz;
+                    gl_Position = projectionMatrix * mvPosition;
+                }
+            `,
+            fragmentShader: `
+                varying vec3 vNormal;
+                varying vec3 vViewPosition;
+                uniform float uTime;
+                
+                void main() {
+                    vec3 viewDir = normalize(vViewPosition);
+                    
+                    // Fresnel - edges are brighter (like X-ray)
+                    float fresnel = pow(1.0 - abs(dot(vNormal, viewDir)), 2.0);
+                    
+                    // X-ray blue-white color
+                    vec3 edgeColor = vec3(0.7, 0.9, 1.0);
+                    vec3 centerColor = vec3(0.0, 0.1, 0.2);
+                    
+                    vec3 color = mix(centerColor, edgeColor, fresnel);
+                    
+                    // Add subtle pulsing
+                    float pulse = sin(uTime * 2.0) * 0.1 + 0.9;
+                    color *= pulse;
+                    
+                    // Bone-like internal structure hint
+                    float bone = smoothstep(0.3, 0.5, fresnel) * 0.3;
+                    color += vec3(bone);
+                    
+                    float alpha = 0.2 + fresnel * 0.8;
+                    
+                    gl_FragColor = vec4(color, alpha);
+                }
+            `,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false
+        };
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const material = new THREE.ShaderMaterial({
+                    uniforms: { uTime: { value: 0 } },
+                    vertexShader: xrayShader.vertexShader,
+                    fragmentShader: xrayShader.fragmentShader,
+                    transparent: true,
+                    side: THREE.DoubleSide,
+                    depthWrite: false
+                });
+                const mesh = new THREE.Mesh(child.geometry, material);
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+        
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        composer.addPass(new EffectPass(camera, new BloomEffect({ 
+            intensity: 1.0, 
+            luminanceThreshold: 0.3,
+            radius: 0.6 
+        })));
+    }
+
+    // ==========================================
+    // MODE 16: Dissolve
+    // ==========================================
+    function setupDissolve() {
+        scene.background = new THREE.Color(0x0a0a0a);
+        const group = new THREE.Group();
+        
+        const dissolveShader = {
+            vertexShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                varying vec3 vNormal;
+                
+                void main() {
+                    vUv = uv;
+                    vPosition = position;
+                    vNormal = normalize(normalMatrix * normal);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                varying vec2 vUv;
+                varying vec3 vPosition;
+                varying vec3 vNormal;
+                uniform float uTime;
+                uniform vec3 uEdgeColor;
+                uniform vec3 uBaseColor;
+                uniform sampler2D uMap;
+                uniform bool useMap;
+                
+                // Noise function
+                float hash(vec3 p) {
+                    p = fract(p * 0.3183099 + 0.1);
+                    p *= 17.0;
+                    return fract(p.x * p.y * p.z * (p.x + p.y + p.z));
+                }
+                
+                float noise(vec3 p) {
+                    vec3 i = floor(p);
+                    vec3 f = fract(p);
+                    f = f * f * (3.0 - 2.0 * f);
+                    
+                    return mix(
+                        mix(mix(hash(i + vec3(0,0,0)), hash(i + vec3(1,0,0)), f.x),
+                            mix(hash(i + vec3(0,1,0)), hash(i + vec3(1,1,0)), f.x), f.y),
+                        mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
+                            mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z
+                    );
+                }
+                
+                void main() {
+                    // Generate noise based on position
+                    float n = noise(vPosition * 3.0);
+                    
+                    // Dissolve threshold (animated)
+                    float dissolveAmount = (sin(uTime * 0.5) * 0.5 + 0.5);
+                    
+                    // Discard pixels below threshold
+                    if (n < dissolveAmount) {
+                        discard;
+                    }
+                    
+                    // Edge glow
+                    float edge = 1.0 - smoothstep(0.0, 0.1, n - dissolveAmount);
+                    
+                    // Base color from original material
+                    vec4 baseColor = vec4(uBaseColor, 1.0);
+                    if (useMap) {
+                        baseColor = texture2D(uMap, vUv);
+                    }
+                    
+                    // Lighting
+                    vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+                    float diff = max(dot(vNormal, lightDir), 0.0) * 0.5 + 0.5;
+                    
+                    vec3 finalColor = baseColor.rgb * diff;
+                    
+                    // Add edge glow
+                    finalColor = mix(finalColor, uEdgeColor * 2.0, edge);
+                    
+                    // Add ember particles near edge
+                    if (edge > 0.3) {
+                        float ember = noise(vPosition * 20.0 + uTime * 5.0);
+                        if (ember > 0.7) {
+                            finalColor += vec3(1.0, 0.5, 0.0) * (ember - 0.7) * 3.0;
+                        }
+                    }
+                    
+                    gl_FragColor = vec4(finalColor, baseColor.a);
+                }
+            `,
+            side: THREE.DoubleSide
+        };
+
+        originalModel.traverse((child) => {
+            if (child.isMesh) {
+                const origMat = child.userData.originalMaterial;
+                const baseColor = origMat.color ? origMat.color.clone() : new THREE.Color(0.8, 0.8, 0.8);
+                
+                const material = new THREE.ShaderMaterial({
+                    uniforms: {
+                        uTime: { value: 0 },
+                        uEdgeColor: { value: new THREE.Color(0xff6600) },
+                        uBaseColor: { value: baseColor },
+                        uMap: { value: origMat.map || null },
+                        useMap: { value: !!origMat.map }
+                    },
+                    vertexShader: dissolveShader.vertexShader,
+                    fragmentShader: dissolveShader.fragmentShader,
+                    side: THREE.DoubleSide
+                });
+                const mesh = new THREE.Mesh(child.geometry, material);
+                group.add(mesh);
+            }
+        });
+        
+        currentObject = group;
+        scene.add(currentObject);
+        
+        composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        composer.addPass(new EffectPass(camera, new BloomEffect({ 
+            intensity: 1.2, 
+            luminanceThreshold: 0.4,
+            radius: 0.5 
+        })));
+    }
+
+    // ==========================================
+    // SWITCHER
+    // ==========================================
+    function switchMode(mode) {
+      console.log('=== switchMode called ===', mode);
+      if (!originalModel) return;
+      
+      // Flash Effect
+      gsap.to(flashOverlay, { opacity: 1, duration: 0.1, onComplete: () => {
+          clearScene();
+          currentMode = mode;
+          console.log('Mode switched to:', mode);
+          
+          document.querySelectorAll('.btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.mode === mode);
+          });
+          
+          switch(mode) {
+            case 'default': setupDefault(); break;
+            case 'points': setupPoints(); break;
+            case 'wireframe': setupWireframe(); break;
+            case 'ascii': setupAscii(); break;
+            case 'toon': setupToon(); break;
+            case 'voxel': setupVoxel(); break;
+            case 'glitch': setupGlitch(); break;
+            case 'sketch': setupSketch(); break;
+            case 'glass': setupGlass(); break;
+            case 'liquid': setupLiquid(); break;
+            case 'polygon': setupPolygon(); break;
+            case 'thermal': setupThermal(); break;
+            case 'hologram': setupHologram(); break;
+            case 'pixelation': setupPixelation(); break;
+            case 'xray': setupXray(); break;
+            case 'dissolve': setupDissolve(); break;
+          }
+          
+          // Light mode for sketch (white background)
+          if (mode === 'sketch' || mode === 'pixelation' || mode === 'toon') {
+            document.body.classList.add('light-mode');
+            // Notify parent frame
+            if (window.parent !== window) {
+              window.parent.postMessage({ type: 'theme', mode: 'light' }, '*');
+            }
+          } else {
+            document.body.classList.remove('light-mode');
+            // Notify parent frame
+            if (window.parent !== window) {
+              window.parent.postMessage({ type: 'theme', mode: 'dark' }, '*');
+            }
+          }
+          
+          // Camera Shake & Flash Out
+          gsap.to(camera.position, { z: 8.0, duration: 0.1, yoyo: true, repeat: 1 });
+          gsap.to(flashOverlay, { opacity: 0, duration: 0.5 });
+      }});
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      const time = clock.getElapsedTime();
+      
+      if (currentObject) {
+        // Rotation Logic (Damping)
+        currentRotationY += (targetRotationY - currentRotationY) * 0.1;
+        currentRotationX += (targetRotationX - currentRotationX) * 0.1;
+        
+        if (!isDragging) {
+           targetRotationY += 0.001; 
+        }
+
+        currentObject.rotation.y = currentRotationY;
+        currentObject.rotation.x = currentRotationX;
+        
+        // Bobbing
+        // 복셀은 서브픽셀 이동에서 고대비 경계(특히 눈)가 쉽게 '떨림'으로 보임 → 복셀 모드에선 보빙 제거
+        if (currentMode === 'voxel') {
+          currentObject.position.y = 0;
+        } else {
+          currentObject.position.y = Math.sin(Date.now() * 0.001) * 0.1;
+        }
+        
+        // Update Uniforms for Shaders (Glitch, etc)
+        currentObject.children.forEach(child => {
+            if (child.material && child.material.uniforms && child.material.uniforms.uTime) {
+                child.material.uniforms.uTime.value = time;
+            }
+        });
+      }
+      
+      if (currentMode === 'ascii' && asciiEffect) {
+        asciiEffect.render(scene, camera);
+      } else if (currentMode === 'pixelation' && pixelRenderTarget && pixelScene) {
+        // Render scene to low-res target
+        renderer.setRenderTarget(pixelRenderTarget);
+        renderer.render(scene, camera);
+        
+        // Render fullscreen quad with pixelated texture
+        renderer.setRenderTarget(null);
+        renderer.render(pixelScene, camera);
+      } else if (composer) {
+        composer.render();
+      } else {
+        renderer.render(scene, camera);
+      }
+    }
+
+    initBase();
+    loadModel();
+    animate();
+
+    // Event Listeners
+    document.querySelectorAll('.btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        switchMode(e.target.dataset.mode);
+      });
+    });
+
+    // Drag Indicator
+    const dragIndicator = document.querySelector('.drag-indicator');
+    let indicatorTimeout;
+    
+    // Check if mouse is over the character
+    function checkCharacterIntersection(e) {
+      mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+      mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+      
+      raycaster.setFromCamera(mouse, camera);
+      
+      if (currentObject) {
+        const intersects = raycaster.intersectObject(currentObject, true);
+        return intersects.length > 0;
+      }
+      return false;
+    }
+
+    document.addEventListener('mousedown', (e) => {
+      if (isOverCharacter) {
+        isDragging = true;
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+        container.classList.add('dragging');
+        dragIndicator.classList.add('dragging');
+      }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      // Check if over character
+      isOverCharacter = checkCharacterIntersection(e);
+      
+      // Update drag indicator position
+      dragIndicator.style.left = e.clientX + 'px';
+      dragIndicator.style.top = e.clientY + 'px';
+      
+      // Show indicator only when over character and not dragging
+      if (!isDragging && isOverCharacter) {
+        dragIndicator.classList.add('visible');
+        dragIndicator.classList.remove('hidden');
+        container.style.cursor = 'grab';
+        
+        // Hide after idle
+        clearTimeout(indicatorTimeout);
+        indicatorTimeout = setTimeout(() => {
+          if (!isDragging) {
+            dragIndicator.classList.remove('visible');
+            dragIndicator.classList.add('hidden');
+          }
+        }, 2000);
+      } else if (!isDragging && !isOverCharacter) {
+        dragIndicator.classList.remove('visible');
+        dragIndicator.classList.add('hidden');
+        container.style.cursor = 'default';
+      }
+      
+      if (isDragging) {
+        container.style.cursor = 'grabbing';
+        const deltaMove = {
+          x: e.clientX - previousMousePosition.x,
+          y: e.clientY - previousMousePosition.y
+        };
+
+        targetRotationY += deltaMove.x * 0.005;
+        targetRotationX += deltaMove.y * 0.005;
+        
+        targetRotationX = Math.max(-0.5, Math.min(0.5, targetRotationX));
+
+        previousMousePosition = { x: e.clientX, y: e.clientY };
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isDragging = false;
+      container.classList.remove('dragging');
+      dragIndicator.classList.remove('dragging');
+      container.style.cursor = isOverCharacter ? 'grab' : 'default';
+    });
+    
+    // Hide indicator when mouse leaves window
+    document.addEventListener('mouseleave', () => {
+      dragIndicator.classList.remove('visible');
+      dragIndicator.classList.add('hidden');
+      isOverCharacter = false;
+    });
+    
+    // Hide indicator when hovering over UI elements
+    document.querySelectorAll('.title-container, .ui-container, .btn').forEach(el => {
+      el.addEventListener('mouseenter', () => {
+        dragIndicator.classList.remove('visible');
+        dragIndicator.classList.add('hidden');
+      });
+    });
+    
+    document.addEventListener('touchstart', (e) => {
+      isDragging = true;
+      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (isDragging) {
+        const deltaMove = {
+          x: e.touches[0].clientX - previousMousePosition.x,
+          y: e.touches[0].clientY - previousMousePosition.y
+        };
+        
+        targetRotationY += deltaMove.x * 0.005;
+        targetRotationX += deltaMove.y * 0.005;
+        targetRotationX = Math.max(-0.5, Math.min(0.5, targetRotationX));
+        
+        previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      }
+    });
+    
+    document.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
+      if (asciiEffect) asciiEffect.setSize(window.innerWidth, window.innerHeight);
+      updateVoxelFXAAResolution();
+      
+      // Update pixel render target size
+      if (pixelRenderTarget && currentObject && currentObject.userData.pixelSize) {
+        const pixelSize = currentObject.userData.pixelSize;
+        const lowResWidth = Math.floor(window.innerWidth / pixelSize);
+        const lowResHeight = Math.floor(window.innerHeight / pixelSize);
+        pixelRenderTarget.setSize(lowResWidth, lowResHeight);
+      }
+    });
+  </script>
+</body>
+</html>

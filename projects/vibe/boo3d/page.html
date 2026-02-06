@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOO 3D CHARACTER — Han Donghoon</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #000000;
+            --color-text: #ffffff;
+            --font-primary: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            font-family: var(--font-primary);
+            line-height: 1.5;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* Navigation Bar - matches main page exactly */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 1.25vw;
+            z-index: 1000;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .nav-back {
+            font-size: 0.75vw;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            text-decoration: none;
+            color: inherit;
+            opacity: 0.8;
+            cursor: pointer;
+            transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1),
+                        transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            position: absolute;
+            left: 0;
+            white-space: nowrap;
+        }
+
+        .nav-back:hover {
+            opacity: 1;
+            text-decoration: line-through;
+        }
+
+        .top-bar.transitioning .nav-back {
+            opacity: 0;
+            transform: translateX(-0.6vw);
+        }
+
+        .nav-home {
+            font-size: 0.75vw;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1),
+                        transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+            transform: translateX(3.75vw);
+        }
+
+        .nav-home:hover {
+            text-decoration: line-through;
+        }
+
+        .top-bar.transitioning .nav-home {
+            transform: translateX(0);
+        }
+
+        .location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75vw;
+        }
+
+        /* Light mode theme */
+        body.light-mode {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        body.light-mode .nav-back,
+        body.light-mode .nav-home,
+        body.light-mode .location {
+            color: #000000;
+        }
+
+        /* Project Frame */
+        .project-frame {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <header class="top-bar">
+        <div class="nav-left">
+            <a href="../../../" class="nav-back">← back</a>
+            <a href="../../../" class="nav-home">home</a>
+        </div>
+        <div class="location">han donghoon</div>
+    </header>
+    
+    <iframe src="index.html" class="project-frame" allowfullscreen></iframe>
+
+    <script>
+        const navBack = document.querySelector('.nav-back');
+        const topBar = document.querySelector('.top-bar');
+        
+        navBack.addEventListener('click', (e) => {
+            e.preventDefault();
+            const href = navBack.getAttribute('href');
+            
+            // Add transitioning class for reverse animation
+            topBar.classList.add('transitioning');
+            
+            // Navigate after animation
+            setTimeout(() => {
+                window.location.href = href;
+            }, 400);
+        });
+        
+        // Listen for theme changes from iframe
+        window.addEventListener('message', (e) => {
+            if (e.data.type === 'theme') {
+                if (e.data.mode === 'light') {
+                    document.body.classList.add('light-mode');
+                } else {
+                    document.body.classList.remove('light-mode');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
