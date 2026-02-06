@@ -490,7 +490,7 @@
   <div id="flash-overlay"></div>
   
   <div class="title-container">
-    <h1 class="title" id="page-title">BOO 3D CHARACTER</h1>
+    <h1 class="title" id="page-title">boo 3d character</h1>
     <p class="description">
       <span class="desc-line">a ghostly character rendered through 12 unique visual styles.</span>
       <span class="desc-line">from ethereal glass to cyberpunk glitch, explore different artistic expressions.</span>
@@ -517,26 +517,26 @@
   <!-- Drag Indicator -->
   <div class="drag-indicator">
     <div class="drag-circle"></div>
-    <span class="drag-text">HOLD AND DRAG</span>
+    <span class="drag-text">hold and drag</span>
   </div>
   
   <div class="ui-container">
-    <button class="btn active" data-mode="default">Default</button>
-    <button class="btn" data-mode="points">Point Cloud</button>
-    <button class="btn" data-mode="wireframe">Wireframe</button>
-    <button class="btn" data-mode="ascii">ASCII</button>
-    <button class="btn" data-mode="toon">Toon</button>
-    <button class="btn" data-mode="voxel">Voxel</button>
-    <button class="btn" data-mode="glitch">Glitch</button>
-    <button class="btn" data-mode="sketch">Sketch</button>
-    <button class="btn" data-mode="glass">Glass</button>
-    <button class="btn" data-mode="liquid">Liquid</button>
-    <button class="btn" data-mode="polygon">Polygon</button>
-    <button class="btn" data-mode="thermal">Thermal</button>
-    <button class="btn" data-mode="hologram">Hologram</button>
-    <button class="btn" data-mode="pixelation">Pixelation</button>
-    <button class="btn" data-mode="xray">X-Ray</button>
-    <button class="btn" data-mode="dissolve">Dissolve</button>
+    <button class="btn active" data-mode="default">default</button>
+    <button class="btn" data-mode="points">point cloud</button>
+    <button class="btn" data-mode="wireframe">wireframe</button>
+    <button class="btn" data-mode="ascii">ascii</button>
+    <button class="btn" data-mode="toon">toon</button>
+    <button class="btn" data-mode="voxel">voxel</button>
+    <button class="btn" data-mode="glitch">glitch</button>
+    <button class="btn" data-mode="sketch">sketch</button>
+    <button class="btn" data-mode="glass">glass</button>
+    <button class="btn" data-mode="liquid">liquid</button>
+    <button class="btn" data-mode="polygon">polygon</button>
+    <button class="btn" data-mode="thermal">thermal</button>
+    <button class="btn" data-mode="hologram">hologram</button>
+    <button class="btn" data-mode="pixelation">pixelation</button>
+    <button class="btn" data-mode="xray">x-ray</button>
+    <button class="btn" data-mode="dissolve">dissolve</button>
   </div>
   
   <script type="importmap">
@@ -2377,6 +2377,14 @@
     document.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         const touch = e.touches[0];
+        const touchTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+        const uiContainer = document.querySelector('.ui-container');
+        
+        // Skip if touching the UI menu area (allow horizontal scroll)
+        if (uiContainer && uiContainer.contains(touchTarget)) {
+          return;
+        }
+        
         // Only start dragging if touching the character
         if (checkTouchCharacterIntersection(touch)) {
           isDragging = true;

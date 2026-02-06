@@ -571,16 +571,18 @@ body.loaded .loading {
         height: 2vw !important;
     }
     
-    /* Hero positioned below header on mobile */
+    /* Hero positioned below header on mobile - scrollable */
     .hero {
-        top: 8vw !important;
+        position: relative !important;
+        top: auto !important;
         height: auto !important;
-        padding: 0 4vw !important;
+        min-height: auto !important;
+        padding: calc(12vw - 20px) 4vw calc(6vw - 30px) 4vw !important;
         align-items: flex-start !important;
     }
     
     .scroll-spacer {
-        margin-top: 10vw !important;
+        display: none !important;
     }
     
     /* Sub text full width, left aligned on mobile */
@@ -596,8 +598,11 @@ body.loaded .loading {
     
     .cover-section {
         padding: 0 4vw 6vw 4vw !important;
-        margin-top: -2vw !important;
-        padding-top: 2vw !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        background-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
     
     .filter-menu {
@@ -665,12 +670,13 @@ body.loaded .loading {
     }
     
     .hero {
-        top: 10vw !important;
-        padding: 0 5vw !important;
+        position: relative !important;
+        top: auto !important;
+        padding: calc(14vw - 20px) 5vw calc(6vw - 30px) 5vw !important;
     }
     
     .scroll-spacer {
-        margin-top: 13vw !important;
+        display: none !important;
     }
     
     .sub-text-wrapper {
@@ -685,8 +691,11 @@ body.loaded .loading {
     
     .cover-section {
         padding: 0 5vw 8vw 5vw !important;
-        margin-top: -2.5vw !important;
-        padding-top: 2.5vw !important;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+        background-color: transparent !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
     
     .filter-menu {
