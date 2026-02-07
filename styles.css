@@ -734,7 +734,7 @@ body.light-mode .cover-section.visible {
         bottom: 0;
         left: -1vw;
         right: -1vw;
-        height: 1px;
+        height: 6px;
         background-color: var(--color-text);
     }
     
@@ -753,7 +753,7 @@ body.light-mode .cover-section.visible {
     }
     
     .filter-menu {
-        margin-top: calc(6vw + 2px) !important;
+        margin-top: calc(6vw + 4px) !important;
         gap: 4vw !important;
         flex-wrap: wrap !important;
     }

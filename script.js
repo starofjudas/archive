@@ -178,12 +178,12 @@ function initThemeToggle() {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
-        themeLabel.textContent = 'lightmode';
+        themeLabel.textContent = 'light';
     }
     
     themeToggle.addEventListener('click', () => {
         const isLight = document.body.classList.toggle('light-mode');
-        themeLabel.textContent = isLight ? 'lightmode' : 'darkmode';
+        themeLabel.textContent = isLight ? 'light' : 'dark';
         localStorage.setItem('theme', isLight ? 'light' : 'dark');
     });
 }
