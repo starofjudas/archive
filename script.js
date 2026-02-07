@@ -707,7 +707,12 @@ function initFilterMenu() {
     const projectList = document.getElementById('project-list');
     
     filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            
+            // Prevent layout shift by maintaining scroll position
+            const scrollY = window.scrollY;
+            
             // Update active button
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
@@ -743,13 +748,53 @@ function initFilterMenu() {
                 }
             });
             
+            // Restore scroll position to prevent layout shift
+            window.scrollTo(0, scrollY);
+            
             // Animate
             projectItems.forEach(item => {
-                if (item.classList.contains('hidden')) return;
-                
+                const shouldShow = filter === 'all' || item.dataset.category === filter;
                 const wasVis = wasVisible.get(item);
                 
+                if (!shouldShow) {
+                    // Hide item - reset styles
+                    const thumb = item.querySelector('.project-thumb');
+                    const info = item.querySelector('.project-info');
+                    if (thumb) {
+                        thumb.style.opacity = '0';
+                        thumb.style.transform = 'translateY(20px)';
+                        thumb.style.animation = 'none';
+                    }
+                    if (info) {
+                        info.style.opacity = '0';
+                        info.style.transform = 'translateY(20px)';
+                        info.style.animation = 'none';
+                    }
+                    return;
+                }
+                
+                // Reset thumb and info animations for all visible items
+                const thumb = item.querySelector('.project-thumb');
+                const info = item.querySelector('.project-info');
+                
+                // Clear any existing animations
+                if (thumb) {
+                    thumb.style.animation = 'none';
+                    thumb.style.opacity = '0';
+                    thumb.style.transform = 'translateY(20px)';
+                }
+                if (info) {
+                    info.style.animation = 'none';
+                    info.style.opacity = '0';
+                    info.style.transform = 'translateY(20px)';
+                }
+                
+                // Ensure item is visible
+                item.style.opacity = '1';
+                item.style.transform = '';
+                
                 if (wasVis && positions.has(item)) {
+                    // Item was visible - use FLIP animation
                     const oldPos = positions.get(item);
                     const newRect = item.getBoundingClientRect();
                     
@@ -764,11 +809,31 @@ function initFilterMenu() {
                             requestAnimationFrame(() => {
                                 item.style.transform = '';
                                 item.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease';
+                                
+                                // Animate thumb and info
+                                setTimeout(() => {
+                                    if (thumb) {
+                                        thumb.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                                    }
+                                    if (info) {
+                                        info.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards';
+                                    }
+                                }, 50);
                             });
                         });
+                    } else {
+                        // No position change, just animate thumb and info
+                        setTimeout(() => {
+                            if (thumb) {
+                                thumb.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                            }
+                            if (info) {
+                                info.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards';
+                            }
+                        }, 50);
                     }
                 } else {
-                    // New item appearing - use fadeInUp animation
+                    // Item was hidden, now appearing - use fadeInUp animation
                     item.style.opacity = '0';
                     item.style.transform = 'translateY(30px)';
                     item.style.transition = 'none';
@@ -777,6 +842,19 @@ function initFilterMenu() {
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
                             item.classList.add('animate');
+                            item.style.opacity = '1';
+                            item.style.transform = '';
+                            item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                            
+                            // Animate thumb and info
+                            setTimeout(() => {
+                                if (thumb) {
+                                    thumb.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                                }
+                                if (info) {
+                                    info.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards';
+                                }
+                            }, 50);
                         });
                     });
                 }
