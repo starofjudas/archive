@@ -10,6 +10,8 @@ let loadingFinished = false;
     let lastParticleTime = 0;
     
     // Create particle
+    const shapes = ['circle', 'square', 'triangle', 'star', 'diamond'];
+    
     function createParticle(x) {
         if (!particleContainer) return;
         
@@ -21,10 +23,12 @@ let loadingFinished = false;
         if (rand > 0.8) particle.classList.add('large');
         else if (rand < 0.3) particle.classList.add('small');
         
-        // White with random opacity
-        const opacity = 0.3 + Math.random() * 0.7;
-        particle.style.background = '#ffffff';
-        particle.style.opacity = opacity;
+        // Random shape
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        particle.classList.add(shape);
+        
+        // Full opacity
+        const opacity = 1;
         
         // Position at progress bar edge
         particle.style.left = x + 'px';
@@ -91,10 +95,11 @@ let loadingFinished = false;
             
             // Create particles at the edge
             const now = Date.now();
-            if (now - lastParticleTime > 30) {
+            if (now - lastParticleTime > 15) {
                 const x = (window.innerWidth * progress) / 100;
                 createParticle(x);
-                if (Math.random() > 0.7) createParticle(x);
+                createParticle(x);
+                if (Math.random() > 0.5) createParticle(x);
                 lastParticleTime = now;
             }
         }
@@ -155,7 +160,62 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load projects
     loadProjects();
+    
+    // Cover section fade in on scroll
+    initCoverFade();
+    
+    // Theme toggle
+    initThemeToggle();
 });
+
+// Theme Toggle
+function initThemeToggle() {
+    const themeToggle = document.querySelector('.theme-toggle');
+    const themeLabel = document.querySelector('.theme-label');
+    if (!themeToggle || !themeLabel) return;
+    
+    // Check saved theme
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-mode');
+        themeLabel.textContent = 'lightmode';
+    }
+    
+    themeToggle.addEventListener('click', () => {
+        const isLight = document.body.classList.toggle('light-mode');
+        themeLabel.textContent = isLight ? 'lightmode' : 'darkmode';
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+}
+
+// Cover section fade in on scroll
+function initCoverFade() {
+    const coverSection = document.querySelector('.cover-section');
+    const scrollSpacer = document.querySelector('.scroll-spacer');
+    
+    if (!coverSection || !scrollSpacer) return;
+    
+    // Check if mobile (no fade effect needed)
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+        coverSection.classList.add('visible');
+        return;
+    }
+    
+    function checkScroll() {
+        const scrollY = window.scrollY;
+        const threshold = 50; // Start fading after 50px scroll
+        
+        if (scrollY > threshold) {
+            coverSection.classList.add('visible');
+        } else {
+            coverSection.classList.remove('visible');
+        }
+    }
+    
+    window.addEventListener('scroll', checkScroll);
+    checkScroll(); // Check initial state
+}
 
 // Start all entrance animations after loading
 function startEntranceAnimations() {
@@ -492,10 +552,9 @@ function initProjectFeatures() {
     initProjectNavigation();
 }
 
-// Handle project click with navigation animation
+// Handle project click with navigation
 function initProjectNavigation() {
     const projectLinks = document.querySelectorAll('.project-link');
-    const topBar = document.querySelector('.top-bar');
     
     projectLinks.forEach(link => {
         link.addEventListener('click', (e) => {
@@ -505,13 +564,11 @@ function initProjectNavigation() {
             // Save scroll position before navigating
             sessionStorage.setItem('scrollPosition', window.scrollY);
             
-            // Add transitioning class to trigger animation
-            topBar.classList.add('transitioning');
+            // Mark that we're coming from home (for subpage header animation)
+            sessionStorage.setItem('fromHome', 'true');
             
-            // Navigate after animation
-            setTimeout(() => {
-                window.location.href = href;
-            }, 400);
+            // Navigate immediately without header animation
+            window.location.href = href;
         });
     });
 }

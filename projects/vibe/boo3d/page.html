@@ -51,19 +51,39 @@
             position: relative;
         }
 
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
         .nav-back {
-            font-size: 0.75vw;
+            font-size: max(16px, 0.833vw);
             font-weight: 400;
             letter-spacing: -0.01em;
             text-decoration: none;
             color: inherit;
-            opacity: 0.8;
+            opacity: 0;
             cursor: pointer;
-            transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1),
-                        transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            position: absolute;
-            left: 0;
             white-space: nowrap;
+            width: 0;
+            margin-right: 0;
+            overflow: hidden;
+            transition: opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        margin-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        
+        body.loaded .nav-back,
+        body.header-ready .nav-back {
+            opacity: 1;
+            width: auto;
+            margin-right: 14px;
+        }
+        
+        /* Skip animation on refresh/direct access */
+        body.header-ready .nav-back {
+            transition: none;
         }
 
         .nav-back:hover {
@@ -73,34 +93,22 @@
 
         .top-bar.transitioning .nav-back {
             opacity: 0;
-            transform: translateX(-0.6vw);
+            width: 0;
+            margin-right: 0;
+            transform: translateX(-20px);
         }
 
         .nav-home {
-            font-size: 0.75vw;
+            font-size: max(16px, 0.833vw);
             font-weight: 400;
             letter-spacing: -0.01em;
             text-decoration: none;
             color: inherit;
             cursor: pointer;
-            transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1),
-                        transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-            transform: translateX(3.75vw);
         }
 
         .nav-home:hover {
             text-decoration: line-through;
-        }
-
-        .top-bar.transitioning .nav-home {
-            transform: translateX(0);
-        }
-
-        .location {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.75vw;
         }
 
         /* Light mode theme */
@@ -110,8 +118,7 @@
         }
 
         body.light-mode .nav-back,
-        body.light-mode .nav-home,
-        body.light-mode .location {
+        body.light-mode .nav-home {
             color: #000000;
         }
 
@@ -169,8 +176,8 @@
             position: absolute;
             width: 6px;
             height: 6px;
-            border-radius: 50%;
             pointer-events: none;
+            background: #ffffff;
         }
         
         .particle.small {
@@ -181,6 +188,43 @@
         .particle.large {
             width: 10px;
             height: 10px;
+        }
+        
+        .particle.circle {
+            border-radius: 50%;
+        }
+        
+        .particle.square {
+            border-radius: 0;
+        }
+        
+        .particle.triangle {
+            background: transparent !important;
+            width: 0 !important;
+            height: 0 !important;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 7px solid #ffffff;
+        }
+        
+        .particle.triangle.small {
+            border-left-width: 3px;
+            border-right-width: 3px;
+            border-bottom-width: 5px;
+        }
+        
+        .particle.triangle.large {
+            border-left-width: 6px;
+            border-right-width: 6px;
+            border-bottom-width: 10px;
+        }
+        
+        .particle.star {
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+        
+        .particle.diamond {
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
         }
         
         body.light-mode .loading {
@@ -199,7 +243,11 @@
             background: #000000 !important;
         }
         
-        /* Hide content until loaded (keep header visible) */
+        body.light-mode .particle.triangle {
+            border-bottom-color: #000000 !important;
+        }
+        
+        /* Hide content until loaded */
         body.is-loading .project-frame {
             opacity: 0;
         }
@@ -227,16 +275,8 @@
             
             .nav-home {
                 font-size: 2vw;
-                transform: translateX(8vw);
             }
             
-            .top-bar.transitioning .nav-back {
-                transform: translateX(-1.5vw);
-            }
-            
-            .location {
-                font-size: 2vw;
-            }
         }
         
         /* Responsive - Mobile */
@@ -251,17 +291,8 @@
             
             .nav-home {
                 font-size: 3.5vw;
-                transform: translateX(14vw);
             }
             
-            .top-bar.transitioning .nav-back {
-                transform: translateX(-2vw);
-            }
-            
-            .location {
-                font-size: 3.5vw;
-                gap: 2vw;
-            }
         }
         
         /* Responsive - Small Mobile */
@@ -276,13 +307,9 @@
             
             .nav-home {
                 font-size: 4vw;
-                transform: translateX(16vw);
             }
             
-            .location {
-                font-size: 4vw;
-            }
-        }
+                    }
     </style>
 </head>
 <body class="is-loading">
@@ -299,7 +326,6 @@
             <a href="../../../" class="nav-back">← back</a>
             <a href="../../../" class="nav-home">home</a>
         </div>
-        <div class="location">han donghoon</div>
     </header>
     
     <iframe src="index.html" class="project-frame" allowfullscreen></iframe>
@@ -314,7 +340,23 @@
         let currentProgress = 0;
         let loadingFinished = false;
         
+        // Check if coming from home page
+        const fromHome = sessionStorage.getItem('fromHome');
+        const skipHeaderAnimation = !fromHome;
+        
+        if (fromHome) {
+            // Clear the flag
+            sessionStorage.removeItem('fromHome');
+        }
+        
+        // If direct access or refresh, show header in loaded state immediately
+        if (skipHeaderAnimation) {
+            document.body.classList.add('header-ready');
+        }
+        
         // Particle System
+        const shapes = ['circle', 'square', 'triangle', 'star', 'diamond'];
+        
         function createParticle(x) {
             if (!particleContainer) return;
             
@@ -325,10 +367,13 @@
             if (rand > 0.8) particle.classList.add('large');
             else if (rand < 0.3) particle.classList.add('small');
             
-            const opacity = 0.3 + Math.random() * 0.7;
+            // Random shape
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            particle.classList.add(shape);
+            
+            const opacity = 1;
             const isLight = document.body.classList.contains('light-mode');
             particle.style.background = isLight ? '#000000' : '#ffffff';
-            particle.style.opacity = opacity;
             
             particle.style.left = x + 'px';
             particle.style.top = '2px';
@@ -387,10 +432,11 @@
                 progressFill.style.width = currentProgress + '%';
                 
                 const now = Date.now();
-                if (now - lastParticleTime > 30) {
+                if (now - lastParticleTime > 15) {
                     const x = (window.innerWidth * currentProgress) / 100;
                     createParticle(x);
-                    if (Math.random() > 0.7) createParticle(x);
+                    createParticle(x);
+                    if (Math.random() > 0.5) createParticle(x);
                     lastParticleTime = now;
                 }
             }
@@ -446,7 +492,7 @@
             
             setTimeout(() => {
                 window.location.href = href;
-            }, 400);
+            }, 600);
         }
         
         navBack.addEventListener('click', navigateBack);
@@ -462,6 +508,21 @@
                 }
             }
         });
+        
+        // Check saved theme
+        const savedTheme = localStorage.getItem('theme');
+        const iframe = document.querySelector('.project-frame');
+        
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-mode');
+            // Sync theme to iframe after it loads
+            iframe.addEventListener('load', () => {
+                if (iframe.contentWindow) {
+                    iframe.contentWindow.postMessage({ type: 'themeChange', mode: 'light' }, '*');
+                }
+            });
+        }
+        
     </script>
 </body>
 </html>
