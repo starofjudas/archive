@@ -15,7 +15,7 @@
 
 html {
     font-size: 16px;
-    scroll-behavior: smooth;
+    scroll-behavior: auto; /* Changed to auto for custom smooth scroll */
     overscroll-behavior: contain;
     /* Hide scrollbar but keep scroll functionality */
     scrollbar-width: none; /* Firefox */
@@ -757,16 +757,10 @@ body.light-mode .cover-section.visible {
     display: none;
 }
 
-.project-item[data-size="large"] {
-    grid-column: span 7;
-}
-
-.project-item[data-size="small"] {
-    grid-column: span 5;
-}
-
+.project-item[data-size="large"],
+.project-item[data-size="small"],
 .project-item[data-size="medium"] {
-    grid-column: span 4;
+    grid-column: span 6;
 }
 
 .project-thumb {

@@ -168,6 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Theme toggle
     initThemeToggle();
+    
+    // Smooth scroll implementation
+    initSmoothScroll();
 });
 
 // Theme Toggle
@@ -187,6 +190,100 @@ function initThemeToggle() {
         const isLight = document.body.classList.toggle('light-mode');
         themeLabel.textContent = isLight ? 'light' : 'dark';
         localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    });
+}
+
+// Smooth scroll with momentum and easing
+function initSmoothScroll() {
+    // Skip on touch devices to avoid conflicts
+    if (isTouchDevice) return;
+    
+    let currentScroll = 0;
+    let targetScroll = 0;
+    let ease = 0.08; // Easing factor (lower = smoother, slower)
+    let isScrolling = false;
+    
+    // Update current scroll position
+    function updateScroll() {
+        currentScroll += (targetScroll - currentScroll) * ease;
+        
+        // Apply scroll
+        window.scrollTo(0, currentScroll);
+        
+        // Continue animation if not close enough
+        if (Math.abs(targetScroll - currentScroll) > 0.5) {
+            requestAnimationFrame(updateScroll);
+        } else {
+            window.scrollTo(0, targetScroll);
+            currentScroll = targetScroll;
+            isScrolling = false;
+        }
+    }
+    
+    // Handle wheel events
+    let wheelTimeout;
+    window.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        
+        // Calculate scroll delta
+        const delta = e.deltaY;
+        targetScroll += delta;
+        
+        // Clamp scroll position
+        const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+        targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+        
+        // Start animation if not already running
+        if (!isScrolling) {
+            isScrolling = true;
+            currentScroll = window.scrollY;
+            updateScroll();
+        }
+        
+        // Clear timeout
+        clearTimeout(wheelTimeout);
+        wheelTimeout = setTimeout(() => {
+            // Smooth stop after wheel stops
+            targetScroll = window.scrollY;
+        }, 150);
+    }, { passive: false });
+    
+    // Handle scroll events (for programmatic scrolling)
+    window.addEventListener('scroll', () => {
+        if (!isScrolling) {
+            currentScroll = window.scrollY;
+            targetScroll = window.scrollY;
+        }
+    });
+    
+    // Handle keyboard scrolling
+    window.addEventListener('keydown', (e) => {
+        if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) {
+            e.preventDefault();
+            const scrollAmount = e.key === 'ArrowUp' ? -100 :
+                                e.key === 'ArrowDown' ? 100 :
+                                e.key === 'PageUp' ? -window.innerHeight * 0.8 :
+                                e.key === 'PageDown' ? window.innerHeight * 0.8 :
+                                e.key === 'Home' ? -Infinity :
+                                e.key === 'End' ? Infinity : 0;
+            
+            if (scrollAmount === -Infinity) {
+                targetScroll = 0;
+            } else if (scrollAmount === Infinity) {
+                targetScroll = document.documentElement.scrollHeight - window.innerHeight;
+            } else {
+                targetScroll += scrollAmount;
+            }
+            
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+            
+            if (!isScrolling) {
+                isScrolling = true;
+                currentScroll = window.scrollY;
+                updateScroll();
+            }
+        }
     });
 }
 
