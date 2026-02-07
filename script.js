@@ -150,9 +150,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Adjust font size (without animation)
     adjustTitleSize(false);
     adjustSubTextSize(false);
+    adjustMobileSubTextSize();
     window.addEventListener('resize', () => {
         adjustTitleSize(false);
         adjustSubTextSize(false);
+        adjustMobileSubTextSize();
     });
     
     // Restore scroll position if returning from project
@@ -188,33 +190,20 @@ function initThemeToggle() {
     });
 }
 
-// Cover section fade in on scroll
+// Cover section fade in on scroll (disabled for PC and tablet)
 function initCoverFade() {
     const coverSection = document.querySelector('.cover-section');
     const scrollSpacer = document.querySelector('.scroll-spacer');
     
     if (!coverSection || !scrollSpacer) return;
     
-    // Check if mobile (no fade effect needed)
+    // PC and tablet: no cover section effect, keep transparent
+    // Mobile: keep existing behavior
     const isMobile = window.innerWidth <= 768;
     if (isMobile) {
         coverSection.classList.add('visible');
-        return;
     }
-    
-    function checkScroll() {
-        const scrollY = window.scrollY;
-        const threshold = 50; // Start fading after 50px scroll
-        
-        if (scrollY > threshold) {
-            coverSection.classList.add('visible');
-        } else {
-            coverSection.classList.remove('visible');
-        }
-    }
-    
-    window.addEventListener('scroll', checkScroll);
-    checkScroll(); // Check initial state
+    // PC and tablet: do nothing, cover-section stays transparent
 }
 
 // Start all entrance animations after loading
@@ -222,6 +211,12 @@ function startEntranceAnimations() {
     // Enable top bar transitions
     const topBar = document.querySelector('.top-bar');
     if (topBar) topBar.classList.add('ready');
+    
+    // Mark sub-text-wrapper as loaded for line animations (first)
+    const subTextWrapper = document.querySelector('.sub-text-wrapper');
+    if (subTextWrapper) {
+        subTextWrapper.classList.add('loaded');
+    }
     
     // Animate title
     animateTitle();
@@ -233,6 +228,38 @@ function startEntranceAnimations() {
             line.classList.add('animate');
         }, 300 + (index * 150));
     });
+    
+    // Animate mobile sub text (same animation as PC)
+    const mobileSubLines = document.querySelectorAll('.sub-text-mobile p');
+    mobileSubLines.forEach((line, index) => {
+        setTimeout(() => {
+            line.classList.add('animate');
+        }, 300 + (index * 150));
+    });
+    
+    // Animate filter menu
+    const filterMenu = document.querySelector('.filter-menu');
+    if (filterMenu) {
+        setTimeout(() => {
+            filterMenu.classList.add('animate');
+        }, 800);
+    }
+    
+    // Animate project list
+    const projectList = document.querySelector('.project-list');
+    if (projectList) {
+        setTimeout(() => {
+            projectList.classList.add('animate');
+            
+            // Animate each project item with stagger (after filter menu appears)
+            const projectItems = projectList.querySelectorAll('.project-item');
+            projectItems.forEach((item, index) => {
+                setTimeout(() => {
+                    item.classList.add('animate');
+                }, 2000 + (index * 100));
+            });
+        }, 1000);
+    }
     
     // Mark SVG as loaded
     const svg = document.querySelector('.sub-text-svg');
@@ -293,6 +320,12 @@ function adjustSubTextSize(shouldAnimate = false) {
     document.fonts.ready.then(() => {
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
+                // Set font size based on screen size (mobile: 117px, others: 107px)
+                const isMobile = window.innerWidth <= 768;
+                const fontSize = isMobile ? 117 : 107;
+                line1.setAttribute('font-size', fontSize);
+                line2.setAttribute('font-size', fontSize);
+                
                 // Get bounding boxes
                 const bbox1 = line1.getBBox();
                 const bbox2 = line2.getBBox();
@@ -304,15 +337,26 @@ function adjustSubTextSize(shouldAnimate = false) {
                 const indent = totalWidth * 0.35;
                 line1.setAttribute('x', indent);
                 
-                // Recalculate bbox after repositioning
+                // Recalculate bbox after repositioning first line
                 const newBbox1 = line1.getBBox();
+                
+                // Adjust second line y position based on first line y coordinate
+                // Mobile: 120px spacing, PC/Tablet: 4px spacing
+                const spacing = isMobile ? 120 : 4;
+                const line1Y = parseFloat(line1.getAttribute('y')) || newBbox1.y;
+                const line2NewY = line1Y + newBbox1.height + spacing; // First line y + height + spacing
+                line2.setAttribute('y', line2NewY);
+                line2.removeAttribute('dy'); // Remove dy if exists, use y instead
+                
+                // Recalculate bbox after repositioning second line
+                const newBbox2 = line2.getBBox();
                 
                 // Calculate viewBox dimensions
                 const padding = 5;
                 const minX = 0 - padding;
-                const minY = Math.min(newBbox1.y, bbox2.y) - padding;
-                const maxX = Math.max(newBbox1.x + newBbox1.width, bbox2.x + bbox2.width) + padding;
-                const maxY = Math.max(newBbox1.y + newBbox1.height, bbox2.y + bbox2.height) + padding;
+                const minY = Math.min(newBbox1.y, newBbox2.y) - padding;
+                const maxX = Math.max(newBbox1.x + newBbox1.width, newBbox2.x + newBbox2.width) + padding;
+                const maxY = Math.max(newBbox1.y + newBbox1.height, newBbox2.y + newBbox2.height) + padding;
                 
                 const width = maxX - minX;
                 const height = maxY - minY;
@@ -322,6 +366,57 @@ function adjustSubTextSize(shouldAnimate = false) {
             });
         });
     });
+}
+
+// Adjust mobile sub-text font size to fit screen width
+function adjustMobileSubTextSize() {
+    const isMobile = window.innerWidth <= 768;
+    if (!isMobile) return;
+    
+    const line1 = document.querySelector('.sub-text-line-1');
+    const line2 = document.querySelector('.sub-text-line-2');
+    const wrapper = document.querySelector('.sub-text-wrapper');
+    if (!line1 || !line2 || !wrapper) return;
+    
+    // Get actual container width
+    const wrapperRect = wrapper.getBoundingClientRect();
+    const availableWidth = wrapperRect.width - 5; // Subtract small safety margin
+    
+    // Create a temporary element to measure text width
+    const temp = document.createElement('span');
+    temp.style.visibility = 'hidden';
+    temp.style.position = 'absolute';
+    temp.style.fontFamily = getComputedStyle(line2).fontFamily;
+    temp.style.fontWeight = getComputedStyle(line2).fontWeight;
+    temp.style.whiteSpace = 'nowrap';
+    temp.style.fontSize = '26px';
+    document.body.appendChild(temp);
+    
+    // Binary search to find the right font size
+    let minSize = 10;
+    let maxSize = 100;
+    let bestSize = 26;
+    
+    for (let i = 0; i < 30; i++) {
+        const testSize = (minSize + maxSize) / 2;
+        temp.style.fontSize = testSize + 'px';
+        temp.textContent = line2.textContent;
+        const textWidth = temp.offsetWidth;
+        
+        if (textWidth <= availableWidth) {
+            bestSize = testSize;
+            minSize = testSize;
+        } else {
+            maxSize = testSize;
+        }
+    }
+    
+    // Apply the calculated font size to both lines (with slight reduction for safety)
+    const finalSize = Math.floor(bestSize * 0.95); // 5% safety margin
+    line1.style.fontSize = finalSize + 'px';
+    line2.style.fontSize = finalSize + 'px';
+    
+    document.body.removeChild(temp);
 }
 
 // Animate title characters with staggered delay
@@ -542,6 +637,30 @@ function renderProjects(projects) {
             </a>
         </article>
     `).join('');
+    
+    // Animate project items after rendering
+    animateProjectItems();
+}
+
+// Animate project items with stagger effect
+function animateProjectItems() {
+    const projectList = document.querySelector('.project-list');
+    if (!projectList) return;
+    
+    // Add animate class to list if not already animated
+    if (!projectList.classList.contains('animate')) {
+        projectList.classList.add('animate');
+    }
+    
+    // Animate each visible project item
+    const visibleItems = projectList.querySelectorAll('.project-item:not(.hidden)');
+    visibleItems.forEach((item, index) => {
+        // Remove existing animate class to restart animation
+        item.classList.remove('animate');
+        setTimeout(() => {
+            item.classList.add('animate');
+        }, index * 100);
+    });
 }
 
 // Initialize project features after rendering
@@ -649,13 +768,15 @@ function initFilterMenu() {
                         });
                     }
                 } else {
+                    // New item appearing - use fadeInUp animation
                     item.style.opacity = '0';
+                    item.style.transform = 'translateY(30px)';
                     item.style.transition = 'none';
+                    item.classList.remove('animate');
                     
                     requestAnimationFrame(() => {
                         requestAnimationFrame(() => {
-                            item.style.opacity = '1';
-                            item.style.transition = 'opacity 0.4s ease';
+                            item.classList.add('animate');
                         });
                     });
                 }
