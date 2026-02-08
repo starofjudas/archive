@@ -1,10 +1,4 @@
 [
-  {
-    "id": "1",
-    "title": "boo 3d character",
-    "category": "vibe",
-    "size": "large",
-    "thumbnail": "images/thumbnails/p1_boo.png",
-    "link": "projects/vibe/boo3d/page.html"
-  }
+  {"id":"1","title":"boo 3d character","category":"vibe","size":"large","thumbnail":"images/thumbnails/p1_boo.png","link":"projects/vibe/boo3d/page.html"},
+  {"id":"2","title":"chzzkcup interaction","category":"vibe","size":"large","thumbnailColor":"#5b8fb9","link":"projects/vibe/chzzkcup/page.html"}
 ]

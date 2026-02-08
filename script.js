@@ -149,10 +149,12 @@ let loadingFinished = false;
 document.addEventListener('DOMContentLoaded', () => {
     // Adjust font size (without animation)
     adjustTitleSize(false);
+    adjustFooterTitleSize(false);
     adjustSubTextSize(false);
     adjustMobileSubTextSize();
     window.addEventListener('resize', () => {
         adjustTitleSize(false);
+        adjustFooterTitleSize(false);
         adjustSubTextSize(false);
         adjustMobileSubTextSize();
     });
@@ -317,6 +319,9 @@ function startEntranceAnimations() {
     
     // Animate title
     animateTitle();
+    
+    // Animate footer title
+    animateFooterTitle();
     
     // Animate sub text
     const subLines = document.querySelectorAll('.sub-line');
@@ -518,13 +523,56 @@ function adjustMobileSubTextSize() {
 
 // Animate title characters with staggered delay
 function animateTitle() {
-    const chars = document.querySelectorAll('.char');
+    const titleWrapper = document.querySelector('.title-wrapper');
+    if (!titleWrapper) return;
+    const chars = titleWrapper.querySelectorAll('.char');
     
-    // Animate title characters
     chars.forEach((char, index) => {
         setTimeout(() => {
             char.classList.add('animate');
-        }, index * 80); // 80ms delay between each character
+        }, index * 80);
+    });
+}
+
+// Adjust footer title font size (same logic as main title)
+function adjustFooterTitleSize() {
+    const wrapper = document.querySelector('.footer-title-wrapper');
+    const chars = document.querySelectorAll('.footer-char');
+    
+    if (!wrapper || chars.length === 0) return;
+    
+    document.fonts.ready.then(() => {
+        const targetWidth = window.innerWidth * 0.975;
+        const baseFontSize = 100;
+        chars.forEach(char => {
+            char.style.fontSize = baseFontSize + 'px';
+        });
+        wrapper.offsetWidth;
+        
+        let totalWidth = 0;
+        const containers = document.querySelectorAll('.footer-char-container');
+        containers.forEach(container => {
+            totalWidth += container.getBoundingClientRect().width;
+        });
+        
+        const ratio = targetWidth / totalWidth;
+        const newFontSize = Math.floor(baseFontSize * ratio);
+        chars.forEach(char => {
+            char.style.fontSize = newFontSize + 'px';
+        });
+    });
+}
+
+// Animate footer title characters with staggered delay (same as archive)
+function animateFooterTitle() {
+    const wrapper = document.querySelector('.footer-title-wrapper');
+    if (!wrapper) return;
+    const chars = wrapper.querySelectorAll('.footer-char');
+    
+    chars.forEach((char, index) => {
+        setTimeout(() => {
+            char.classList.add('animate');
+        }, index * 80);
     });
 }
 
@@ -711,7 +759,8 @@ async function loadProjects() {
     try {
         const response = await fetch('data/projects.json');
         projectsData = await response.json();
-        renderProjects(projectsData);
+        // 나중에 추가한 프로젝트가 앞에 오도록 역순 렌더
+        renderProjects(projectsData.slice().reverse());
         initProjectFeatures();
     } catch (error) {
         console.error('Failed to load projects:', error);
@@ -723,17 +772,35 @@ function renderProjects(projects) {
     const projectList = document.getElementById('project-list');
     if (!projectList) return;
     
-    projectList.innerHTML = projects.map(project => `
-        <article class="project-item" data-category="${project.category}" data-size="${project.size}" data-id="${project.id}">
+    if (!projects || projects.length === 0) {
+        projectList.innerHTML = '';
+        projectList.classList.remove('is-empty', 'is-filter-empty');
+        if (!projectList.classList.contains('animate')) {
+            projectList.classList.add('animate');
+        }
+        return;
+    }
+    
+    projectList.classList.remove('is-empty', 'is-filter-empty');
+    // 레이아웃: 큰-작은 / 작은-큰 반복 (인덱스 0,3=large / 1,2=small)
+    projectList.innerHTML = projects.map((project, index) => {
+        const layoutSize = (index % 4 === 0 || index % 4 === 3) ? 'large' : 'small';
+        const isColorThumb = !!project.thumbnailColor;
+        const thumbStyle = isColorThumb
+            ? `background-color: ${project.thumbnailColor}; background-image: none; background-size: cover; background-position: center;`
+            : `background-image: url('${project.thumbnail}'); background-size: cover; background-position: center;`;
+        return `
+        <article class="project-item" data-category="${project.category}" data-size="${layoutSize}" data-id="${project.id}">
             <a href="${project.link}" class="project-link">
-                <div class="project-thumb" style="background-image: url('${project.thumbnail}'); background-size: cover; background-position: center;"></div>
+                <div class="project-thumb" ${isColorThumb ? 'data-thumb="color"' : ''} style="${thumbStyle}"></div>
                 <div class="project-info">
                     <h3 class="project-title">${project.title}</h3>
                     <span class="project-meta">${project.category}</span>
                 </div>
             </a>
         </article>
-    `).join('');
+    `;
+    }).join('');
     
     // Animate project items after rendering
     animateProjectItems();
@@ -960,9 +1027,9 @@ function initFilterMenu() {
     });
 }
 
-// Thumbnail fallback (if no image, use random placeholder)
+// Thumbnail fallback (이미지 없을 때만 랜덤 플레이스홀더, 컬러 썸네일은 제외)
 function initThumbnailFallback() {
-    const thumbs = document.querySelectorAll('.project-thumb');
+    const thumbs = document.querySelectorAll('.project-thumb:not([data-thumb="color"])');
     thumbs.forEach((thumb) => {
         const bgImage = thumb.style.backgroundImage;
         if (!bgImage || bgImage === 'none' || bgImage.includes('undefined')) {
@@ -974,19 +1041,54 @@ function initThumbnailFallback() {
     });
 }
 
-// 3D Tilt Effect for Project Thumbnails (desktop only)
+// 3D Tilt + 그레이스케일→컬러 호버 효과 (모든 리스트 공통, desktop만)
 function initTiltEffect() {
-    // Skip tilt effect on touch devices
     if (isTouchDevice) return;
     
-    const projectItems = document.querySelectorAll('.project-item');
+    const projectList = document.getElementById('project-list');
+    if (!projectList) return;
+    
+    const projectItems = projectList.querySelectorAll('.project-item');
+    const easeSmooth = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
+    const grayscaleDefault = 'grayscale(0.4)';
+    
+    // 다른 모든 썸네일을 그레이스케일로 (아웃 시 복원 누락 방지)
+    function setOthersToGrayscale(exceptThumb) {
+        projectItems.forEach((it) => {
+            const t = it.querySelector('.project-thumb');
+            if (t && t !== exceptThumb) {
+                t.style.willChange = '';
+                t.style.transition = `transform 1.2s ${easeSmooth}, filter 1.1s ${easeSmooth}`;
+                t.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                t.style.filter = grayscaleDefault;
+            }
+        });
+    }
+    
+    function setAllToGrayscale() {
+        projectItems.forEach((it) => {
+            const t = it.querySelector('.project-thumb');
+            if (t) {
+                t.style.willChange = '';
+                t.style.transition = `transform 1.2s ${easeSmooth}, filter 1.1s ${easeSmooth}`;
+                t.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+                t.style.filter = grayscaleDefault;
+            }
+        });
+    }
     
     projectItems.forEach(item => {
         const thumb = item.querySelector('.project-thumb');
         if (!thumb) return;
         
         item.addEventListener('mouseenter', () => {
-            thumb.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            setOthersToGrayscale(thumb);
+            thumb.style.animation = 'none';
+            thumb.style.opacity = '1';
+            thumb.style.filter = 'grayscale(0)';
+            thumb.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            thumb.style.transition = `transform 1s ${easeSmooth}, filter 1s ${easeSmooth}`;
+            thumb.style.willChange = 'transform';
         });
         
         item.addEventListener('mousemove', (e) => {
@@ -997,15 +1099,20 @@ function initTiltEffect() {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
             
-            const rotateX = (y - centerY) / centerY * -12;
-            const rotateY = (x - centerX) / centerX * 12;
+            const rotateX = (y - centerY) / centerY * -1;
+            const rotateY = (x - centerX) / centerX * 1;
             
-            thumb.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            thumb.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         });
         
         item.addEventListener('mouseleave', () => {
-            thumb.style.transition = 'transform 1.2s cubic-bezier(0.19, 1, 0.22, 1)';
-            thumb.style.transform = 'rotateX(0) rotateY(0)';
+            thumb.style.willChange = '';
+            thumb.style.transition = `transform 1.2s ${easeSmooth}, filter 1.1s ${easeSmooth}`;
+            thumb.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+            thumb.style.filter = grayscaleDefault;
         });
     });
+    
+    // 커서가 문서 밖으로 나갔을 때도 전부 그레이스케일 복원
+    document.body.addEventListener('mouseleave', setAllToGrayscale);
 }

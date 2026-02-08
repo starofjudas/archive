@@ -52,11 +52,6 @@
             position: relative;
         }
 
-        .nav-left {
-            display: flex;
-            align-items: center;
-        }
-
         .nav-back {
             font-size: max(16px, 0.833vw);
             font-weight: 400;
@@ -82,7 +77,6 @@
             margin-right: 14px;
         }
         
-        /* Skip animation on refresh/direct access */
         body.header-ready .nav-back {
             transition: none;
         }
@@ -112,7 +106,6 @@
             text-decoration: line-through;
         }
 
-        /* Light mode theme */
         body.light-mode {
             background-color: #ffffff;
             color: #000000;
@@ -123,7 +116,6 @@
             color: #000000;
         }
 
-        /* Project Frame */
         .project-frame {
             position: fixed;
             top: 0;
@@ -133,7 +125,6 @@
             border: none;
         }
         
-        /* Loading Progress Bar */
         .loading {
             position: fixed;
             top: 0;
@@ -181,23 +172,10 @@
             background: #ffffff;
         }
         
-        .particle.small {
-            width: 4px;
-            height: 4px;
-        }
-        
-        .particle.large {
-            width: 10px;
-            height: 10px;
-        }
-        
-        .particle.circle {
-            border-radius: 50%;
-        }
-        
-        .particle.square {
-            border-radius: 0;
-        }
+        .particle.small { width: 4px; height: 4px; }
+        .particle.large { width: 10px; height: 10px; }
+        .particle.circle { border-radius: 50%; }
+        .particle.square { border-radius: 0; }
         
         .particle.triangle {
             background: transparent !important;
@@ -207,125 +185,42 @@
             border-right: 4px solid transparent;
             border-bottom: 7px solid #ffffff;
         }
+        .particle.triangle.small { border-left-width: 3px; border-right-width: 3px; border-bottom-width: 5px; }
+        .particle.triangle.large { border-left-width: 6px; border-right-width: 6px; border-bottom-width: 10px; }
+        .particle.star { clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%); }
+        .particle.diamond { clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
         
-        .particle.triangle.small {
-            border-left-width: 3px;
-            border-right-width: 3px;
-            border-bottom-width: 5px;
-        }
+        body.light-mode .loading { background: #ffffff; }
+        body.light-mode .progress-bar { background: rgba(0, 0, 0, 0.1); }
+        body.light-mode .progress-fill { background: #000000; }
+        body.light-mode .particle { background: #000000 !important; }
+        body.light-mode .particle.triangle { border-bottom-color: #000000 !important; }
         
-        .particle.triangle.large {
-            border-left-width: 6px;
-            border-right-width: 6px;
-            border-bottom-width: 10px;
-        }
-        
-        .particle.star {
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-        }
-        
-        .particle.diamond {
-            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-        }
-        
-        body.light-mode .loading {
-            background: #ffffff;
-        }
-        
-        body.light-mode .progress-bar {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        
-        body.light-mode .progress-fill {
-            background: #000000;
-        }
-        
-        body.light-mode .particle {
-            background: #000000 !important;
-        }
-        
-        body.light-mode .particle.triangle {
-            border-bottom-color: #000000 !important;
-        }
-        
-        /* Hide content until loaded */
-        body.is-loading .project-frame {
-            opacity: 0;
-        }
-        
-        /* Header stays above loading */
-        .top-bar {
-            z-index: 10002;
-        }
-        
+        body.is-loading .project-frame { opacity: 0; }
+        .top-bar { z-index: 10002; }
         body.loaded .loading {
             opacity: 0;
             transition: opacity 0.5s ease;
             pointer-events: none;
         }
         
-        /* Responsive - Tablet */
         @media (max-width: 1024px) {
-            .top-bar {
-                padding: 3vw;
-            }
-            
-            .nav-back {
-                font-size: 2vw;
-            }
-            
-            .nav-home {
-                font-size: 2vw;
-            }
-            
+            .top-bar { padding: 3vw; }
+            .nav-back, .nav-home { font-size: 2vw; }
         }
-        
-        /* Responsive - Mobile */
         @media (max-width: 768px) {
-            .top-bar {
-                padding: 4vw;
-            }
-            
-            .nav-back {
-                font-size: 3.5vw;
-            }
-            
-            .nav-home {
-                font-size: 3.5vw;
-            }
-            
-            /* Remove hover effects on mobile */
-            .nav-back:hover,
-            .nav-home:hover {
-                text-decoration: none !important;
-            }
+            .top-bar { padding: 4vw; }
+            .nav-back, .nav-home { font-size: 3.5vw; }
+            .nav-back:hover, .nav-home:hover { text-decoration: none !important; }
         }
-        
-        /* Responsive - Small Mobile */
         @media (max-width: 480px) {
-            .top-bar {
-                padding: 5vw;
-            }
-            
-            .nav-back {
-                font-size: 4vw;
-            }
-            
-            .nav-home {
-                font-size: 4vw;
-            }
-            
-            /* Remove hover effects on mobile */
-            .nav-back:hover,
-            .nav-home:hover {
-                text-decoration: none !important;
-            }
-            
-                    }
+            .top-bar { padding: 5vw; }
+            .nav-back, .nav-home { font-size: 4vw; }
+            .nav-back:hover, .nav-home:hover { text-decoration: none !important; }
+        }
     </style>
 </head>
 <body class="is-loading">
-    <!-- Loading Progress Bar -->
     <div class="loading">
         <div class="progress-bar">
             <div class="progress-fill"></div>
@@ -352,97 +247,58 @@
         let currentProgress = 0;
         let loadingFinished = false;
         
-        // Check if coming from home page
         const fromHome = sessionStorage.getItem('fromHome');
         const skipHeaderAnimation = !fromHome;
+        if (fromHome) sessionStorage.removeItem('fromHome');
+        if (skipHeaderAnimation) document.body.classList.add('header-ready');
         
-        if (fromHome) {
-            // Clear the flag
-            sessionStorage.removeItem('fromHome');
-        }
-        
-        // If direct access or refresh, show header in loaded state immediately
-        if (skipHeaderAnimation) {
-            document.body.classList.add('header-ready');
-        }
-        
-        // Particle System
         const shapes = ['circle', 'square', 'triangle', 'star', 'diamond'];
-        
         function createParticle(x) {
             if (!particleContainer) return;
-            
             const particle = document.createElement('div');
             particle.className = 'particle';
-            
             const rand = Math.random();
             if (rand > 0.8) particle.classList.add('large');
             else if (rand < 0.3) particle.classList.add('small');
-            
-            // Random shape
-            const shape = shapes[Math.floor(Math.random() * shapes.length)];
-            particle.classList.add(shape);
-            
-            const opacity = 1;
+            particle.classList.add(shapes[Math.floor(Math.random() * shapes.length)]);
             const isLight = document.body.classList.contains('light-mode');
             particle.style.background = isLight ? '#000000' : '#ffffff';
-            
             particle.style.left = x + 'px';
             particle.style.top = '2px';
-            
             const vx = (Math.random() - 0.5) * 8;
             const vy = Math.random() * 6 + 2;
             const rotation = Math.random() * 360;
             const scale = 0.5 + Math.random() * 1;
             const lifetime = 800 + Math.random() * 1200;
-            
             particle.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
             particleContainer.appendChild(particle);
-            
             let startTime = Date.now();
-            let posX = x;
-            let posY = 2;
-            let velocityX = vx;
-            let velocityY = vy;
-            
+            let posX = x, posY = 2;
+            let velocityX = vx, velocityY = vy;
             function animateParticle() {
                 const elapsed = Date.now() - startTime;
                 const prog = elapsed / lifetime;
-                
-                if (prog >= 1) {
-                    particle.remove();
-                    return;
-                }
-                
+                if (prog >= 1) { particle.remove(); return; }
                 velocityY += 0.15;
                 posX += velocityX;
                 posY += velocityY;
-                
-                const fadeOpacity = (1 - prog) * opacity;
+                const fadeOpacity = (1 - prog);
                 const currentScale = scale * (1 - prog * 0.5);
-                
                 particle.style.left = posX + 'px';
                 particle.style.top = posY + 'px';
                 particle.style.opacity = fadeOpacity;
                 particle.style.transform = `scale(${currentScale}) rotate(${rotation + elapsed * 0.2}deg)`;
-                
                 requestAnimationFrame(animateParticle);
             }
-            
             requestAnimationFrame(animateParticle);
         }
-        
         function createParticleBurst(x, count) {
-            for (let i = 0; i < count; i++) {
-                setTimeout(() => createParticle(x), i * 20);
-            }
+            for (let i = 0; i < count; i++) setTimeout(() => createParticle(x), i * 20);
         }
-        
         function updateProgress(value) {
             currentProgress = Math.min(value, 100);
             if (progressFill) {
                 progressFill.style.width = currentProgress + '%';
-                
                 const now = Date.now();
                 if (now - lastParticleTime > 15) {
                     const x = (window.innerWidth * currentProgress) / 100;
@@ -453,88 +309,53 @@
                 }
             }
         }
-        
         function finishLoading() {
             if (loadingFinished) return;
             loadingFinished = true;
-            
             createParticleBurst(window.innerWidth, 20);
-            
             setTimeout(() => {
                 document.body.classList.remove('is-loading');
                 document.body.classList.add('loaded');
-                
-                setTimeout(() => {
-                    loading.style.display = 'none';
-                }, 500);
+                setTimeout(() => { loading.style.display = 'none'; }, 500);
             }, 300);
         }
-        
-        // Gradual progress while loading
         let progressInterval = setInterval(() => {
-            if (currentProgress < 90 && !loadingFinished) {
-                updateProgress(currentProgress + 1);
-            }
+            if (currentProgress < 90 && !loadingFinished) updateProgress(currentProgress + 1);
         }, 30);
-        
-        // Listen for loading complete message from iframe
         window.addEventListener('message', (e) => {
             if (e.data.type === 'loadingComplete') {
                 clearInterval(progressInterval);
-                
                 const completeInterval = setInterval(() => {
-                    if (currentProgress < 100) {
-                        updateProgress(currentProgress + 2);
-                    } else {
+                    if (currentProgress < 100) updateProgress(currentProgress + 2);
+                    else {
                         clearInterval(completeInterval);
                         finishLoading();
                     }
                 }, 20);
             }
         });
-        
-        // Navigation - both back and home links
         const navHome = document.querySelector('.nav-home');
-        
         function navigateBack(e) {
             e.preventDefault();
-            const href = navBack.getAttribute('href');
-            
             topBar.classList.add('transitioning');
-            
-            setTimeout(() => {
-                window.location.href = href;
-            }, 600);
+            setTimeout(() => { window.location.href = navBack.getAttribute('href'); }, 600);
         }
-        
         navBack.addEventListener('click', navigateBack);
         navHome.addEventListener('click', navigateBack);
-        
-        // Listen for theme changes from iframe
         window.addEventListener('message', (e) => {
             if (e.data.type === 'theme') {
-                if (e.data.mode === 'light') {
-                    document.body.classList.add('light-mode');
-                } else {
-                    document.body.classList.remove('light-mode');
-                }
+                if (e.data.mode === 'light') document.body.classList.add('light-mode');
+                else document.body.classList.remove('light-mode');
             }
         });
-        
-        // Check saved theme
         const savedTheme = localStorage.getItem('theme');
         const iframe = document.querySelector('.project-frame');
-        
         if (savedTheme === 'light') {
             document.body.classList.add('light-mode');
-            // Sync theme to iframe after it loads
             iframe.addEventListener('load', () => {
-                if (iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'themeChange', mode: 'light' }, '*');
-                }
+                if (iframe.contentWindow) iframe.contentWindow.postMessage({ type: 'themeChange', mode: 'light' }, '*');
             });
         }
-        
     </script>
 </body>
 </html>

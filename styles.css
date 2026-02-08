@@ -613,6 +613,10 @@ body.light-mode .cover-section.visible {
     .project-list {
         margin-top: calc(2vw + 4px) !important;
     }
+    
+    .site-footer {
+        margin-top: 0 !important;
+    }
 }
 
 
@@ -636,6 +640,17 @@ body.light-mode .cover-section.visible {
 
 .sub-text-mobile {
     display: none;
+    font-family: var(--font-primary);
+    font-weight: 400;
+    color: var(--color-text);
+}
+
+.sub-text-mobile p {
+    margin: 0 0 0.3em 0;
+}
+
+.sub-text-mobile p:last-child {
+    margin-bottom: 0;
 }
 
 .sub-line {
@@ -666,6 +681,7 @@ body.light-mode .cover-section.visible {
 .sub-text-mobile p {
     opacity: 0;
     transform: translateY(50px);
+    font-size: 26px;
 }
 
 .sub-text-mobile p.animate {
@@ -736,6 +752,8 @@ body.light-mode .cover-section.visible {
 
 /* Project List */
 .project-list {
+    position: relative;
+    z-index: 2;
     margin-top: 2vw;
     display: grid;
     grid-template-columns: repeat(12, 1fr);
@@ -751,23 +769,126 @@ body.light-mode .cover-section.visible {
 .project-item {
     transition: opacity 0.4s ease, transform 0.4s ease;
     perspective: 1000px;
+    perspective-origin: center center;
+    overflow: visible;
 }
 
 .project-item.hidden {
     display: none;
 }
 
-.project-item[data-size="large"],
-.project-item[data-size="small"],
+/* 큰-작은 / 작은-큰 번갈아 오는 그리드 (12칸 기준) */
+.project-item[data-size="large"] {
+    grid-column: span 8;
+}
+.project-item[data-size="small"] {
+    grid-column: span 4;
+}
 .project-item[data-size="medium"] {
     grid-column: span 6;
+}
+
+/* Footer - 좌우 패딩 없음(cover-section 패딩만 사용) → 헤더와 동일한 여백 */
+.site-footer {
+    position: relative;
+    z-index: 0;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.footer-info {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5vw;
+    padding: 0;
+    font-family: var(--font-primary);
+    font-size: max(16px, 0.833vw);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+}
+
+.footer-copyright {
+    margin-right: auto;
+}
+
+.footer-name {
+    margin-left: auto;
+}
+
+.footer-create-block {
+    position: relative;
+    display: inline-block;
+    margin-top: 0;
+    isolation: isolate;
+}
+
+/* create 텍스트 상단 45% 가림 - 브라우저 너비와 무관하게 유지, 라이트/다크 모드 대응 */
+.footer-create-block::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 43%;
+    min-height: 40px;
+    background-color: var(--color-bg);
+    pointer-events: none;
+    z-index: 10;
+}
+
+.footer-title-wrapper {
+    position: relative;
+    z-index: 0;
+    display: inline-flex;
+    margin-top: 0;
+    transform: translateY(-0.22em);
+}
+
+.footer-char-container {
+    overflow: hidden;
+    display: inline-block;
+    line-height: 0.85;
+    vertical-align: top;
+    margin-right: -0.07em;
+}
+
+.footer-char-container.space {
+    width: 0.25em;
+    margin-right: 0;
+}
+
+.footer-char {
+    display: inline-block;
+    font-family: var(--font-primary);
+    font-weight: 800;
+    font-size: 100px;
+    color: var(--color-text);
+    text-transform: lowercase;
+    line-height: 0.85;
+    vertical-align: top;
+    transform: translateY(110%);
+    opacity: 0;
+    will-change: transform, opacity;
+}
+
+.footer-char.animate {
+    animation: charRevealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .project-thumb {
     width: 100%;
     aspect-ratio: 16 / 9;
     border-radius: 0;
-    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.7s cubic-bezier(0.33, 1, 0.68, 1), filter 0.8s cubic-bezier(0.33, 1, 0.68, 1);
     transform-style: preserve-3d;
     cursor: pointer;
     background-size: cover;
@@ -778,6 +899,7 @@ body.light-mode .cover-section.visible {
     -webkit-backface-visibility: hidden;
     opacity: 0;
     transform: translateY(20px);
+    filter: grayscale(0.4); /* 기본: 살짝 그레이스케일, 호버 시 JS에서 컬러로 */
 }
 
 .project-item.animate .project-thumb {
@@ -789,6 +911,8 @@ body.light-mode .cover-section.visible {
     flex-direction: column;
     gap: 0.75vw;
     text-decoration: none;
+    transform-style: preserve-3d; /* 3D tilt on thumb 유지 */
+    overflow: visible;
 }
 
 .project-info {
@@ -818,7 +942,7 @@ body.light-mode .cover-section.visible {
     transition: opacity 0.3s ease;
 }
 
-/* Mobile - Hide custom cursor on touch devices */
+/* Mobile - Hide custom cursor on touch devices, 썸네일 항상 컬러(호버 없음) */
 @media (hover: none) and (pointer: coarse) {
     body {
         cursor: auto;
@@ -827,6 +951,10 @@ body.light-mode .cover-section.visible {
     .cursor-dot,
     .cursor-trail {
         display: none !important;
+    }
+    
+    .project-thumb {
+        filter: grayscale(0); /* 터치 기기: 호버 없으므로 기본 컬러 노출 */
     }
 }
 
@@ -897,6 +1025,11 @@ body.light-mode .cover-section.visible {
 
 /* Responsive - Mobile */
 @media screen and (max-width: 768px) {
+    /* 모바일: 호버 없음 → 썸네일 항상 컬러 */
+    .project-thumb {
+        filter: grayscale(0) !important;
+    }
+    
     .top-bar {
         padding: 3vw !important;
     }
@@ -928,8 +1061,8 @@ body.light-mode .cover-section.visible {
         width: 100% !important;
         margin-top: 8px !important;
         position: relative;
-        padding-top: 25px !important;
-        padding-bottom: 22px !important;
+        padding-top: 27px !important;
+        padding-bottom: 26px !important;
     }
     
     .sub-text-wrapper::before {
@@ -973,7 +1106,7 @@ body.light-mode .cover-section.visible {
     }
     
     .sub-text-mobile p {
-        line-height: 1.3 !important;
+        line-height: 1 !important;
     }
     
     /* Remove hover effects on mobile */
@@ -985,12 +1118,16 @@ body.light-mode .cover-section.visible {
     }
     
     .cover-section {
-        padding: 0 3vw 6vw 3vw !important;
+        min-height: 0 !important;
+        padding: 0 3vw 0 3vw !important;
         margin-top: 0 !important;
         padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
         background-color: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;
+        overflow: visible !important;
     }
     
     .filter-menu {
@@ -1037,6 +1174,30 @@ body.light-mode .cover-section.visible {
     .top-bar.transitioning .logo {
         transform: translateX(12vw) !important;
     }
+    
+    .site-footer {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+        padding-bottom: 30px !important;
+        overflow: visible !important;
+    }
+    
+    .footer-create-block {
+        overflow: visible !important;
+    }
+    
+    .footer-create-block::after {
+        top: 0 !important;
+        height: 43% !important;
+        z-index: 10 !important;
+    }
+    
+    .footer-info {
+        font-size: 3.5vw !important;
+        margin-top: 4vw !important;
+        padding: 0 !important;
+    }
 }
 
 /* Responsive - Small Mobile */
@@ -1050,6 +1211,10 @@ body.light-mode .cover-section.visible {
     }
     
     .theme-toggle {
+        font-size: 4vw !important;
+    }
+    
+    .footer-info {
         font-size: 4vw !important;
     }
     
@@ -1074,9 +1239,12 @@ body.light-mode .cover-section.visible {
     }
     
     .cover-section {
-        padding: 0 5vw 8vw 5vw !important;
+        min-height: 0 !important;
+        padding: 0 5vw 0 5vw !important;
         margin-top: 0 !important;
         padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
         background-color: transparent !important;
         backdrop-filter: none !important;
         -webkit-backdrop-filter: none !important;

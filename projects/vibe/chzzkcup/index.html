@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>document.title='archive';</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>archive</title>
+  <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background: #000000;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    }
+
+    .svg-center {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 50vw;
+      height: auto;
+      z-index: 0;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .svg-center canvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .svg-center .logo-svg-source {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .title-container {
+      position: fixed;
+      top: 5vw;
+      left: 1.25vw;
+      z-index: 100;
+      max-width: 40vw;
+    }
+
+    .title {
+      font-size: max(20px, 1.042vw);
+      font-weight: 800;
+      letter-spacing: 0;
+      color: #fff;
+      margin-bottom: calc(1vw - 5px);
+      white-space: nowrap;
+      line-height: 1.2;
+    }
+    
+    .title .char {
+      display: inline-block;
+      opacity: 0;
+      animation: charRevealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    @keyframes charRevealUp {
+      from {
+        transform: translateY(110%);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .description {
+      font-size: max(16px, 0.75vw);
+      font-weight: 300;
+      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.6);
+      letter-spacing: -0.01em;
+      margin-top: -0.3vw;
+    }
+    
+    .description .desc-line {
+      display: block;
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: descLineReveal 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    
+    .description .desc-line:nth-child(1) { animation-delay: 0.3s; }
+    .description .desc-line:nth-child(2) { animation-delay: 0.4s; }
+    
+    @keyframes descLineReveal {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .title-container {
+        top: calc(10vw - 10px);
+        left: 3vw;
+        right: 3vw;
+        max-width: none;
+        width: auto;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .title-container {
+        top: 13vw;
+        left: 4vw;
+        right: 4vw;
+        max-width: none;
+        width: auto;
+      }
+      .description .desc-line { white-space: normal; }
+    }
+
+    @media (max-width: 480px) {
+      .title-container {
+        top: 17vw;
+        left: 5vw;
+        right: 5vw;
+        max-width: none;
+        width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="svg-center" id="logo-wrap" aria-hidden="true">
+    <canvas id="logo-canvas"></canvas>
+    <svg class="logo-svg-source" id="logo-svg" viewBox="0 0 260 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M108.344 21.2286L109.451 14.9488H100.657L112.087 0H90.1607L89.054 6.27984H97.8482L86.4178 21.2286H108.344Z" fill="white"/>
+      <path d="M157.04 21.2286L158.148 14.9488H149.352L160.784 0H138.858L137.749 6.27984H146.545L135.115 21.2286H157.04Z" fill="white"/>
+      <path d="M114.509 0L110.766 21.2286H132.693L136.436 0H114.509ZM120.175 14.9488L121.704 6.2781H127.027L125.498 14.9488H120.175Z" fill="white"/>
+      <path d="M174.097 15.5004H160.473L159.462 21.2286H181.388L183.765 7.75018H170.14L170.497 5.72824H184.122L185.131 0H163.206L160.829 13.4784H174.454L174.097 15.5004Z" fill="white"/>
+      <path d="M20.5239 37.385L0 64.227H32.0326L33.4316 56.2871H18.0043L26.3861 45.3248H35.3648L36.7655 37.385H20.5239Z" fill="white"/>
+      <path d="M93.7365 64.227L95.1355 56.2871H84.0166L98.4694 37.385H70.7452L69.3445 45.3248H80.4651L66.0123 64.227H93.7365Z" fill="white"/>
+      <path d="M124.588 64.227L125.988 56.2871H114.868L129.321 37.385H101.598L100.197 45.3248H111.318L96.8651 64.227H124.588Z" fill="white"/>
+      <path d="M144.722 27.3188H134.226L127.716 64.227H138.214L140.58 50.806H145.875L143.507 64.227H154.005L156.371 50.806H149.912L160.173 37.385H148.242L141.36 46.3845L144.722 27.3188Z" fill="white"/>
+      <path d="M35.1595 64.227H45.6572L48.9894 45.3248H55.7216L52.3877 64.227H62.8837L67.6166 37.385H50.3901L52.165 27.3188H41.669L35.1595 64.227Z" fill="white"/>
+      <path d="M182.185 37.385L161.661 64.227H193.694L195.094 56.2871H179.665L188.047 45.3248H197.028L198.427 37.385H182.185Z" fill="white"/>
+      <path d="M218.717 37.385L215.383 56.2871H208.653L211.987 37.385H201.491L196.756 64.227H224.48L229.213 37.385H218.717Z" fill="white"/>
+      <path d="M255.267 64.227L260 37.385H232.276L226.276 71.4047H236.772L238.037 64.227H255.267ZM239.44 56.2871L241.373 45.3248H248.103L246.17 56.2871H239.44Z" fill="white"/>
+    </svg>
+  </div>
+
+  <div class="title-container">
+    <h1 class="title" id="page-title">chzzkcup interaction</h1>
+    <p class="description">
+      <span class="desc-line">interaction experience.</span>
+      <span class="desc-line">explore the project.</span>
+    </p>
+  </div>
+  
+  <script>
+    const title = document.getElementById('page-title');
+    const text = title.textContent;
+    title.innerHTML = text.split('').map((char, i) => 
+      `<span class="char" style="animation-delay: ${i * 0.03}s">${char === ' ' ? '&nbsp;' : char}</span>`
+    ).join('');
+
+    function notifyLoaded() {
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'loadingComplete' }, '*');
+      }
+    }
+    if (document.readyState === 'complete') notifyLoaded();
+    else window.addEventListener('DOMContentLoaded', notifyLoaded);
+
+    // ——— 로고 글리치 (logo_glitch.html과 동일: 5x5 블록 + 수평 슬라이스 RGB) ———
+    (function () {
+      const wrap = document.getElementById('logo-wrap');
+      const canvas = document.getElementById('logo-canvas');
+      const svgEl = document.getElementById('logo-svg');
+      if (!wrap || !canvas || !svgEl) return;
+
+      const VIEWBOX_W = 260, VIEWBOX_H = 72;
+      const BLOCK_GRID = 5;
+      let logoImage = null;
+      let startTime = Date.now();
+      let smoothedIntensity = 0;
+      let buffer = null;
+
+      function pseudoRandom(v) {
+        const s = Math.sin(v * 12.9898);
+        return (s * 43758.5453) - Math.floor(s * 43758.5453);
+      }
+
+      function random2(x, y) {
+        return pseudoRandom(x + y * 78.233);
+      }
+
+      function svgToImage(svg) {
+        return new Promise(function (resolve) {
+          const c = svg.cloneNode(true);
+          c.setAttribute('width', VIEWBOX_W);
+          c.setAttribute('height', VIEWBOX_H);
+          const str = new XMLSerializer().serializeToString(c);
+          const blob = new Blob([str], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          img.onload = function () {
+            URL.revokeObjectURL(url);
+            resolve(img);
+          };
+          img.src = url;
+        });
+      }
+
+      function resizeCanvas() {
+        const maxW = Math.max(100, (window.innerWidth * 0.5) | 0);
+        const scale = maxW / VIEWBOX_W;
+        const w = (VIEWBOX_W * scale) | 0;
+        const h = (VIEWBOX_H * scale) | 0;
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+          buffer = document.createElement('canvas');
+          buffer.width = w;
+          buffer.height = h;
+          canvas.style.width = (w / window.innerWidth * 100).toFixed(2) + 'vw';
+          canvas.style.height = 'auto';
+        }
+      }
+
+      function drawBlockGlitch(bufCtx, img, intensity) {
+        const w = buffer.width, h = buffer.height;
+        const blockW = VIEWBOX_W / BLOCK_GRID, blockH = VIEWBOX_H / BLOCK_GRID;
+        const baseTime = Math.floor((Date.now() - startTime) * 0.001 * 18);
+
+        bufCtx.fillStyle = '#000000';
+        bufCtx.fillRect(0, 0, w, h);
+        for (let by = 0; by < BLOCK_GRID; by++) {
+          for (let bx = 0; bx < BLOCK_GRID; bx++) {
+            const noiseVal = random2(bx * 0.5 + by * 0.5, baseTime * 0.7);
+            let shiftU = 0;
+            if (intensity > 0.15 && noiseVal > 0.78) {
+              shiftU = (random2(bx + 100, by + 200 + baseTime * 1.5) - 0.5) * 0.025 * (1 + intensity);
+            }
+            const sx = bx * blockW, sy = by * blockH;
+            const dx = (bx / BLOCK_GRID) * w + shiftU * w;
+            const dy = (by / BLOCK_GRID) * h;
+            const dw = w / BLOCK_GRID, dh = h / BLOCK_GRID;
+            bufCtx.drawImage(img, sx, sy, blockW, blockH, dx, dy, dw, dh);
+          }
+        }
+      }
+
+      function drawSliceEffect(ctx, intensity) {
+        const w = canvas.width, h = canvas.height;
+        const elapsed = (Date.now() - startTime) * 0.001;
+        const sliceCount = 4 + Math.floor(random2(elapsed, 0) * 4);
+        const sliceH = h / sliceCount;
+        const randomAmp = 0.006 + random2(elapsed, 123.4) * 0.01;
+
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, w, h);
+        ctx.globalAlpha = 1;
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.drawImage(buffer, 0, 0, w, h, 0, 0, w, h);
+
+        if (intensity <= 0) return;
+
+        for (let i = 0; i < sliceCount; i++) {
+          const sy = (i / sliceCount) * h;
+          const xOffsetPx = (random2(i, elapsed * 0.005) - 0.5) * randomAmp * intensity * w;
+          const xOffsetPxBlue = xOffsetPx * 1.2;
+
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalAlpha = 0.28;
+          ctx.drawImage(buffer, 0, sy, w, sliceH, xOffsetPx, sy, w, sliceH);
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.fillStyle = 'rgba(255, 0, 253, 0.35)';
+          ctx.fillRect(xOffsetPx, sy, w, sliceH);
+          ctx.restore();
+
+          ctx.save();
+          ctx.globalCompositeOperation = 'lighter';
+          ctx.globalAlpha = 0.28;
+          ctx.drawImage(buffer, 0, sy, w, sliceH, -xOffsetPxBlue, sy, w, sliceH);
+          ctx.globalCompositeOperation = 'multiply';
+          ctx.fillStyle = 'rgba(0, 255, 163, 0.35)';
+          ctx.fillRect(-xOffsetPxBlue, sy, w, sliceH);
+          ctx.restore();
+        }
+      }
+
+      function drawLogo(ctx, img, intensity) {
+        if (!buffer || buffer.width !== canvas.width) return;
+        const bufCtx = buffer.getContext('2d');
+        if (!bufCtx) return;
+
+        if (!intensity || intensity < 0.01) {
+          ctx.fillStyle = '#000000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, VIEWBOX_W, VIEWBOX_H, 0, 0, canvas.width, canvas.height);
+          return;
+        }
+
+        drawBlockGlitch(bufCtx, img, intensity);
+        drawSliceEffect(ctx, intensity);
+      }
+
+      function animate() {
+        const elapsed = (Date.now() - startTime) * 0.001;
+        const frequencyVar = 6 + (Math.sin(elapsed * 0.5) + Math.sin(elapsed * 1.7) * 0.5 + Math.sin(elapsed * 3.1) * 0.2) * 2;
+        const baseTime = Math.floor(elapsed * frequencyVar);
+        const threshold = 0.8 + (Math.sin(elapsed * 0.2) + Math.cos(elapsed * 1.1) * 0.5) * 0.1;
+        const isGlitch = pseudoRandom(baseTime) > threshold;
+        const targetIntensity = isGlitch ? 0.55 : 0;
+        smoothedIntensity += (targetIntensity - smoothedIntensity) * 0.012;
+        if (smoothedIntensity < 0.01) smoothedIntensity = 0;
+
+        const ctx = canvas.getContext('2d');
+        if (logoImage && ctx && buffer) {
+          drawLogo(ctx, logoImage, smoothedIntensity);
+        }
+        requestAnimationFrame(animate);
+      }
+
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      svgToImage(svgEl).then(function (img) {
+        logoImage = img;
+        if (!buffer) {
+          buffer = document.createElement('canvas');
+          buffer.width = canvas.width;
+          buffer.height = canvas.height;
+        }
+        animate();
+      });
+    })();
+  </script>
+</body>
+</html>
