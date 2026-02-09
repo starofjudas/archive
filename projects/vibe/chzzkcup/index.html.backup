@@ -22,60 +22,10 @@
             font-weight: bold;
             font-style: normal;
         }
-        /* Drag Indicator (boo3d와 동일한 커서 효과) */
-        .drag-indicator {
-            position: fixed;
-            pointer-events: none;
-            z-index: 150;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            transform: translate(-50%, -50%);
-        }
-        .drag-indicator.visible {
-            opacity: 1;
-        }
-        .drag-indicator.hidden {
-            opacity: 0;
-        }
-        .drag-circle {
-            position: absolute;
-            width: 12vw;
-            height: 12vw;
-            border: 1px solid #ffffff;
-            border-radius: 50%;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-        }
-        .drag-indicator.dragging .drag-circle {
-            transform: scale(0.9);
-            opacity: 0.5;
-        }
-        .drag-text {
-            font-size: 0.7vw;
-            font-weight: 400;
-            letter-spacing: 0.15em;
-            color: rgba(255, 255, 255, 0.9);
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-        /* Mobile - Hide drag indicator on touch devices */
-        @media (hover: none) and (pointer: coarse) {
-            .drag-indicator {
-                display: none !important;
-            }
-        }
     </style>
 </head>
 <body>
     <canvas id="canvas-3d"></canvas>
-    
-    <!-- Drag Indicator -->
-    <div class="drag-indicator">
-        <div class="drag-circle"></div>
-        <span class="drag-text">hold and drag</span>
-    </div>
     
 
     <script type="importmap">
@@ -103,11 +53,7 @@
 
         // Scene setup
         const scene = new THREE.Scene();
-        
-        // 배경 블랙 고정
-        const currentBgColor = new THREE.Color(0x000000); // 블랙 고정
-        
-        scene.background = currentBgColor; // 초기 배경 설정
+        scene.background = new THREE.Color(0x000000); // 검은 배경
 
         const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.1, 100);
         camera.position.set(0, 0, 5);
@@ -120,7 +66,6 @@
             powerPreference: 'high-performance'
         });
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-        renderer.setClearColor(currentBgColor, 1); // 초기 배경 색상 설정
         
         // CSS로 크기 제어하도록 설정 (인라인 스타일 제거)
         function setRendererSize() {
@@ -209,13 +154,24 @@
             ctx.textBaseline = 'middle';
             ctx.letterSpacing = '0em';
 
-            // 텍스트 렌더링 (개행 처리)
+            // 부드러운 가장자리를 위한 텍스트 렌더링
+            // 1. 약간의 그림자로 가장자리 부드럽게
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.3)';
+            ctx.shadowBlur = 2;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 0;
+
+            // 2. 텍스트 그리기 (개행 처리)
             const lines = ['스트리밍은', '계속됩니다'];
             const lineHeight = fontSize * uiParams.textLineHeight; // UI 파라미터 적용
             const totalHeight = lines.length * lineHeight;
             const startY = height / 2 - totalHeight / 2 + lineHeight / 2;
             
-            // 텍스트 그리기
+            lines.forEach((line, i) => {
+                ctx.fillText(line, width / 2, startY + i * lineHeight);
+            });
+
+            // 3. 그림자 제거 후 다시 그리기 (더 선명하게)
             ctx.shadowBlur = 0;
             lines.forEach((line, i) => {
                 ctx.fillText(line, width / 2, startY + i * lineHeight);
@@ -340,10 +296,8 @@
                     new THREE.PlaneGeometry(textPlaneBaseSize.width, textPlaneBaseSize.height),
                     new THREE.MeshBasicMaterial({
                         map: textTexture,
-                        transparent: true,
-                        alphaTest: 0.01, // 완전히 투명한 부분 제거
-                        side: THREE.DoubleSide,
-                        depthWrite: false // 투명도 처리 개선
+                        transparent: false,
+                        side: THREE.DoubleSide
                     })
                 );
                 textPlane.position.set(0, 0, -2);
@@ -352,9 +306,6 @@
             } else {
                 // 텍스처만 업데이트
                 textPlane.material.map = textTexture;
-                textPlane.material.transparent = true;
-                textPlane.material.alphaTest = 0.01;
-                textPlane.material.depthWrite = false;
                 textPlane.material.needsUpdate = true;
             }
             updateTextPlaneSize(); // 초기 크기 설정
@@ -497,106 +448,45 @@
         const clock = new THREE.Clock();
         let lastTime = 0;
 
-        // Raycaster for logo detection (boo3d와 동일)
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
-        let isOverLogo = false;
-        const dragIndicator = document.querySelector('.drag-indicator');
-        let indicatorTimeout;
-
         // 마우스 드래그 회전 제어
         let isDragging = false;
         let previousMousePosition = { x: 0, y: 0 };
         let rotationSpeed = { x: 0, y: 0, z: 0 }; // 자동 회전 속도
         let currentRotation = { x: 0, y: 0, z: 0 }; // 현재 회전 각도
-        
-        // 로고 위에 마우스가 있는지 확인
-        function checkLogoIntersection(event) {
-            if (!modelGroup || modelGroup.children.length === 0) return false;
-            
-            mouse.x = (event.clientX / canvas.clientWidth) * 2 - 1;
-            mouse.y = -(event.clientY / canvas.clientHeight) * 2 + 1;
-            
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(modelGroup, true);
-            return intersects.length > 0;
-        }
 
         // 마우스 이벤트 핸들러
         function onMouseDown(event) {
-            if (isOverLogo) {
-                isDragging = true;
-                previousMousePosition = {
-                    x: event.clientX,
-                    y: event.clientY
-                };
-                canvas.style.cursor = 'grabbing';
-                if (dragIndicator) {
-                    dragIndicator.classList.add('dragging');
-                }
-            }
+            isDragging = true;
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
+            canvas.style.cursor = 'grabbing';
         }
 
         function onMouseMove(event) {
-            // 로고 위에 마우스가 있는지 확인
-            isOverLogo = checkLogoIntersection(event);
-            
-            // Drag indicator 위치 업데이트
-            if (dragIndicator) {
-                dragIndicator.style.left = event.clientX + 'px';
-                dragIndicator.style.top = event.clientY + 'px';
-            }
-            
-            // Drag indicator 표시/숨김 (boo3d와 동일)
-            if (!isDragging && isOverLogo) {
-                if (dragIndicator) {
-                    dragIndicator.classList.add('visible');
-                    dragIndicator.classList.remove('hidden');
-                }
-                canvas.style.cursor = 'grab';
-                
-                // 일정 시간 후 자동 숨김
-                clearTimeout(indicatorTimeout);
-                indicatorTimeout = setTimeout(() => {
-                    if (!isDragging && dragIndicator) {
-                        dragIndicator.classList.remove('visible');
-                        dragIndicator.classList.add('hidden');
-                    }
-                }, 2000);
-            } else if (!isDragging && !isOverLogo) {
-                if (dragIndicator) {
-                    dragIndicator.classList.remove('visible');
-                    dragIndicator.classList.add('hidden');
-                }
-                canvas.style.cursor = 'default';
-            }
-            
-            if (isDragging && modelGroup && modelGroup.children.length > 0) {
-                const deltaX = event.clientX - previousMousePosition.x;
-                const deltaY = event.clientY - previousMousePosition.y;
+            if (!isDragging || !modelGroup || modelGroup.children.length === 0) return;
 
-                // 마우스 이동량에 비례해 회전 (Y축은 수평, X축은 수직)
-                const rotationSpeed = 0.005;
-                currentRotation.y += deltaX * rotationSpeed;
-                currentRotation.x -= deltaY * rotationSpeed;
+            const deltaX = event.clientX - previousMousePosition.x;
+            const deltaY = event.clientY - previousMousePosition.y;
 
-                modelGroup.rotation.y = currentRotation.y;
-                modelGroup.rotation.x = currentRotation.x;
+            // 마우스 이동량에 비례해 회전 (Y축은 수평, X축은 수직)
+            const rotationSpeed = 0.005;
+            currentRotation.y += deltaX * rotationSpeed;
+            currentRotation.x -= deltaY * rotationSpeed;
 
-                previousMousePosition = {
-                    x: event.clientX,
-                    y: event.clientY
-                };
-                canvas.style.cursor = 'grabbing';
-            }
+            modelGroup.rotation.y = currentRotation.y;
+            modelGroup.rotation.x = currentRotation.x;
+
+            previousMousePosition = {
+                x: event.clientX,
+                y: event.clientY
+            };
         }
 
         function onMouseUp() {
             isDragging = false;
-            if (dragIndicator) {
-                dragIndicator.classList.remove('dragging');
-            }
-            canvas.style.cursor = isOverLogo ? 'grab' : 'default';
+            canvas.style.cursor = 'grab';
         }
 
         // 터치 이벤트 지원
@@ -641,17 +531,7 @@
         canvas.addEventListener('touchstart', onTouchStart);
         canvas.addEventListener('touchmove', onTouchMove);
         canvas.addEventListener('touchend', onTouchEnd);
-        
-        // 마우스가 창을 벗어날 때 indicator 숨김
-        window.addEventListener('mouseleave', () => {
-            if (dragIndicator) {
-                dragIndicator.classList.remove('visible');
-                dragIndicator.classList.add('hidden');
-            }
-            isOverLogo = false;
-        });
-        
-        canvas.style.cursor = 'default';
+        canvas.style.cursor = 'grab';
 
         // 이전 캔버스 크기 저장 (실시간 반응을 위해)
         let lastCanvasSize = { width: -1, height: -1 };
@@ -723,8 +603,8 @@
                 modelGroup.visible = false;
                 renderer.setRenderTarget(fbo);
                 
-                // 배경을 명시적으로 클리어 (현재 배경 색상)
-                renderer.setClearColor(currentBgColor, 1);
+                // 배경을 명시적으로 클리어 (검은색)
+                renderer.setClearColor(0x000000, 1);
                 renderer.clear();
                 
                 // 씬 렌더링 (배경 + 텍스트)
@@ -752,7 +632,7 @@
 
             // 최종 렌더링
             renderer.setRenderTarget(null);
-            renderer.setClearColor(currentBgColor, 1); // 현재 배경 색상 사용
+            renderer.setClearColor(0x000000, 1); // 배경 색상 명시적으로 설정
             renderer.render(scene, camera);
         }
         requestAnimationFrame(animate);

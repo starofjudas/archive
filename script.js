@@ -1080,6 +1080,8 @@ function initTiltEffect() {
     projectItems.forEach(item => {
         const thumb = item.querySelector('.project-thumb');
         if (!thumb) return;
+        const isSmall = item.getAttribute('data-size') === 'small';
+        const tiltStrength = isSmall ? 2.5 : 1.5;
         
         item.addEventListener('mouseenter', () => {
             setOthersToGrayscale(thumb);
@@ -1099,8 +1101,8 @@ function initTiltEffect() {
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
             
-            const rotateX = (y - centerY) / centerY * -1;
-            const rotateY = (x - centerX) / centerX * 1;
+            const rotateX = ((y - centerY) / centerY) * -tiltStrength;
+            const rotateY = ((x - centerX) / centerX) * tiltStrength;
             
             thumb.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         });
