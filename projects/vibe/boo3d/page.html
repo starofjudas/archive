@@ -349,8 +349,8 @@
     
     <header class="top-bar">
         <div class="nav-left">
-            <a href="../../../" class="nav-back">← back</a>
-            <a href="../../../" class="nav-home">home</a>
+            <a href="/" class="nav-back">← back</a>
+            <a href="/" class="nav-home">home</a>
         </div>
     </header>
     
@@ -510,14 +510,34 @@
         // Navigation - both back and home links
         const navHome = document.querySelector('.nav-home');
         
+        // GitHub Pages 호환을 위한 홈 경로 계산
+        function getHomePath() {
+            const currentPath = window.location.pathname;
+            const pathParts = currentPath.split('/').filter(p => p);
+            const archiveIndex = pathParts.indexOf('archive');
+            if (archiveIndex !== -1) {
+                return '/' + pathParts.slice(0, archiveIndex + 1).join('/') + '/';
+            }
+            return '/';
+        }
+
+        // 백/홈 버튼 링크 설정
+        const homePath = getHomePath();
+        if (navBack) {
+            navBack.setAttribute('href', homePath);
+        }
+        if (navHome) {
+            navHome.setAttribute('href', homePath);
+        }
+        
         function navigateBack(e) {
             e.preventDefault();
-            const href = navBack.getAttribute('href');
+            const homePath = getHomePath();
             
             topBar.classList.add('transitioning');
             
             setTimeout(() => {
-                window.location.href = href;
+                window.location.href = homePath;
             }, 600);
         }
         
