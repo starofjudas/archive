@@ -157,6 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
         adjustFooterTitleSize(false);
         adjustSubTextSize(false);
         adjustMobileSubTextSize();
+        // 리사이즈 시 가림 영역 높이도 재조정
+        setTimeout(() => adjustFooterMaskHeight(), 100);
     });
     
     // Restore scroll position if returning from project
@@ -560,6 +562,31 @@ function adjustFooterTitleSize() {
         chars.forEach(char => {
             char.style.fontSize = newFontSize + 'px';
         });
+        
+        // 폰트 크기 조정 후 가림 영역 높이 조정
+        adjustFooterMaskHeight();
+    });
+}
+
+// Adjust footer mask height based on actual rendered height (43% 공통 적용)
+function adjustFooterMaskHeight() {
+    const footerCreateBlock = document.querySelector('.footer-create-block');
+    if (!footerCreateBlock) return;
+    
+    // 폰트 크기 조정 후 실제 렌더링이 완료될 때까지 약간의 지연
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            // 실제 렌더링된 높이 측정
+            const actualHeight = footerCreateBlock.getBoundingClientRect().height;
+            
+            if (actualHeight > 0) {
+                // 높이의 43% 계산
+                const maskHeight = actualHeight * 0.43;
+                
+                // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
+                footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
+            }
+        });
     });
 }
 
@@ -568,6 +595,11 @@ function animateFooterTitle() {
     const wrapper = document.querySelector('.footer-title-wrapper');
     if (!wrapper) return;
     const chars = wrapper.querySelectorAll('.footer-char');
+    
+    // 애니메이션 완료 후 가림 영역 높이 조정 (애니메이션 시간 1.2초 + 약간의 여유)
+    setTimeout(() => {
+        adjustFooterMaskHeight();
+    }, 1500);
     
     chars.forEach((char, index) => {
         setTimeout(() => {

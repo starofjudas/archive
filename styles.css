@@ -841,7 +841,7 @@ body.light-mode .cover-section.visible {
     top: 0;
     left: 0;
     right: 0;
-    height: 43.5%;
+    height: var(--mask-height, 43.5%);
     min-height: 40px;
     background-color: var(--color-bg);
     pointer-events: none;
@@ -961,8 +961,8 @@ body.light-mode .cover-section.visible {
     }
 }
 
-/* Responsive - Tablet */
-@media screen and (max-width: 1024px) {
+/* Responsive - Tablet (세로/가로모드 모두 포함) */
+@media screen and (max-width: 1366px) and (min-width: 481px) {
     .top-bar {
         padding: 3vw !important;
     }
@@ -1026,9 +1026,9 @@ body.light-mode .cover-section.visible {
         gap: 1.5vw !important;
     }
     
-    /* 태블릿: create 텍스트 가림 */
+    /* 태블릿: create 텍스트 가림 (JavaScript로 동적 조정됨) */
     .footer-create-block::after {
-        height: 35% !important;
+        height: var(--mask-height, 35%) !important;
         min-height: 40px !important;
     }
 }
@@ -1199,7 +1199,7 @@ body.light-mode .cover-section.visible {
     
     .footer-create-block::after {
         top: 0 !important;
-        height: 35% !important;
+        height: var(--mask-height, 35%) !important;
         min-height: 40px !important;
         z-index: 10 !important;
     }
