@@ -568,7 +568,7 @@ function adjustFooterTitleSize() {
     });
 }
 
-// Adjust footer mask height based on actual rendered height (43% 공통 적용)
+// Adjust footer mask height based on actual rendered height (43.5% 공통 적용)
 // 실제 텍스트 높이(wrapperHeight)를 기준으로 계산하여 정확도 향상
 function adjustFooterMaskHeight() {
     const footerCreateBlock = document.querySelector('.footer-create-block');
@@ -590,8 +590,8 @@ function adjustFooterMaskHeight() {
                 const baseHeight = wrapperHeight > 0 ? wrapperHeight : actualHeight;
                 
                 if (baseHeight > 0) {
-                    // 높이의 43% 계산 (모든 화면 크기 공통)
-                    const maskHeight = baseHeight * 0.43;
+                    // 높이의 43.5% 계산 (모든 화면 크기 공통)
+                    const maskHeight = baseHeight * 0.435;
                     
                     // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
                     footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
