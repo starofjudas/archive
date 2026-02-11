@@ -568,29 +568,54 @@ function adjustFooterTitleSize() {
     });
 }
 
-// Adjust footer mask height based on actual rendered height
-// PC: 43%, 태블릿/모바일: 42%
+// Adjust footer mask height based on actual rendered height (43% 공통 적용)
+// 실제 텍스트 높이(wrapperHeight)를 기준으로 계산하여 정확도 향상
 function adjustFooterMaskHeight() {
     const footerCreateBlock = document.querySelector('.footer-create-block');
-    if (!footerCreateBlock) return;
+    const footerTitleWrapper = document.querySelector('.footer-title-wrapper');
+    if (!footerCreateBlock || !footerTitleWrapper) return;
     
-    // 폰트 크기 조정 후 실제 렌더링이 완료될 때까지 약간의 지연
+    // 폰트 크기 조정 후 실제 렌더링이 완료될 때까지 충분한 지연
+    // 실제 디바이스에서는 폰트 렌더링이 더 오래 걸릴 수 있음
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            // 실제 렌더링된 높이 측정
-            const actualHeight = footerCreateBlock.getBoundingClientRect().height;
-            
-            if (actualHeight > 0) {
-                // 화면 크기에 따라 다른 퍼센트 적용
-                const isTabletOrMobile = window.innerWidth <= 1366;
-                const percentage = isTabletOrMobile ? 0.42 : 0.43; // 태블릿/모바일: 42%, PC: 43%
+            // 추가 지연으로 실제 렌더링 완료 보장 (특히 모바일 디바이스)
+            setTimeout(() => {
+                // 실제 렌더링된 높이 측정
+                const actualHeight = footerCreateBlock.getBoundingClientRect().height;
+                const wrapperHeight = footerTitleWrapper.getBoundingClientRect().height;
                 
-                // 높이의 퍼센트 계산
-                const maskHeight = actualHeight * percentage;
+                // 실제 텍스트 높이를 기준으로 계산 (더 정확함)
+                // wrapperHeight가 있으면 그것을 사용, 없으면 actualHeight 사용
+                const baseHeight = wrapperHeight > 0 ? wrapperHeight : actualHeight;
                 
-                // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
-                footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
-            }
+                if (baseHeight > 0) {
+                    // 높이의 43% 계산 (모든 화면 크기 공통)
+                    const maskHeight = baseHeight * 0.43;
+                    
+                    // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
+                    footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
+                    
+                    // 디버깅: 실제 디바이스에서 문제 파악을 위한 로그
+                    if (window.innerWidth <= 1366) {
+                        console.log('[Footer Mask Debug]', {
+                            screenWidth: window.innerWidth,
+                            screenHeight: window.innerHeight,
+                            viewportWidth: document.documentElement.clientWidth,
+                            viewportHeight: document.documentElement.clientHeight,
+                            actualHeight: actualHeight,
+                            wrapperHeight: wrapperHeight,
+                            baseHeight: baseHeight,
+                            maskHeight: maskHeight,
+                            percentage: (maskHeight / baseHeight * 100).toFixed(2) + '%',
+                            devicePixelRatio: window.devicePixelRatio,
+                            fontSize: window.getComputedStyle(footerTitleWrapper.querySelector('.footer-char')).fontSize,
+                            lineHeight: window.getComputedStyle(footerTitleWrapper.querySelector('.footer-char')).lineHeight,
+                            userAgent: navigator.userAgent
+                        });
+                    }
+                }
+            }, 50); // 실제 디바이스에서 렌더링 완료를 위한 추가 지연
         });
     });
 }
