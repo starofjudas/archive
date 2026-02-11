@@ -21,6 +21,13 @@
 
         html {
             font-size: 16px;
+            /* 브라우저 스크롤바 숨김 (그라운드룰) */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        html::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         body {
@@ -31,6 +38,13 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
+            /* 브라우저 스크롤바 숨김 (그라운드룰) */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        body::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
         }
 
         /* Navigation Bar - matches main page exactly */

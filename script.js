@@ -958,7 +958,14 @@ function initFilterMenu() {
                 }
             });
             
-            // Apply filter
+            // 필터링 전: 보이는 아이템들의 크기와 위치 저장
+            const visibleItemsBefore = Array.from(projectList.querySelectorAll('.project-item:not(.hidden)'));
+            const oldSizes = new Map();
+            visibleItemsBefore.forEach(item => {
+                oldSizes.set(item, item.getAttribute('data-size'));
+            });
+            
+            // Apply filter - 기존 아이템 유지하고 hidden만 토글
             projectItems.forEach(item => {
                 const shouldShow = filter === 'all' || item.dataset.category === filter;
                 if (shouldShow) {
@@ -974,116 +981,120 @@ function initFilterMenu() {
                 }
             });
             
+            // 필터링 후 보이는 아이템들에 대해 리스트 규칙 재적용 (all과 동일한 규칙)
+            const visibleItemsAfter = Array.from(projectList.querySelectorAll('.project-item:not(.hidden)'));
+            const sizeChanges = new Map();
+            visibleItemsAfter.forEach((item, visibleIndex) => {
+                // all과 동일한 규칙: 큰-작은-작은-큰 반복 (인덱스 0,3=large / 1,2=small)
+                const newLayoutSize = (visibleIndex % 4 === 0 || visibleIndex % 4 === 3) ? 'large' : 'small';
+                const oldSize = oldSizes.get(item);
+                sizeChanges.set(item, { oldSize, newLayoutSize, willChange: oldSize !== newLayoutSize });
+            });
+            
             // Restore scroll position to prevent layout shift
             window.scrollTo(0, scrollY);
             
-            // Animate
-            projectItems.forEach(item => {
-                const shouldShow = filter === 'all' || item.dataset.category === filter;
-                const wasVis = wasVisible.get(item);
-                
-                if (!shouldShow) {
-                    // Hide item - reset styles
-                    const thumb = item.querySelector('.project-thumb');
-                    const info = item.querySelector('.project-info');
-                    if (thumb) {
-                        thumb.style.opacity = '0';
-                        thumb.style.transform = 'translateY(20px)';
-                        thumb.style.animation = 'none';
-                    }
-                    if (info) {
-                        info.style.opacity = '0';
-                        info.style.transform = 'translateY(20px)';
-                        info.style.animation = 'none';
-                    }
-                    return;
-                }
-                
-                // Reset thumb and info animations for all visible items
-                const thumb = item.querySelector('.project-thumb');
-                const info = item.querySelector('.project-info');
-                
-                // Clear any existing animations
-                if (thumb) {
-                    thumb.style.animation = 'none';
-                    thumb.style.opacity = '0';
-                    thumb.style.transform = 'translateY(20px)';
-                }
-                if (info) {
-                    info.style.animation = 'none';
-                    info.style.opacity = '0';
-                    info.style.transform = 'translateY(20px)';
-                }
-                
-                // Ensure item is visible
-                item.style.opacity = '1';
-                item.style.transform = '';
-                
-                if (wasVis && positions.has(item)) {
-                    // Item was visible - use FLIP animation
+            // FLIP 애니메이션: 크기와 위치를 동시에 재조정
+            requestAnimationFrame(() => {
+                visibleItemsAfter.forEach((item, visibleIndex) => {
+                    const wasVis = wasVisible.get(item);
                     const oldPos = positions.get(item);
-                    const newRect = item.getBoundingClientRect();
+                    const sizeChange = sizeChanges.get(item);
                     
-                    const deltaX = oldPos.left - newRect.left;
-                    const deltaY = oldPos.top - newRect.top;
-                    
-                    if (deltaX !== 0 || deltaY !== 0) {
-                        item.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-                        item.style.transition = 'none';
+                    if (!wasVis || !oldPos) {
+                        // 이전에 보이지 않았던 아이템은 페이드인만
+                        // 크기 설정은 먼저 적용
+                        if (sizeChange && sizeChange.willChange) {
+                            item.setAttribute('data-size', sizeChange.newLayoutSize);
+                        }
+                        
+                        item.style.opacity = '0';
+                        item.style.transform = 'translateY(20px)';
+                        item.style.transition = 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
                         
                         requestAnimationFrame(() => {
-                            requestAnimationFrame(() => {
-                                item.style.transform = '';
-                                item.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.4s ease';
-                                
-                                // Animate thumb and info
-                                setTimeout(() => {
-                                    if (thumb) {
-                                        thumb.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-                                    }
-                                    if (info) {
-                                        info.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards';
-                                    }
-                                }, 50);
-                            });
-                        });
-                    } else {
-                        // No position change, just animate thumb and info
-                        setTimeout(() => {
-                            if (thumb) {
-                                thumb.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
-                            }
-                            if (info) {
-                                info.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards';
-                            }
-                        }, 50);
-                    }
-                } else {
-                    // Item was hidden, now appearing - use fadeInUp animation
-                    item.style.opacity = '0';
-                    item.style.transform = 'translateY(30px)';
-                    item.style.transition = 'none';
-                    item.classList.remove('animate');
-                    
-                    requestAnimationFrame(() => {
-                        requestAnimationFrame(() => {
-                            item.classList.add('animate');
                             item.style.opacity = '1';
                             item.style.transform = '';
-                            item.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
                             
-                            // Animate thumb and info
+                            const thumb = item.querySelector('.project-thumb');
+                            const info = item.querySelector('.project-info');
                             setTimeout(() => {
                                 if (thumb) {
-                                    thumb.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards';
+                                    thumb.style.animation = 'fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards';
                                 }
                                 if (info) {
-                                    info.style.animation = 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards';
+                                    info.style.animation = 'fadeInUp 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards';
                                 }
                             }, 50);
                         });
-                    });
-                }
+                        return;
+                    }
+                    
+                    // 기존에 보이던 아이템: 크기와 위치를 동시에 FLIP 애니메이션
+                    const hasSizeChange = sizeChange && sizeChange.willChange;
+                    
+                    // 크기 변경을 먼저 적용하지 않고, 목표 크기로 변경한 상태에서 위치 계산
+                    // 1단계: 목표 크기로 변경 (transition 없이, 레이아웃 재계산용)
+                    if (hasSizeChange) {
+                        item.style.transition = 'none';
+                        item.setAttribute('data-size', sizeChange.newLayoutSize);
+                    }
+                    
+                    // 2단계: 크기 변경 후 새로운 위치 계산
+                    const newRect = item.getBoundingClientRect();
+                    const deltaX = oldPos.left - newRect.left;
+                    const deltaY = oldPos.top - newRect.top;
+                    const hasPositionChange = deltaX !== 0 || deltaY !== 0;
+                    
+                    if (hasPositionChange || hasSizeChange) {
+                        // 3단계: 크기를 원래대로 되돌리고, transform으로 이전 위치로 이동
+                        if (hasSizeChange) {
+                            // 크기를 원래 크기로 되돌림 (transition 없이)
+                            item.setAttribute('data-size', sizeChange.oldSize);
+                        }
+                        
+                        // FLIP 애니메이션: 이전 위치에서 시작
+                        item.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+                        item.style.transition = 'none';
+                        item.style.opacity = '1';
+                        
+                        requestAnimationFrame(() => {
+                            requestAnimationFrame(() => {
+                                // 4단계: 목표 크기로 변경하고, transform을 제거하여 자연스럽게 이동
+                                // 크기와 위치가 동시에 애니메이션되도록 transition 설정
+                                if (hasSizeChange) {
+                                    item.setAttribute('data-size', sizeChange.newLayoutSize);
+                                }
+                                item.style.transform = '';
+                                item.style.transition = 'transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), grid-column 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-out';
+                            });
+                        });
+                    } else {
+                        // 위치와 크기 변경 모두 없음 - 그대로 유지
+                        item.style.opacity = '1';
+                        item.style.transform = '';
+                        item.style.transition = '';
+                    }
+                });
+                
+                // 숨겨진 아이템 처리
+                projectItems.forEach(item => {
+                    const shouldShow = filter === 'all' || item.dataset.category === filter;
+                    if (!shouldShow) {
+                        const thumb = item.querySelector('.project-thumb');
+                        const info = item.querySelector('.project-info');
+                        if (thumb) {
+                            thumb.style.opacity = '0';
+                            thumb.style.transform = '';
+                            thumb.style.animation = 'none';
+                        }
+                        if (info) {
+                            info.style.opacity = '0';
+                            info.style.transform = '';
+                            info.style.animation = 'none';
+                        }
+                    }
+                });
             });
         });
     });

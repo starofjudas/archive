@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>archive</title>
-    <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
     <style>
         * {
             margin: 0;
@@ -17,6 +17,27 @@
             --color-bg: #000000;
             --color-text: #ffffff;
             --font-primary: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+        }
+
+        body.light-mode {
+            --color-bg: #f7f7f7;
+            --color-text: #000000;
+        }
+
+        body.light-mode .progress-bar {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode .progress-fill {
+            background: #000000;
+        }
+
+        body.light-mode .particle {
+            background: #000000 !important;
+        }
+
+        body.light-mode .particle.triangle {
+            border-bottom-color: #000000 !important;
         }
 
         html {
@@ -120,7 +141,7 @@
             text-decoration: line-through;
         }
 
-        /* Title & Description - boo3d와 동일 위치/간격 */
+        /* Title & Description - vibe와 동일 위치/간격 */
         .title-container {
             position: fixed;
             top: 5vw;
@@ -148,23 +169,12 @@
             margin-top: -0.3vw;
         }
 
-        .title-container .description .desc-line {
-            display: block;
-        }
-
         body.light-mode .title-container .description {
             color: rgba(0, 0, 0, 0.6);
         }
 
-        /* Light mode theme */
-        body.light-mode {
-            background-color: #ffffff;
-            color: #000000;
-        }
-
-        body.light-mode .nav-back,
-        body.light-mode .nav-home {
-            color: #000000;
+        .title-container .description .desc-line {
+            display: block;
         }
 
         /* Project Frame */
@@ -176,6 +186,111 @@
             height: 100%;
             border: none;
             z-index: 0;
+        }
+
+        /* 이미지 확대 레이어 - page.html에 위치하여 헤더와 타이틀 위에 표시 */
+        .image-zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 10005; /* 헤더(10002)와 타이틀(1001) 위에 표시 */
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            overflow: auto;
+            /* 브라우저 스크롤바 숨김 (그라운드룰) */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .image-zoom-overlay::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        .image-zoom-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .image-zoom-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .image-zoom-container img {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+            object-fit: contain;
+            cursor: default;
+            display: block;
+        }
+
+        .image-zoom-close {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #000000;
+            border: none;
+            border-radius: 50%;
+            display: none; /* 기본적으로 숨김, JavaScript로 표시 */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+            z-index: 10006; /* 최상단 - 스크롤과 무관하게 항상 고정 */
+            pointer-events: auto;
+            margin: 0;
+            padding: 0;
+        }
+
+        .image-zoom-close:hover {
+            opacity: 0.8;
+        }
+
+        .image-zoom-close::before,
+        .image-zoom-close::after {
+            content: '';
+            position: absolute;
+            width: 2px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            transform: rotate(45deg);
+        }
+
+        .image-zoom-close::after {
+            transform: rotate(-45deg);
+        }
+
+        @media (max-width: 768px) {
+            .image-zoom-container {
+                padding: 0;
+            }
+
+            .image-zoom-close {
+                top: 20px;
+                right: 20px;
+                width: 36px;
+                height: 36px;
+            }
+
+            .image-zoom-close::before,
+            .image-zoom-close::after {
+                height: 16px;
+            }
         }
         
         /* Loading Progress Bar */
@@ -271,26 +386,6 @@
         
         .particle.diamond {
             clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-        }
-        
-        body.light-mode .loading {
-            background: #ffffff;
-        }
-        
-        body.light-mode .progress-bar {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        
-        body.light-mode .progress-fill {
-            background: #000000;
-        }
-        
-        body.light-mode .particle {
-            background: #000000 !important;
-        }
-        
-        body.light-mode .particle.triangle {
-            border-bottom-color: #000000 !important;
         }
         
         body.is-loading .project-frame {
@@ -393,22 +488,85 @@
     
     <header class="top-bar">
         <div class="nav-left">
-            <a href="../../../" class="nav-back">← back</a>
-            <a href="../../../" class="nav-home">home</a>
+            <a href="../../../../" class="nav-back">← back</a>
+            <a href="../../../../" class="nav-home">home</a>
         </div>
     </header>
     
     <div class="title-container">
-        <h1 class="title">chzzk logo glass effect</h1>
+        <h1 class="title">TOKYO 東京タワー</h1>
         <p class="description">
-            <span class="desc-line">three.js webgl transmission material.</span>
-            <span class="desc-line">interactive 3d glass refraction effect.</span>
+            <span class="desc-line">A minimalist poster capturing Tokyo Tower</span>
+            <span class="desc-line">through bold form and restrained color.</span>
+            <span class="desc-line">Reduced to its essence, the city reveals its quiet strength.</span>
         </p>
     </div>
     
     <iframe src="index.html" class="project-frame" allowfullscreen></iframe>
 
+    <!-- 이미지 확대 레이어 -->
+    <div class="image-zoom-overlay" id="image-zoom-overlay">
+        <div class="image-zoom-container">
+            <img id="zoomed-image" src="" alt="Zoomed image">
+        </div>
+    </div>
+    
+    <!-- 닫기 버튼 - overlay 밖에 배치하여 스크롤과 무관하게 고정 -->
+    <button class="image-zoom-close" id="image-zoom-close" style="display: none;"></button>
+
     <script>
+        // 테마 적용 (홈 화면 테마 동기화)
+        function applyTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.body.classList.add('light-mode');
+            } else {
+                document.body.classList.remove('light-mode');
+            }
+        }
+        
+        // 페이지 로드 시 즉시 테마 적용 (로딩 화면도 테마 적용)
+        applyTheme();
+        
+        // 테마 변경 감지
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'theme') {
+                applyTheme();
+            }
+        });
+        
+        // 주기적으로 테마 확인 (같은 탭에서의 변경 감지)
+        setInterval(() => {
+            applyTheme();
+        }, 500);
+        
+        // iframe에 테마 전달
+        const iframe = document.querySelector('.project-frame');
+        if (iframe) {
+            function sendThemeToIframe() {
+                const savedTheme = localStorage.getItem('theme');
+                iframe.contentWindow.postMessage({ type: 'themeChange', theme: savedTheme }, '*');
+            }
+            
+            iframe.addEventListener('load', () => {
+                setTimeout(sendThemeToIframe, 100);
+            });
+            
+            // 테마 변경 시에도 iframe에 전달
+            window.addEventListener('storage', (e) => {
+                if (e.key === 'theme') {
+                    sendThemeToIframe();
+                }
+            });
+            
+            // 테마 요청 메시지 수신
+            window.addEventListener('message', (e) => {
+                if (e.data && e.data.type === 'requestTheme') {
+                    sendThemeToIframe();
+                }
+            });
+        }
+        
         const navBack = document.querySelector('.nav-back');
         const topBar = document.querySelector('.top-bar');
         const loading = document.querySelector('.loading');
@@ -567,28 +725,52 @@
         
         navBack.addEventListener('click', navigateBack);
         navHome.addEventListener('click', navigateBack);
-        
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'theme') {
-                if (e.data.mode === 'light') {
-                    document.body.classList.add('light-mode');
-                } else {
-                    document.body.classList.remove('light-mode');
+
+        // 이미지 확대 기능 (iframe에서 메시지 수신)
+        const overlay = document.getElementById('image-zoom-overlay');
+        const zoomedImage = document.getElementById('zoomed-image');
+        const closeBtn = document.getElementById('image-zoom-close');
+
+        function openImageZoom(imageSrc) {
+            zoomedImage.src = imageSrc;
+            overlay.classList.add('active');
+            closeBtn.style.display = 'flex'; // 닫기 버튼 표시
+            document.body.style.overflow = 'hidden';
+
+            // ESC 키로 닫기
+            const handleEscape = (e) => {
+                if (e.key === 'Escape') {
+                    closeImageZoom();
+                    document.removeEventListener('keydown', handleEscape);
                 }
-            }
-        });
-        
-        const savedTheme = localStorage.getItem('theme');
-        const iframe = document.querySelector('.project-frame');
-        
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-mode');
-            iframe.addEventListener('load', () => {
-                if (iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'themeChange', mode: 'light' }, '*');
+            };
+            document.addEventListener('keydown', handleEscape);
+        }
+
+        function closeImageZoom() {
+            overlay.classList.remove('active');
+            closeBtn.style.display = 'none'; // 닫기 버튼 숨김
+            document.body.style.overflow = '';
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeImageZoom);
+        }
+
+        if (overlay) {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closeImageZoom();
                 }
             });
         }
+
+        // iframe에서 이미지 확대 메시지 수신
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'openImageZoom') {
+                openImageZoom(e.data.imageSrc);
+            }
+        });
     </script>
 </body>
 </html>
