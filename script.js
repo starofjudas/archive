@@ -152,30 +152,13 @@ document.addEventListener('DOMContentLoaded', () => {
     adjustFooterTitleSize(false);
     adjustSubTextSize(false);
     adjustMobileSubTextSize();
-    // 리사이즈 디바운싱
-    let resizeTimeout;
     window.addEventListener('resize', () => {
         adjustTitleSize(false);
         adjustFooterTitleSize(false);
         adjustSubTextSize(false);
         adjustMobileSubTextSize();
-        
-        // 리사이즈 완료 후 가림 영역 높이 재조정 (태블릿 가로/세로모드 대응)
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            adjustFooterMaskHeight();
-        }, 200);
-    });
-    
-    // 화면 회전 이벤트 처리 (태블릿 가로/세로 모드 전환)
-    window.addEventListener('orientationchange', () => {
-        setTimeout(() => {
-            adjustTitleSize(false);
-            adjustFooterTitleSize(false);
-            adjustSubTextSize(false);
-            adjustMobileSubTextSize();
-            adjustFooterMaskHeight();
-        }, 300);
+        // 리사이즈 시 가림 영역 높이도 재조정
+        setTimeout(() => adjustFooterMaskHeight(), 100);
     });
     
     // Restore scroll position if returning from project
@@ -585,54 +568,25 @@ function adjustFooterTitleSize() {
     });
 }
 
-// Adjust footer mask height based on actual rendered height
-// 태블릿: 42%, PC/모바일: 43%
+// Adjust footer mask height based on actual rendered height (43% 공통 적용)
 function adjustFooterMaskHeight() {
     const footerCreateBlock = document.querySelector('.footer-create-block');
     if (!footerCreateBlock) return;
     
-    // 태블릿 감지 (481px ~ 1366px)
-    const isTablet = window.innerWidth >= 481 && window.innerWidth <= 1366;
-    const maskPercentage = isTablet ? 0.42 : 0.43;
-    
-    // 폰트 로딩 완료 대기
-    document.fonts.ready.then(() => {
-        // 여러 프레임에 걸쳐 측정하여 정확도 향상 (태블릿 가로/세로모드 대응)
-        let attempts = 0;
-        const maxAttempts = 10;
-        let lastHeight = 0;
-        
-        function measureAndSet() {
-            requestAnimationFrame(() => {
-                requestAnimationFrame(() => {
-                    // 실제 렌더링된 높이 측정
-                    const actualHeight = footerCreateBlock.getBoundingClientRect().height;
-                    
-                    // 높이가 측정되었고, 이전 측정값과 동일하면 설정 (안정화 확인)
-                    if (actualHeight > 0) {
-                        if (actualHeight === lastHeight || attempts >= 3) {
-                            // 높이의 퍼센트 계산 (태블릿: 42%, 기타: 43%)
-                            const maskHeight = actualHeight * maskPercentage;
-                            
-                            // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
-                            footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
-                        } else {
-                            // 높이가 변하고 있으면 재시도
-                            lastHeight = actualHeight;
-                            attempts++;
-                            setTimeout(measureAndSet, 100);
-                        }
-                    } else if (attempts < maxAttempts) {
-                        // 높이가 아직 측정되지 않았으면 재시도
-                        attempts++;
-                        setTimeout(measureAndSet, 100);
-                    }
-                });
-            });
-        }
-        
-        // 초기 지연 후 측정 시작
-        setTimeout(measureAndSet, 100);
+    // 폰트 크기 조정 후 실제 렌더링이 완료될 때까지 약간의 지연
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            // 실제 렌더링된 높이 측정
+            const actualHeight = footerCreateBlock.getBoundingClientRect().height;
+            
+            if (actualHeight > 0) {
+                // 높이의 43% 계산
+                const maskHeight = actualHeight * 0.43;
+                
+                // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
+                footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
+            }
+        });
     });
 }
 
@@ -643,10 +597,9 @@ function animateFooterTitle() {
     const chars = wrapper.querySelectorAll('.footer-char');
     
     // 애니메이션 완료 후 가림 영역 높이 조정 (애니메이션 시간 1.2초 + 약간의 여유)
-    // 태블릿 가로/세로모드 대응을 위해 더 긴 지연 시간
     setTimeout(() => {
         adjustFooterMaskHeight();
-    }, 2000);
+    }, 1500);
     
     chars.forEach((char, index) => {
         setTimeout(() => {
