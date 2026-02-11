@@ -195,6 +195,7 @@
             left: 0;
             width: 100vw;
             height: 100vh;
+            height: 100dvh; /* 모바일 뷰포트 높이 지원 (동적 뷰포트) */
             background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -202,13 +203,23 @@
             display: none;
             opacity: 0;
             transition: opacity 0.3s ease;
-            overflow: auto;
+            overflow-y: auto;
+            overflow-x: hidden;
             /* 모바일 터치 스크롤 활성화 */
             -webkit-overflow-scrolling: touch;
             touch-action: pan-y;
             /* 브라우저 스크롤바 숨김 (그라운드룰) */
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
+            /* 모바일에서 확실한 전체 화면 덮기 */
+            margin: 0;
+            padding: 0;
+        }
+        
+        @supports (height: 100dvh) {
+            .image-zoom-overlay {
+                height: 100dvh; /* 동적 뷰포트 높이 지원 브라우저에서만 */
+            }
         }
 
         .image-zoom-overlay::-webkit-scrollbar {
@@ -218,6 +229,8 @@
         .image-zoom-overlay.active {
             display: block;
             opacity: 1;
+            /* 활성화 시 확실한 배경 표시 */
+            background: rgba(0, 0, 0, 0.95) !important;
         }
 
         .image-zoom-container {
@@ -225,7 +238,7 @@
             width: 100%;
             min-height: 100vh;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
             padding: 0;
             box-sizing: border-box;
@@ -244,6 +257,8 @@
             touch-action: pan-y;
             -webkit-user-select: none;
             user-select: none;
+            /* 이미지가 컨테이너 높이에 맞춰지도록 */
+            flex-shrink: 0;
         }
 
         .image-zoom-close {
@@ -285,8 +300,35 @@
         }
 
         @media (max-width: 768px) {
+            .image-zoom-overlay {
+                /* 모바일에서 확실한 스크롤 활성화 */
+                overflow-y: auto;
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-y;
+            }
+            
             .image-zoom-container {
                 padding: 0;
+                min-height: auto;
+                /* 이미지 높이에 맞춰 컨테이너 높이 조정 */
+                height: auto;
+                align-items: flex-start;
+                justify-content: flex-start;
+                padding-top: 0;
+                padding-bottom: 0;
+                /* 모바일에서 이미지가 컨테이너 높이만큼 확장되도록 */
+                align-content: flex-start;
+            }
+            
+            .image-zoom-container img {
+                /* 모바일에서 이미지가 전체 너비를 차지하되 높이는 자동 */
+                width: 100%;
+                height: auto;
+                max-width: 100%;
+                margin: 0;
+                /* 이미지가 상단에 정렬되도록 */
+                align-self: flex-start;
             }
 
             .image-zoom-close {
@@ -768,7 +810,6 @@
         const closeBtn = document.getElementById('image-zoom-close');
 
         function openImageZoom(imageSrc) {
-            zoomedImage.src = imageSrc;
             overlay.classList.add('active');
             closeBtn.style.display = 'flex'; // 닫기 버튼 표시
             
@@ -777,7 +818,49 @@
             const isMobile = window.innerWidth <= 768;
             if (!isMobile) {
                 document.body.style.overflow = 'hidden';
+            } else {
+                // 모바일에서 body 스크롤 방지 (overlay만 스크롤 가능)
+                document.body.style.position = 'fixed';
+                document.body.style.width = '100%';
             }
+
+            // 이미지 로드 후 컨테이너 높이 조정 및 스크롤 활성화
+            const adjustContainerHeight = () => {
+                const container = document.querySelector('.image-zoom-container');
+                if (container) {
+                    if (isMobile) {
+                        // 모바일: 이미지 높이에 맞춰 컨테이너 높이 설정
+                        container.style.minHeight = 'auto';
+                        container.style.height = 'auto';
+                        // 이미지 높이가 뷰포트보다 크면 컨테이너 높이를 이미지 높이로 설정
+                        const imageHeight = zoomedImage.offsetHeight || zoomedImage.naturalHeight;
+                        if (imageHeight > window.innerHeight) {
+                            container.style.minHeight = imageHeight + 'px';
+                        }
+                    } else {
+                        // 데스크톱: 기본 설정 유지
+                        container.style.minHeight = '100vh';
+                    }
+                }
+                // 스크롤 위치 초기화
+                requestAnimationFrame(() => {
+                    overlay.scrollTop = 0;
+                });
+            };
+            
+            // 이미지 로드 처리
+            if (zoomedImage.complete && zoomedImage.naturalWidth > 0) {
+                // 이미지가 이미 로드된 경우
+                adjustContainerHeight();
+            } else {
+                // 이미지 로드 대기
+                zoomedImage.onload = adjustContainerHeight;
+                zoomedImage.onerror = () => {
+                    console.error('이미지 로드 실패:', imageSrc);
+                };
+            }
+            
+            zoomedImage.src = imageSrc;
 
             // ESC 키로 닫기
             const handleEscape = (e) => {
@@ -793,8 +876,18 @@
             overlay.classList.remove('active');
             closeBtn.style.display = 'none'; // 닫기 버튼 숨김
             document.body.style.overflow = '';
-            // 스크롤 위치 초기화 (선택사항)
+            // 모바일에서 고정된 body 위치 해제
+            document.body.style.position = '';
+            document.body.style.width = '';
+            // 스크롤 위치 초기화
             overlay.scrollTop = 0;
+            
+            // 컨테이너 높이 초기화
+            const container = document.querySelector('.image-zoom-container');
+            if (container) {
+                container.style.minHeight = '';
+                container.style.height = '';
+            }
         }
 
         if (closeBtn) {
