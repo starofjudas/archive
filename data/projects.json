@@ -1,5 +1,5 @@
 [
   {"id":"1","title":"boo 3d character","category":"vibe","size":"large","thumbnail":"images/thumbnails/p1_boo.png","link":"projects/vibe/boo3d/page.html"},
-  {"id":"2","title":"TOKYO 東京タワー","category":"moment","size":"large","thumbnail":"images/thumbnails/p3_poster.png","link":"projects/moment/tokyo/page.html"},
+  {"id":"2","title":"TOKYO","category":"moment","size":"large","thumbnail":"images/thumbnails/p3_poster.png","link":"projects/moment/tokyo/page.html"},
   {"id":"3","title":"chzzk logo glass effect","category":"vibe","size":"large","thumbnail":"images/thumbnails/p2_logo.png","link":"projects/vibe/chzzkcup/page.html"}
 ]

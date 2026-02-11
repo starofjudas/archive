@@ -158,6 +158,16 @@
             color: inherit;
             margin-bottom: calc(1vw - 5px);
             line-height: 1.2;
+            /* 등장 모션 초기 상태 */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .title-container .title.animate {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .title-container .description {
@@ -167,6 +177,16 @@
             color: rgba(255, 255, 255, 0.6);
             letter-spacing: -0.01em;
             margin-top: -0.3vw;
+            /* 등장 모션 초기 상태 */
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, 
+                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+
+        .title-container .description.animate {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         body.light-mode .title-container .description {
@@ -196,9 +216,7 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh; /* 모바일 뷰포트 높이 지원 (동적 뷰포트) */
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: #000000; /* 검은 배경 유지 (opacity, blur 효과 제거) */
             z-index: 10005; /* 헤더(10002)와 타이틀(1001) 위에 표시 */
             display: none;
             opacity: 0;
@@ -229,8 +247,6 @@
         .image-zoom-overlay.active {
             display: block;
             opacity: 1;
-            /* 활성화 시 확실한 배경 표시 */
-            background: rgba(0, 0, 0, 0.95) !important;
         }
 
         .image-zoom-container {
@@ -240,18 +256,25 @@
             display: flex;
             align-items: flex-start;
             justify-content: center;
-            padding: 0;
+            padding: 10vh 0; /* 상하단 마진: 브라우저 높이의 10%씩 */
             box-sizing: border-box;
             /* 모바일에서 터치 이벤트 허용 */
             touch-action: pan-y;
         }
+        
+        /* 정방형/가로형 이미지: PC/태블릿에서 화면 정중앙에 위치 */
+        @media (min-width: 769px) {
+            .image-zoom-container.centered {
+                align-items: center;
+            }
+        }
 
         .image-zoom-container img {
-            width: 100%;
+            width: 80%; /* 기본: 브라우저 너비의 80% */
             height: auto;
-            max-width: 100%;
+            max-width: 80%;
             object-fit: contain;
-            cursor: default;
+            cursor: grab; /* 드래그 가능한 커서 */
             display: block;
             /* 모바일에서 터치 스크롤 허용 */
             touch-action: pan-y;
@@ -259,6 +282,21 @@
             user-select: none;
             /* 이미지가 컨테이너 높이에 맞춰지도록 */
             flex-shrink: 0;
+            transition: transform 0.1s ease-out;
+        }
+        
+        .image-zoom-container img:active {
+            cursor: grabbing; /* 드래그 중 커서 */
+        }
+        
+        /* PC/태블릿: 모든 이미지 동일한 크기 규칙 (80% 너비) */
+        @media (min-width: 769px) {
+            /* PC/태블릿에서는 가로형/정방형 이미지도 세로형과 동일하게 80% 너비 */
+            .image-zoom-container img.landscape,
+            .image-zoom-container img.square {
+                width: 80%;
+                max-width: 80%;
+            }
         }
 
         .image-zoom-close {
@@ -309,26 +347,43 @@
             }
             
             .image-zoom-container {
-                padding: 0;
+                padding: 10vh 0; /* 모바일에서도 상하단 마진: 브라우저 높이의 10%씩 */
                 min-height: auto;
                 /* 이미지 높이에 맞춰 컨테이너 높이 조정 */
                 height: auto;
                 align-items: flex-start;
-                justify-content: flex-start;
-                padding-top: 0;
-                padding-bottom: 0;
+                justify-content: center;
                 /* 모바일에서 이미지가 컨테이너 높이만큼 확장되도록 */
                 align-content: flex-start;
             }
             
             .image-zoom-container img {
-                /* 모바일에서 이미지가 전체 너비를 차지하되 높이는 자동 */
+                /* 모바일: 세로형 이미지는 너비 100%로 확대하여 갤러리(50vh)보다 크게 표시 */
                 width: 100%;
                 height: auto;
                 max-width: 100%;
                 margin: 0;
                 /* 이미지가 상단에 정렬되도록 */
                 align-self: flex-start;
+            }
+            
+            /* 모바일: 정방형/가로형 이미지 처리 */
+            .image-zoom-container.centered {
+                align-items: center;
+                padding: 10vh 0; /* 상하 마진만 유지 */
+                justify-content: center; /* 수평 중앙 정렬 */
+            }
+            
+            /* 모바일: 가로형/정방형 이미지는 원본 비율 유지, 드래그로 탐색 가능 */
+            .image-zoom-container img.landscape,
+            .image-zoom-container img.square {
+                width: 100%;
+                max-width: 100%;
+                height: auto;
+                /* min-height 제거: 원본 비율 유지, 한 화면에 안들어가면 드래그로 탐색 */
+                object-fit: contain;
+                align-self: center; /* 중앙 정렬 */
+                margin: 0 auto; /* 수평 중앙 정렬 */
             }
 
             .image-zoom-close {
@@ -545,11 +600,9 @@
     </header>
     
     <div class="title-container">
-        <h1 class="title">TOKYO 東京タワー</h1>
+        <h1 class="title">TOKYO</h1>
         <p class="description">
-            <span class="desc-line">A minimalist poster capturing Tokyo Tower</span>
-            <span class="desc-line">through bold form and restrained color.</span>
-            <span class="desc-line">Reduced to its essence, the city reveals its quiet strength.</span>
+            <span class="desc-line">A quiet portrait of Tokyo, seen through its most familiar silhouette.</span>
         </p>
     </div>
     
@@ -734,6 +787,24 @@
                 document.body.classList.remove('is-loading');
                 document.body.classList.add('loaded');
                 
+                // 타이틀/설명 등장 모션 트리거
+                const titleElement = document.querySelector('.title-container .title');
+                const descriptionElement = document.querySelector('.title-container .description');
+                
+                if (titleElement) {
+                    requestAnimationFrame(() => {
+                        titleElement.classList.add('animate');
+                    });
+                }
+                
+                if (descriptionElement) {
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            descriptionElement.classList.add('animate');
+                        }, 100);
+                    });
+                }
+                
                 setTimeout(() => {
                     loading.style.display = 'none';
                 }, 500);
@@ -794,6 +865,10 @@
             e.preventDefault();
             const homePath = getHomePath();
             
+            // 스크롤 위치가 저장되어 있으면 복원하도록 플래그 설정
+            // 홈 화면의 restoreScrollPosition() 함수가 자동으로 처리함
+            // 추가로 스크롤 위치가 없으면 현재 위치를 저장하지 않음 (이미 저장되어 있음)
+            
             topBar.classList.add('transitioning');
             
             setTimeout(() => {
@@ -808,14 +883,40 @@
         const overlay = document.getElementById('image-zoom-overlay');
         const zoomedImage = document.getElementById('zoomed-image');
         const closeBtn = document.getElementById('image-zoom-close');
+        
+        // 이미지 드래그 관련 변수
+        let isDragging = false;
+        let startX = 0;
+        let startY = 0;
+        let scrollLeft = 0;
+        let scrollTop = 0;
 
-        function openImageZoom(imageSrc) {
+        function openImageZoom(imageSrc, orientation) {
             overlay.classList.add('active');
             closeBtn.style.display = 'flex'; // 닫기 버튼 표시
             
+            const container = document.querySelector('.image-zoom-container');
+            
+            // 이미지 방향 클래스 제거 후 새로 추가
+            zoomedImage.classList.remove('portrait', 'landscape', 'square');
+            const isMobile = window.innerWidth <= 768;
+            
+            if (orientation) {
+                zoomedImage.classList.add(orientation);
+                
+                // 모바일에서만 정방형/가로형 이미지는 컨테이너를 중앙 정렬로 변경
+                // PC/태블릿에서는 모든 이미지 동일한 규칙 적용
+                if ((orientation === 'landscape' || orientation === 'square') && isMobile) {
+                    container.classList.add('centered');
+                } else {
+                    container.classList.remove('centered');
+                }
+            } else {
+                container.classList.remove('centered');
+            }
+            
             // 모바일에서는 body overflow를 hidden으로 설정하지 않음 (overlay가 스크롤 가능하도록)
             // 데스크톱에서는 body 스크롤 방지
-            const isMobile = window.innerWidth <= 768;
             if (!isMobile) {
                 document.body.style.overflow = 'hidden';
             } else {
@@ -827,25 +928,68 @@
             // 이미지 로드 후 컨테이너 높이 조정 및 스크롤 활성화
             const adjustContainerHeight = () => {
                 const container = document.querySelector('.image-zoom-container');
-                if (container) {
-                    if (isMobile) {
-                        // 모바일: 이미지 높이에 맞춰 컨테이너 높이 설정
-                        container.style.minHeight = 'auto';
-                        container.style.height = 'auto';
-                        // 이미지 높이가 뷰포트보다 크면 컨테이너 높이를 이미지 높이로 설정
+                if (container && zoomedImage) {
+                    // 이미지 실제 높이 측정 (로드 완료 후)
+                    requestAnimationFrame(() => {
+                        const viewportHeight = window.innerHeight;
                         const imageHeight = zoomedImage.offsetHeight || zoomedImage.naturalHeight;
-                        if (imageHeight > window.innerHeight) {
-                            container.style.minHeight = imageHeight + 'px';
+                        
+                        // 이미지가 뷰포트 높이보다 작으면 위아래로 균등하게 마진 추가
+                        if (imageHeight < viewportHeight) {
+                            const remainingHeight = viewportHeight - imageHeight;
+                            const equalMargin = remainingHeight / 2;
+                            // 최소 10vh는 유지하되, 더 많은 공간이 있으면 균등 분배
+                            const paddingTop = Math.max(equalMargin, viewportHeight * 0.1);
+                            const paddingBottom = Math.max(equalMargin, viewportHeight * 0.1);
+                            container.style.paddingTop = paddingTop + 'px';
+                            container.style.paddingBottom = paddingBottom + 'px';
+                        } else {
+                            // 이미지가 뷰포트보다 크거나 같으면 기본 패딩 유지
+                            container.style.paddingTop = '';
+                            container.style.paddingBottom = '';
                         }
-                    } else {
-                        // 데스크톱: 기본 설정 유지
-                        container.style.minHeight = '100vh';
-                    }
+                        
+                        if (isMobile) {
+                            // 모바일: 이미지 높이에 맞춰 컨테이너 높이 설정
+                            container.style.minHeight = 'auto';
+                            container.style.height = 'auto';
+                            
+                            // 갤러리에서 이미지는 50vh로 표시되므로, 확대 시 최소 70vh 이상 보장
+                            const galleryHeight = viewportHeight * 0.5; // 50vh
+                            const minZoomHeight = viewportHeight * 0.7; // 70vh
+                            
+                            // 세로형 이미지만 최소 크기 보장 (가로형/정방형은 원본 비율 유지, 드래그로 탐색)
+                            const imageWidth = zoomedImage.offsetWidth || zoomedImage.naturalWidth;
+                            const imageAspectRatio = imageWidth / imageHeight;
+                            const isPortrait = imageAspectRatio < 1;
+                            const isLandscapeOrSquare = imageAspectRatio >= 1;
+                            
+                            // 세로형 이미지만 최소 높이 보장
+                            if (isPortrait && imageHeight < minZoomHeight) {
+                                // 세로형: 최소 높이 70vh 보장
+                                zoomedImage.style.minHeight = minZoomHeight + 'px';
+                                zoomedImage.style.width = 'auto';
+                            } else if (isLandscapeOrSquare) {
+                                // 가로형/정방형: 원본 비율 유지, min-height 제거
+                                zoomedImage.style.minHeight = '';
+                                zoomedImage.style.width = '100%';
+                            }
+                            
+                            // 이미지 높이가 뷰포트보다 크면 컨테이너 높이를 이미지 높이로 설정
+                            if (imageHeight > viewportHeight) {
+                                container.style.minHeight = imageHeight + 'px';
+                            }
+                        } else {
+                            // 데스크톱: 기본 설정 유지
+                            container.style.minHeight = '100vh';
+                        }
+                        
+                        // 스크롤 위치 초기화
+                        requestAnimationFrame(() => {
+                            overlay.scrollTop = 0;
+                        });
+                    });
                 }
-                // 스크롤 위치 초기화
-                requestAnimationFrame(() => {
-                    overlay.scrollTop = 0;
-                });
             };
             
             // 이미지 로드 처리
@@ -860,6 +1004,17 @@
                 };
             }
             
+            // 이미지 로드 후 드래그 기능 초기화
+            const initDragAfterLoad = () => {
+                initImageDrag();
+            };
+            
+            if (zoomedImage.complete && zoomedImage.naturalWidth > 0) {
+                initDragAfterLoad();
+            } else {
+                zoomedImage.addEventListener('load', initDragAfterLoad, { once: true });
+            }
+            
             zoomedImage.src = imageSrc;
 
             // ESC 키로 닫기
@@ -870,6 +1025,65 @@
                 }
             };
             document.addEventListener('keydown', handleEscape);
+        }
+        
+        // 이미지 드래그 기능
+        function initImageDrag() {
+            if (!zoomedImage || !overlay) return;
+            
+            // 기존 이벤트 리스너 제거 (중복 방지)
+            zoomedImage.removeEventListener('mousedown', handleMouseDown);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+            zoomedImage.removeEventListener('mouseleave', handleMouseLeave);
+            
+            // 새 이벤트 리스너 추가
+            zoomedImage.addEventListener('mousedown', handleMouseDown);
+            zoomedImage.addEventListener('mouseleave', handleMouseLeave);
+        }
+        
+        function handleMouseDown(e) {
+            if (!overlay || !zoomedImage) return;
+            
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            scrollLeft = overlay.scrollLeft;
+            scrollTop = overlay.scrollTop;
+            zoomedImage.style.cursor = 'grabbing';
+            e.preventDefault();
+            e.stopPropagation();
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+        }
+        
+        function handleMouseMove(e) {
+            if (!isDragging || !overlay) return;
+            e.preventDefault();
+            
+            const walkX = (e.clientX - startX) * 1.5; // 드래그 속도 조절
+            const walkY = (e.clientY - startY) * 1.5;
+            
+            overlay.scrollLeft = scrollLeft - walkX;
+            overlay.scrollTop = scrollTop - walkY;
+        }
+        
+        function handleMouseUp() {
+            if (isDragging) {
+                isDragging = false;
+                if (zoomedImage) {
+                    zoomedImage.style.cursor = 'grab';
+                }
+                document.removeEventListener('mousemove', handleMouseMove);
+                document.removeEventListener('mouseup', handleMouseUp);
+            }
+        }
+        
+        function handleMouseLeave() {
+            if (!isDragging) {
+                zoomedImage.style.cursor = 'grab';
+            }
         }
 
         function closeImageZoom() {
@@ -887,7 +1101,15 @@
             if (container) {
                 container.style.minHeight = '';
                 container.style.height = '';
+                container.classList.remove('centered');
             }
+            
+            // 이미지 방향 클래스 제거
+            zoomedImage.classList.remove('portrait', 'landscape', 'square');
+            
+            // 드래그 상태 초기화
+            isDragging = false;
+            zoomedImage.style.cursor = 'grab';
         }
 
         if (closeBtn) {
@@ -905,7 +1127,7 @@
         // iframe에서 이미지 확대 메시지 수신
         window.addEventListener('message', (e) => {
             if (e.data && e.data.type === 'openImageZoom') {
-                openImageZoom(e.data.imageSrc);
+                openImageZoom(e.data.imageSrc, e.data.orientation);
             }
         });
     </script>

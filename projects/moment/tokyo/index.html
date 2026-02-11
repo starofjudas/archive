@@ -50,7 +50,7 @@
         /* 포스터 모드 - 단일 이미지 */
         body.poster-mode .gallery-container {
             overflow: hidden;
-            justify-content: center;
+            justify-content: center; /* 포스터 모드: 중앙 정렬 */
         }
 
         body.poster-mode .gallery-wrapper {
@@ -59,6 +59,7 @@
             width: 100%;
             height: 100%;
             padding: 0;
+            margin: 0; /* 포스터 모드에서는 margin 제거 */
         }
 
         body.poster-mode .gallery-item {
@@ -129,6 +130,11 @@
             height: 100%;
             padding: 0 20px; /* 첫 번째와 마지막 썸네일의 좌우 마진 */
         }
+        
+        /* 포스터 모드에서는 중앙 정렬 */
+        body.poster-mode .gallery-wrapper {
+            justify-content: center;
+        }
 
         /* 갤러리 아이템 */
         .gallery-item {
@@ -154,6 +160,12 @@
 
         /* 모바일: 썸네일 크기를 브라우저 높이의 50%로 변경 */
         @media (max-width: 768px) {
+            .gallery-container {
+                /* 모바일에서 스크롤이 제대로 작동하도록 */
+                -webkit-overflow-scrolling: touch;
+                touch-action: pan-x;
+            }
+            
             .gallery-wrapper {
                 padding: 0 20px; /* 모바일에서도 20px 마진 유지 */
             }
@@ -859,13 +871,24 @@
                     const bgColor = thumbnailBgColors[i % thumbnailBgColors.length];
                     item.style.backgroundColor = bgColor;
                     
-                    // 포스터 모드: 이미지 방향에 따라 크기 설정
-                    // CSS에서 처리하므로 여기서는 스타일 제거
-                    item.style.width = 'auto';
-                    item.style.height = 'auto';
+                    // 모드에 따라 크기 설정
+                    if (isPosterMode) {
+                        // 포스터 모드: CSS에서 처리하므로 스타일 제거
+                        item.style.width = 'auto';
+                        item.style.height = 'auto';
+                    } else {
+                        // 갤러리 모드: CSS에서 정의한 높이 유지 (60vh 또는 50vh)
+                        // JavaScript에서 스타일을 명시적으로 설정하지 않음
+                        item.style.width = '';
+                        item.style.height = '';
+                    }
                     
                     loadedCount++;
                     if (loadedCount === totalImages) {
+                        // 모든 이미지 로드 완료 후 갤러리 모드일 경우 초기 스크롤 위치를 중앙으로 설정
+                        if (!isPosterMode) {
+                            centerGalleryOnLoad();
+                        }
                         notifyLoaded();
                     }
                 });
@@ -875,6 +898,10 @@
                     console.warn(`Failed to load ${availableImages[i]}`);
                     loadedCount++;
                     if (loadedCount === totalImages) {
+                        // 모든 이미지 로드 완료 후 갤러리 모드일 경우 초기 스크롤 위치를 중앙으로 설정
+                        if (!isPosterMode) {
+                            centerGalleryOnLoad();
+                        }
                         notifyLoaded();
                     }
                 });
@@ -882,7 +909,9 @@
                 // 이미지 클릭 시 확대 기능
                 img.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    openImageZoom(img.src);
+                    // 이미지 방향 정보 가져오기
+                    const orientation = item.getAttribute('data-orientation') || 'portrait';
+                    openImageZoom(img.src, orientation);
                 });
                 
                 item.appendChild(img);
@@ -891,12 +920,13 @@
         }
 
         // 이미지 확대 기능 - 부모 창(page.html)에 메시지 전송
-        function openImageZoom(imageSrc) {
+        function openImageZoom(imageSrc, orientation) {
             if (window.parent !== window) {
                 // iframe인 경우 부모 창에 메시지 전송
                 window.parent.postMessage({ 
                     type: 'openImageZoom', 
-                    imageSrc: imageSrc 
+                    imageSrc: imageSrc,
+                    orientation: orientation || 'portrait'
                 }, '*');
             } else {
                 // 직접 열린 경우 (개발용)
@@ -912,10 +942,99 @@
         }
 
 
+        // 갤러리 모드에서 초기 스크롤 위치 설정
+        function centerGalleryOnLoad() {
+            const galleryContainer = document.querySelector('.gallery-container');
+            const galleryWrapper = document.querySelector('.gallery-wrapper');
+            
+            if (!galleryContainer || !galleryWrapper || document.body.classList.contains('poster-mode')) {
+                return;
+            }
+            
+            const isMobile = window.innerWidth <= 768;
+            const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
+            const isMobileOrTablet = isMobile || isTablet;
+            
+            // 이미지 로드 완료 후 레이아웃이 안정화될 때까지 대기
+            setTimeout(() => {
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(() => {
+                            const containerWidth = galleryContainer.clientWidth;
+                            const wrapperWidth = galleryWrapper.scrollWidth;
+                            
+                            console.log('Container width:', containerWidth);
+                            console.log('Wrapper scrollWidth:', wrapperWidth);
+                            console.log('Is mobile:', isMobile);
+                            console.log('Is tablet:', isTablet);
+                            
+                            // 태블릿/모바일에서는 항상 처음부터 시작 (스크롤 위치 0)
+                            if (isMobileOrTablet) {
+                                galleryContainer.scrollLeft = 0;
+                                galleryWrapper.style.marginLeft = '';
+                                galleryWrapper.style.marginRight = '';
+                                console.log('Mobile/Tablet: Starting from the beginning (scrollLeft = 0)');
+                                return;
+                            }
+                            
+                            // 데스크톱: 갤러리 래퍼가 컨테이너보다 작거나 같으면 중앙 정렬 (스크롤 불필요)
+                            if (wrapperWidth <= containerWidth) {
+                                // Wrapper를 중앙에 배치하기 위해 margin-left를 계산하여 설정
+                                const marginLeft = (containerWidth - wrapperWidth) / 2;
+                                galleryWrapper.style.marginLeft = marginLeft + 'px';
+                                galleryWrapper.style.marginRight = 'auto';
+                                galleryContainer.scrollLeft = 0;
+                                console.log('Desktop: No scroll needed, wrapper fits in container - centering with margin');
+                                return;
+                            }
+                            
+                            // 데스크톱: 스크롤이 필요한 경우 margin 제거하고 중앙으로 스크롤
+                            galleryWrapper.style.marginLeft = '';
+                            galleryWrapper.style.marginRight = '';
+                            
+                            // 갤러리 래퍼의 중앙이 컨테이너 중앙에 오도록 스크롤 위치 계산
+                            const maxScroll = wrapperWidth - containerWidth;
+                            const scrollPosition = maxScroll / 2;
+                            
+                            console.log('Desktop: Max scroll:', maxScroll);
+                            console.log('Desktop: Setting scroll position to:', scrollPosition);
+                            
+                            // 스크롤 위치를 강제로 설정 (여러 번 시도)
+                            const setScroll = () => {
+                                galleryContainer.scrollLeft = scrollPosition;
+                            };
+                            
+                            setScroll();
+                            
+                            // 스크롤 위치 확인 및 재시도 (여러 번)
+                            setTimeout(() => {
+                                let attempts = 0;
+                                const maxAttempts = 5;
+                                
+                                const checkAndRetry = () => {
+                                    const actualScroll = galleryContainer.scrollLeft;
+                                    console.log(`Attempt ${attempts + 1}: Actual scroll position:`, actualScroll);
+                                    
+                                    // 스크롤 위치가 제대로 설정되지 않았으면 재시도
+                                    if (Math.abs(actualScroll - scrollPosition) > 5 && attempts < maxAttempts) {
+                                        attempts++;
+                                        setScroll();
+                                        setTimeout(checkAndRetry, 100);
+                                    }
+                                };
+                                
+                                checkAndRetry();
+                            }, 100);
+                        });
+                    });
+                });
+            }, 500); // 이미지 로드 후 충분한 대기 시간
+        }
+
         // 초기 렌더링
         renderGallery();
 
-        // 리사이즈 시 갤러리 아이템 크기 조정
+        // 리사이즈 시 갤러리 아이템 크기 조정 및 중앙 정렬 재적용
         function updateGalleryItemSizes() {
             const items = document.querySelectorAll('.gallery-item');
             const isPosterMode = document.body.classList.contains('poster-mode');
@@ -928,6 +1047,11 @@
                     return;
                 }
             });
+            
+            // 갤러리 모드에서 중앙 정렬 재적용
+            if (!isPosterMode) {
+                centerGalleryOnLoad();
+            }
         }
 
         // 리사이즈 이벤트

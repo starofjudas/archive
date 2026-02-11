@@ -161,10 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => adjustFooterMaskHeight(), 100);
     });
     
-    // Restore scroll position if returning from project
-    restoreScrollPosition();
-    
-    // Load projects
+    // Load projects (스크롤 위치 복원은 프로젝트 로드 완료 후)
     loadProjects();
     
     // Cover section fade in on scroll
@@ -175,6 +172,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Smooth scroll implementation
     initSmoothScroll();
+});
+
+// 브라우저 뒤로가기 캐시(bfcache)에서 복원된 경우 처리
+window.addEventListener('pageshow', (e) => {
+    // bfcache에서 복원된 경우 (persisted === true)
+    if (e.persisted) {
+        // 프로젝트가 이미 로드되어 있으면 스크롤 위치만 복원
+        const projectList = document.getElementById('project-list');
+        if (projectList && projectList.children.length > 0) {
+            // 프로젝트가 이미 렌더링되어 있으면 즉시 복원
+            restoreScrollPosition();
+        } else {
+            // 프로젝트가 아직 로드되지 않았으면 로드 후 복원
+            loadProjects();
+        }
+    }
 });
 
 // Theme Toggle
@@ -840,6 +853,8 @@ function renderProjects(projects) {
         if (!projectList.classList.contains('animate')) {
             projectList.classList.add('animate');
         }
+        // 빈 상태에서도 스크롤 위치 복원 시도
+        restoreScrollPosition();
         return;
     }
     
@@ -866,6 +881,18 @@ function renderProjects(projects) {
     
     // Animate project items after rendering
     animateProjectItems();
+    
+    // 프로젝트 렌더링 완료 후 스크롤 위치 복원
+    // 레이아웃이 완전히 계산되고 이미지 로딩이 시작된 후 복원
+    // 여러 번의 requestAnimationFrame으로 레이아웃 계산 완료 보장
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            // 약간의 지연을 두어 이미지 로딩 시작 후 복원
+            setTimeout(() => {
+                restoreScrollPosition();
+            }, 100);
+        });
+    });
 }
 
 // Animate project items with stagger effect
@@ -907,7 +934,11 @@ function initProjectNavigation() {
             const href = link.getAttribute('href');
             
             // Save scroll position before navigating
-            sessionStorage.setItem('scrollPosition', window.scrollY);
+            const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+            sessionStorage.setItem('scrollPosition', scrollY.toString());
+            
+            // 디버깅용 (필요시 제거)
+            console.log('스크롤 위치 저장:', scrollY);
             
             // Mark that we're coming from home (for subpage header animation)
             sessionStorage.setItem('fromHome', 'true');
@@ -921,9 +952,45 @@ function initProjectNavigation() {
 // Restore scroll position if returning from project page
 function restoreScrollPosition() {
     const savedPosition = sessionStorage.getItem('scrollPosition');
-    if (savedPosition !== null) {
-        window.scrollTo(0, parseInt(savedPosition));
-        sessionStorage.removeItem('scrollPosition');
+    if (savedPosition !== null && savedPosition !== '') {
+        const position = parseInt(savedPosition, 10);
+        
+        if (!isNaN(position) && position >= 0) {
+            // 스크롤 위치 복원 (여러 방법 시도)
+            if (window.scrollTo) {
+                window.scrollTo({
+                    top: position,
+                    left: 0,
+                    behavior: 'auto' // 즉시 이동
+                });
+            } else {
+                // 폴백: scrollTo가 없는 경우
+                window.scrollTop = position;
+                document.documentElement.scrollTop = position;
+                document.body.scrollTop = position;
+            }
+            
+            // 디버깅용 (필요시 제거)
+            console.log('스크롤 위치 복원:', position);
+            
+            // 복원 후 확인 (약간의 지연 후 실제 위치 확인)
+            setTimeout(() => {
+                const actualPosition = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+                if (Math.abs(actualPosition - position) > 10) {
+                    // 복원이 제대로 안 되었으면 다시 시도
+                    window.scrollTo({
+                        top: position,
+                        left: 0,
+                        behavior: 'auto'
+                    });
+                }
+            }, 200);
+            
+            sessionStorage.removeItem('scrollPosition');
+        } else {
+            console.warn('유효하지 않은 스크롤 위치:', savedPosition);
+            sessionStorage.removeItem('scrollPosition');
+        }
     }
 }
 
