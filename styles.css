@@ -841,7 +841,7 @@ body.light-mode .cover-section.visible {
     top: 0;
     left: 0;
     right: 0;
-    height: var(--mask-height, 43.5%);
+    height: var(--mask-height, 44%);
     min-height: 40px;
     background-color: var(--color-bg);
     pointer-events: none;
@@ -1028,7 +1028,7 @@ body.light-mode .cover-section.visible {
     
     /* 태블릿: create 텍스트 가림 (JavaScript로 동적 조정됨) */
     .footer-create-block::after {
-        height: var(--mask-height, 43.5%) !important;
+        height: var(--mask-height, 44%) !important;
         min-height: 40px !important;
     }
 }
@@ -1199,7 +1199,7 @@ body.light-mode .cover-section.visible {
     
     .footer-create-block::after {
         top: 0 !important;
-        height: var(--mask-height, 43.5%) !important;
+        height: var(--mask-height, 44%) !important;
         min-height: 40px !important;
         z-index: 10 !important;
     }
