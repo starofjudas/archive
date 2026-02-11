@@ -1025,7 +1025,7 @@ body.light-mode .cover-section.visible {
     
     /* 태블릿: create 텍스트 가림 */
     .footer-create-block::after {
-        height: 40.5% !important;
+        height: calc(40.5% - 2px) !important;
         min-height: 40px !important;
     }
 }
