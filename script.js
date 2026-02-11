@@ -160,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         adjustSubTextSize(false);
         adjustMobileSubTextSize();
         
-        // 리사이즈 완료 후 가림 영역 높이 재조정 (태블릿 가로모드 대응)
+        // 리사이즈 완료 후 가림 영역 높이 재조정 (태블릿 가로/세로모드 대응)
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             adjustFooterMaskHeight();
@@ -585,10 +585,15 @@ function adjustFooterTitleSize() {
     });
 }
 
-// Adjust footer mask height based on actual rendered height (43% 공통 적용)
+// Adjust footer mask height based on actual rendered height
+// 태블릿: 42%, PC/모바일: 43%
 function adjustFooterMaskHeight() {
     const footerCreateBlock = document.querySelector('.footer-create-block');
     if (!footerCreateBlock) return;
+    
+    // 태블릿 감지 (481px ~ 1366px)
+    const isTablet = window.innerWidth >= 481 && window.innerWidth <= 1366;
+    const maskPercentage = isTablet ? 0.42 : 0.43;
     
     // 폰트 로딩 완료 대기
     document.fonts.ready.then(() => {
@@ -606,8 +611,8 @@ function adjustFooterMaskHeight() {
                     // 높이가 측정되었고, 이전 측정값과 동일하면 설정 (안정화 확인)
                     if (actualHeight > 0) {
                         if (actualHeight === lastHeight || attempts >= 3) {
-                            // 높이의 43% 계산
-                            const maskHeight = actualHeight * 0.43;
+                            // 높이의 퍼센트 계산 (태블릿: 42%, 기타: 43%)
+                            const maskHeight = actualHeight * maskPercentage;
                             
                             // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
                             footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
