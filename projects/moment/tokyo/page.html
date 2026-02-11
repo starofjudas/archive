@@ -203,6 +203,9 @@
             opacity: 0;
             transition: opacity 0.3s ease;
             overflow: auto;
+            /* 모바일 터치 스크롤 활성화 */
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
             /* 브라우저 스크롤바 숨김 (그라운드룰) */
             scrollbar-width: none; /* Firefox */
             -ms-overflow-style: none; /* IE and Edge */
@@ -226,6 +229,8 @@
             justify-content: center;
             padding: 0;
             box-sizing: border-box;
+            /* 모바일에서 터치 이벤트 허용 */
+            touch-action: pan-y;
         }
 
         .image-zoom-container img {
@@ -235,6 +240,10 @@
             object-fit: contain;
             cursor: default;
             display: block;
+            /* 모바일에서 터치 스크롤 허용 */
+            touch-action: pan-y;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .image-zoom-close {
@@ -762,7 +771,13 @@
             zoomedImage.src = imageSrc;
             overlay.classList.add('active');
             closeBtn.style.display = 'flex'; // 닫기 버튼 표시
-            document.body.style.overflow = 'hidden';
+            
+            // 모바일에서는 body overflow를 hidden으로 설정하지 않음 (overlay가 스크롤 가능하도록)
+            // 데스크톱에서는 body 스크롤 방지
+            const isMobile = window.innerWidth <= 768;
+            if (!isMobile) {
+                document.body.style.overflow = 'hidden';
+            }
 
             // ESC 키로 닫기
             const handleEscape = (e) => {
@@ -778,6 +793,8 @@
             overlay.classList.remove('active');
             closeBtn.style.display = 'none'; // 닫기 버튼 숨김
             document.body.style.overflow = '';
+            // 스크롤 위치 초기화 (선택사항)
+            overlay.scrollTop = 0;
         }
 
         if (closeBtn) {
