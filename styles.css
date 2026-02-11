@@ -397,6 +397,7 @@ body.light-mode .cover-section.visible {
         margin-top: 0 !important;
         padding-left: 1.25vw !important;
         padding-right: 1.25vw !important;
+        padding-bottom: 2vw !important;
     }
     
     .cover-section.visible {
@@ -549,6 +550,7 @@ body.light-mode .cover-section.visible {
         margin-top: 0 !important;
         padding-left: 1.25vw !important;
         padding-right: 1.25vw !important;
+        padding-bottom: 2vw !important;
     }
     
     .cover-section.visible {
@@ -987,6 +989,7 @@ body.light-mode .cover-section.visible {
     
     .cover-section {
         padding: calc(4vw - 14px) 3vw !important;
+        padding-bottom: calc(4vw + 20px) !important;
     }
     
     .filter-menu {
