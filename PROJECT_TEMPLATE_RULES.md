@@ -1,5 +1,45 @@
 # 프로젝트 서브페이지 그라운드룰
 
+## 브라우저 탭 아이콘(파비콘) 공통 적용 규칙
+
+모든 페이지에서 **동일한 파비콘**을 사용합니다. archive 루트의 `favicon.svg`를 공통 아이콘으로 적용합니다.
+
+### 적용 대상
+- 홈 화면 (`archive/index.html`)
+- 모든 프로젝트의 `page.html`
+- 모든 프로젝트의 `index.html` (직접 열람 시 탭 아이콘 표시)
+
+### 구현 방법
+
+#### archive 루트 (index.html)
+```html
+<head>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    ...
+</head>
+```
+
+#### 서브페이지 (page.html / index.html)
+`<head>` 상단에 배치. 경로는 **현재 파일 기준 archive 루트의 favicon.svg**로 설정합니다.
+
+- `projects/moment/tokyo/` → `../../../../favicon.svg`
+- `projects/moment/폴더명/` → `../../../favicon.svg`
+- `projects/vibe/폴더명/` → `../../../favicon.svg`
+
+```html
+<head>
+    <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+    <meta charset="UTF-8">
+    ...
+</head>
+```
+
+### 중요 사항
+- 새 프로젝트·새 페이지 추가 시 반드시 파비콘 링크를 포함합니다.
+- 파비콘 파일은 archive 루트의 `favicon.svg` 하나만 사용합니다.
+
+---
+
 ## 브라우저 탭 이름 통일 규칙
 
 모든 프로젝트 서브페이지의 브라우저 탭 이름은 **"archive"**로 통일합니다.
