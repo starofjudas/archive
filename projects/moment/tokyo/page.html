@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-    <script>document.title='archive';</script>
+    <script>document.title = 'archive';</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>archive</title>
-    <link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
+    <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
     <style>
         * {
             margin: 0;
@@ -43,12 +44,15 @@
         html {
             font-size: 16px;
             /* 브라우저 스크롤바 숨김 (그라운드룰) */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
         }
 
         html::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
+            display: none;
+            /* Chrome, Safari, Opera */
         }
 
         body {
@@ -60,12 +64,15 @@
             width: 100vw;
             height: 100vh;
             /* 브라우저 스크롤바 숨김 (그라운드룰) */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
         }
 
         body::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
+            display: none;
+            /* Chrome, Safari, Opera */
         }
 
         /* Navigation Bar - matches main page exactly */
@@ -100,18 +107,18 @@
             margin-right: 0;
             overflow: hidden;
             transition: opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
-                        width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
-                        margin-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
-                        transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+                width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
+                margin-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
-        
+
         body.loaded .nav-back,
         body.header-ready .nav-back {
             opacity: 1;
             width: auto;
             margin-right: 14px;
         }
-        
+
         body.header-ready .nav-back {
             transition: none;
         }
@@ -161,8 +168,8 @@
             /* 등장 모션 초기 상태 */
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), 
-                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .title-container .title.animate {
@@ -180,8 +187,8 @@
             /* 등장 모션 초기 상태 */
             opacity: 0;
             transform: translateY(20px);
-            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s, 
-                        transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
         }
 
         .title-container .description.animate {
@@ -215,9 +222,12 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            height: 100dvh; /* 모바일 뷰포트 높이 지원 (동적 뷰포트) */
-            background: #000000; /* 검은 배경 유지 (opacity, blur 효과 제거) */
-            z-index: 10005; /* 헤더(10002)와 타이틀(1001) 위에 표시 */
+            height: 100dvh;
+            /* 모바일 뷰포트 높이 지원 (동적 뷰포트) */
+            background: #000000;
+            /* 검은 배경 유지 (opacity, blur 효과 제거) */
+            z-index: 10005;
+            /* 헤더(10002)와 타이틀(1001) 위에 표시 */
             display: none;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -227,21 +237,25 @@
             -webkit-overflow-scrolling: touch;
             touch-action: pan-y;
             /* 브라우저 스크롤바 숨김 (그라운드룰) */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE and Edge */
             /* 모바일에서 확실한 전체 화면 덮기 */
             margin: 0;
             padding: 0;
         }
-        
+
         @supports (height: 100dvh) {
             .image-zoom-overlay {
-                height: 100dvh; /* 동적 뷰포트 높이 지원 브라우저에서만 */
+                height: 100dvh;
+                /* 동적 뷰포트 높이 지원 브라우저에서만 */
             }
         }
 
         .image-zoom-overlay::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
+            display: none;
+            /* Chrome, Safari, Opera */
         }
 
         .image-zoom-overlay.active {
@@ -256,12 +270,13 @@
             display: flex;
             align-items: flex-start;
             justify-content: center;
-            padding: 10vh 0; /* 상하단 마진: 브라우저 높이의 10%씩 */
+            padding: 10vh 0;
+            /* 상하단 마진: 브라우저 높이의 10%씩 */
             box-sizing: border-box;
             /* 모바일에서 터치 이벤트 허용 */
             touch-action: pan-y;
         }
-        
+
         /* 정방형/가로형 이미지: PC/태블릿에서 화면 정중앙에 위치 */
         @media (min-width: 769px) {
             .image-zoom-container.centered {
@@ -270,11 +285,13 @@
         }
 
         .image-zoom-container img {
-            width: 80%; /* 기본: 브라우저 너비의 80% */
+            width: 80%;
+            /* 기본: 브라우저 너비의 80% */
             height: auto;
             max-width: 80%;
             object-fit: contain;
-            cursor: grab; /* 드래그 가능한 커서 */
+            cursor: grab;
+            /* 드래그 가능한 커서 */
             display: block;
             /* 모바일에서 터치 스크롤 허용 */
             touch-action: pan-y;
@@ -284,13 +301,15 @@
             flex-shrink: 0;
             transition: transform 0.1s ease-out;
         }
-        
+
         .image-zoom-container img:active {
-            cursor: grabbing; /* 드래그 중 커서 */
+            cursor: grabbing;
+            /* 드래그 중 커서 */
         }
-        
+
         /* PC/태블릿: 모든 이미지 동일한 크기 규칙 (80% 너비) */
         @media (min-width: 769px) {
+
             /* PC/태블릿에서는 가로형/정방형 이미지도 세로형과 동일하게 80% 너비 */
             .image-zoom-container img.landscape,
             .image-zoom-container img.square {
@@ -308,12 +327,14 @@
             background: #000000;
             border: none;
             border-radius: 50%;
-            display: none; /* 기본적으로 숨김, JavaScript로 표시 */
+            display: none;
+            /* 기본적으로 숨김, JavaScript로 표시 */
             align-items: center;
             justify-content: center;
             cursor: pointer;
             transition: opacity 0.2s ease;
-            z-index: 10006; /* 최상단 - 스크롤과 무관하게 항상 고정 */
+            z-index: 10006;
+            /* 최상단 - 스크롤과 무관하게 항상 고정 */
             pointer-events: auto;
             margin: 0;
             padding: 0;
@@ -345,9 +366,10 @@
                 -webkit-overflow-scrolling: touch;
                 touch-action: pan-y;
             }
-            
+
             .image-zoom-container {
-                padding: 10vh 0; /* 모바일에서도 상하단 마진: 브라우저 높이의 10%씩 */
+                padding: 10vh 0;
+                /* 모바일에서도 상하단 마진: 브라우저 높이의 10%씩 */
                 min-height: auto;
                 /* 이미지 높이에 맞춰 컨테이너 높이 조정 */
                 height: auto;
@@ -356,7 +378,7 @@
                 /* 모바일에서 이미지가 컨테이너 높이만큼 확장되도록 */
                 align-content: flex-start;
             }
-            
+
             .image-zoom-container img {
                 /* 모바일: 세로형 이미지는 너비 100%로 확대하여 갤러리(50vh)보다 크게 표시 */
                 width: 100%;
@@ -366,14 +388,16 @@
                 /* 이미지가 상단에 정렬되도록 */
                 align-self: flex-start;
             }
-            
+
             /* 모바일: 정방형/가로형 이미지 처리 */
             .image-zoom-container.centered {
                 align-items: center;
-                padding: 10vh 0; /* 상하 마진만 유지 */
-                justify-content: center; /* 수평 중앙 정렬 */
+                padding: 10vh 0;
+                /* 상하 마진만 유지 */
+                justify-content: center;
+                /* 수평 중앙 정렬 */
             }
-            
+
             /* 모바일: 가로형/정방형 이미지는 원본 비율 유지, 드래그로 탐색 가능 */
             .image-zoom-container img.landscape,
             .image-zoom-container img.square {
@@ -382,8 +406,10 @@
                 height: auto;
                 /* min-height 제거: 원본 비율 유지, 한 화면에 안들어가면 드래그로 탐색 */
                 object-fit: contain;
-                align-self: center; /* 중앙 정렬 */
-                margin: 0 auto; /* 수평 중앙 정렬 */
+                align-self: center;
+                /* 중앙 정렬 */
+                margin: 0 auto;
+                /* 수평 중앙 정렬 */
             }
 
             .image-zoom-close {
@@ -398,7 +424,7 @@
                 height: 16px;
             }
         }
-        
+
         /* Loading Progress Bar */
         .loading {
             position: fixed;
@@ -410,7 +436,7 @@
             pointer-events: none;
             z-index: 10001;
         }
-        
+
         .progress-bar {
             position: absolute;
             top: 0;
@@ -420,7 +446,7 @@
             background: rgba(255, 255, 255, 0.1);
             overflow: visible;
         }
-        
+
         .progress-fill {
             width: 0%;
             height: 100%;
@@ -428,7 +454,7 @@
             transition: width 0.1s ease-out;
             position: relative;
         }
-        
+
         .particle-container {
             position: absolute;
             top: 0;
@@ -438,7 +464,7 @@
             overflow: hidden;
             pointer-events: none;
         }
-        
+
         .particle {
             position: absolute;
             width: 6px;
@@ -446,25 +472,25 @@
             pointer-events: none;
             background: #ffffff;
         }
-        
+
         .particle.small {
             width: 4px;
             height: 4px;
         }
-        
+
         .particle.large {
             width: 10px;
             height: 10px;
         }
-        
+
         .particle.circle {
             border-radius: 50%;
         }
-        
+
         .particle.square {
             border-radius: 0;
         }
-        
+
         .particle.triangle {
             background: transparent !important;
             width: 0 !important;
@@ -473,110 +499,110 @@
             border-right: 4px solid transparent;
             border-bottom: 7px solid #ffffff;
         }
-        
+
         .particle.triangle.small {
             border-left-width: 3px;
             border-right-width: 3px;
             border-bottom-width: 5px;
         }
-        
+
         .particle.triangle.large {
             border-left-width: 6px;
             border-right-width: 6px;
             border-bottom-width: 10px;
         }
-        
+
         .particle.star {
             clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
         }
-        
+
         .particle.diamond {
             clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
         }
-        
+
         body.is-loading .project-frame {
             opacity: 0;
         }
-        
+
         body.loaded .loading {
             opacity: 0;
             transition: opacity 0.5s ease;
             pointer-events: none;
         }
-        
+
         /* Responsive - Tablet */
         @media (max-width: 1024px) {
             .top-bar {
                 padding: 3vw;
             }
-            
+
             .nav-back {
                 font-size: 2vw;
             }
-            
+
             .nav-home {
                 font-size: 2vw;
             }
-            
+
             .title-container {
                 top: 10vw;
                 left: 3vw;
                 max-width: none;
             }
-            
+
             .title-container .title {
                 white-space: normal;
             }
         }
-        
+
         /* Responsive - Mobile */
         @media (max-width: 768px) {
             .top-bar {
                 padding: 4vw;
             }
-            
+
             .nav-back {
                 font-size: 3.5vw;
             }
-            
+
             .nav-home {
                 font-size: 3.5vw;
             }
-            
+
             .title-container {
                 top: 14vw;
                 left: 4vw;
             }
-            
+
             .title-container .description .desc-line {
                 white-space: normal;
             }
-            
+
             .nav-back:hover,
             .nav-home:hover {
                 text-decoration: none !important;
             }
         }
-        
+
         /* Responsive - Small Mobile */
         @media (max-width: 480px) {
             .top-bar {
                 padding: 5vw;
             }
-            
+
             .nav-back {
                 font-size: 4vw;
             }
-            
+
             .nav-home {
                 font-size: 4vw;
             }
-            
+
             .title-container {
                 top: 18vw;
                 left: 5vw;
             }
-            
+
             .nav-back:hover,
             .nav-home:hover {
                 text-decoration: none !important;
@@ -584,6 +610,7 @@
         }
     </style>
 </head>
+
 <body class="is-loading">
     <div class="loading">
         <div class="progress-bar">
@@ -591,21 +618,21 @@
         </div>
         <div class="particle-container"></div>
     </div>
-    
+
     <header class="top-bar">
         <div class="nav-left">
             <a href="/" class="nav-back">← back</a>
             <a href="/" class="nav-home">home</a>
         </div>
     </header>
-    
+
     <div class="title-container">
         <h1 class="title">tokyo</h1>
         <p class="description">
             <span class="desc-line">A quiet portrait of Tokyo, seen through its most familiar silhouette.</span>
         </p>
     </div>
-    
+
     <iframe src="index.html" class="project-frame" allowfullscreen></iframe>
 
     <!-- 이미지 확대 레이어 -->
@@ -614,7 +641,7 @@
             <img id="zoomed-image" src="" alt="Zoomed image">
         </div>
     </div>
-    
+
     <!-- 닫기 버튼 - overlay 밖에 배치하여 스크롤과 무관하게 고정 -->
     <button class="image-zoom-close" id="image-zoom-close" style="display: none;"></button>
 
@@ -628,22 +655,22 @@
                 document.body.classList.remove('light-mode');
             }
         }
-        
+
         // 페이지 로드 시 즉시 테마 적용 (로딩 화면도 테마 적용)
         applyTheme();
-        
+
         // 테마 변경 감지
         window.addEventListener('storage', (e) => {
             if (e.key === 'theme') {
                 applyTheme();
             }
         });
-        
+
         // 주기적으로 테마 확인 (같은 탭에서의 변경 감지)
         setInterval(() => {
             applyTheme();
         }, 500);
-        
+
         // iframe에 테마 전달
         const iframe = document.querySelector('.project-frame');
         if (iframe) {
@@ -651,18 +678,18 @@
                 const savedTheme = localStorage.getItem('theme');
                 iframe.contentWindow.postMessage({ type: 'themeChange', theme: savedTheme }, '*');
             }
-            
+
             iframe.addEventListener('load', () => {
                 setTimeout(sendThemeToIframe, 100);
             });
-            
+
             // 테마 변경 시에도 iframe에 전달
             window.addEventListener('storage', (e) => {
                 if (e.key === 'theme') {
                     sendThemeToIframe();
                 }
             });
-            
+
             // 테마 요청 메시지 수신
             window.addEventListener('message', (e) => {
                 if (e.data && e.data.type === 'requestTheme') {
@@ -670,7 +697,7 @@
                 }
             });
         }
-        
+
         const navBack = document.querySelector('.nav-back');
         const topBar = document.querySelector('.top-bar');
         const loading = document.querySelector('.loading');
@@ -679,93 +706,93 @@
         let lastParticleTime = 0;
         let currentProgress = 0;
         let loadingFinished = false;
-        
+
         const fromHome = sessionStorage.getItem('fromHome');
         const skipHeaderAnimation = !fromHome;
-        
+
         if (fromHome) {
             sessionStorage.removeItem('fromHome');
         }
-        
+
         if (skipHeaderAnimation) {
             document.body.classList.add('header-ready');
         }
-        
+
         const shapes = ['circle', 'square', 'triangle', 'star', 'diamond'];
-        
+
         function createParticle(x) {
             if (!particleContainer) return;
-            
+
             const particle = document.createElement('div');
             particle.className = 'particle';
-            
+
             const rand = Math.random();
             if (rand > 0.8) particle.classList.add('large');
             else if (rand < 0.3) particle.classList.add('small');
-            
+
             const shape = shapes[Math.floor(Math.random() * shapes.length)];
             particle.classList.add(shape);
-            
+
             const opacity = 1;
             const isLight = document.body.classList.contains('light-mode');
             particle.style.background = isLight ? '#000000' : '#ffffff';
-            
+
             particle.style.left = x + 'px';
             particle.style.top = '2px';
-            
+
             const vx = (Math.random() - 0.5) * 8;
             const vy = Math.random() * 6 + 2;
             const rotation = Math.random() * 360;
             const scale = 0.5 + Math.random() * 1;
             const lifetime = 800 + Math.random() * 1200;
-            
+
             particle.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
             particleContainer.appendChild(particle);
-            
+
             let startTime = Date.now();
             let posX = x;
             let posY = 2;
             let velocityX = vx;
             let velocityY = vy;
-            
+
             function animateParticle() {
                 const elapsed = Date.now() - startTime;
                 const prog = elapsed / lifetime;
-                
+
                 if (prog >= 1) {
                     particle.remove();
                     return;
                 }
-                
+
                 velocityY += 0.15;
                 posX += velocityX;
                 posY += velocityY;
-                
+
                 const fadeOpacity = (1 - prog) * opacity;
                 const currentScale = scale * (1 - prog * 0.5);
-                
+
                 particle.style.left = posX + 'px';
                 particle.style.top = posY + 'px';
                 particle.style.opacity = fadeOpacity;
                 particle.style.transform = `scale(${currentScale}) rotate(${rotation + elapsed * 0.2}deg)`;
-                
+
                 requestAnimationFrame(animateParticle);
             }
-            
+
             requestAnimationFrame(animateParticle);
         }
-        
+
         function createParticleBurst(x, count) {
             for (let i = 0; i < count; i++) {
                 setTimeout(() => createParticle(x), i * 20);
             }
         }
-        
+
         function updateProgress(value) {
             currentProgress = Math.min(value, 100);
             if (progressFill) {
                 progressFill.style.width = currentProgress + '%';
-                
+
                 const now = Date.now();
                 if (now - lastParticleTime > 15) {
                     const x = (window.innerWidth * currentProgress) / 100;
@@ -776,27 +803,27 @@
                 }
             }
         }
-        
+
         function finishLoading() {
             if (loadingFinished) return;
             loadingFinished = true;
-            
+
             createParticleBurst(window.innerWidth, 20);
-            
+
             setTimeout(() => {
                 document.body.classList.remove('is-loading');
                 document.body.classList.add('loaded');
-                
+
                 // 타이틀/설명 등장 모션 트리거
                 const titleElement = document.querySelector('.title-container .title');
                 const descriptionElement = document.querySelector('.title-container .description');
-                
+
                 if (titleElement) {
                     requestAnimationFrame(() => {
                         titleElement.classList.add('animate');
                     });
                 }
-                
+
                 if (descriptionElement) {
                     requestAnimationFrame(() => {
                         setTimeout(() => {
@@ -804,23 +831,23 @@
                         }, 100);
                     });
                 }
-                
+
                 setTimeout(() => {
                     loading.style.display = 'none';
                 }, 500);
             }, 300);
         }
-        
+
         let progressInterval = setInterval(() => {
             if (currentProgress < 90 && !loadingFinished) {
                 updateProgress(currentProgress + 1);
             }
         }, 30);
-        
+
         window.addEventListener('message', (e) => {
             if (e.data.type === 'loadingComplete') {
                 clearInterval(progressInterval);
-                
+
                 const completeInterval = setInterval(() => {
                     if (currentProgress < 100) {
                         updateProgress(currentProgress + 2);
@@ -831,15 +858,15 @@
                 }, 20);
             }
         });
-        
+
         const navHome = document.querySelector('.nav-home');
-        
+
         // GitHub Pages 호환을 위한 홈 경로 계산
         function getHomePath() {
             // 현재 경로에서 archive 폴더까지의 경로 계산
             const currentPath = window.location.pathname;
             const pathParts = currentPath.split('/').filter(p => p);
-            
+
             // 'archive' 폴더 찾기
             const archiveIndex = pathParts.indexOf('archive');
             if (archiveIndex !== -1) {
@@ -847,7 +874,7 @@
                 const homePath = '/' + pathParts.slice(0, archiveIndex + 1).join('/') + '/';
                 return homePath;
             }
-            
+
             // archive를 찾지 못한 경우 루트로
             return '/';
         }
@@ -860,17 +887,17 @@
         if (navHome) {
             navHome.setAttribute('href', homePath);
         }
-        
+
         function navigateBack(e) {
             e.preventDefault();
             const homePath = getHomePath();
-            
+
             // 스크롤 위치가 저장되어 있으면 복원하도록 플래그 설정
             // 홈 화면의 restoreScrollPosition() 함수가 자동으로 처리함
             // 추가로 스크롤 위치가 없으면 현재 위치를 저장하지 않음 (이미 저장되어 있음)
-            
+
             topBar.classList.add('transitioning');
-            
+
             setTimeout(() => {
                 window.location.href = homePath;
             }, 600);
@@ -883,7 +910,7 @@
         const overlay = document.getElementById('image-zoom-overlay');
         const zoomedImage = document.getElementById('zoomed-image');
         const closeBtn = document.getElementById('image-zoom-close');
-        
+
         // 이미지 드래그 관련 변수
         let isDragging = false;
         let startX = 0;
@@ -894,7 +921,7 @@
         function openImageZoom(imageSrc, orientation) {
             overlay.classList.add('active');
             closeBtn.style.display = 'flex';
-            
+
             // 모바일에서는 body overflow를 hidden으로 설정하지 않음 (overlay가 스크롤 가능하도록)
             // 데스크톱에서는 body 스크롤 방지
             const isMobile = window.innerWidth <= 768;
@@ -905,15 +932,15 @@
                 document.body.style.position = 'fixed';
                 document.body.style.width = '100%';
             }
-            
+
             // 이미지 로드 (loadImageWithOrientation 함수 사용)
             loadImageWithOrientation(imageSrc, orientation);
-            
+
             // 이미지 로드 후 드래그 기능 초기화
             const initDragAfterLoad = () => {
                 initImageDrag();
             };
-            
+
             if (zoomedImage.complete && zoomedImage.naturalWidth > 0 && zoomedImage.src === imageSrc) {
                 initDragAfterLoad();
             } else {
@@ -929,25 +956,25 @@
             };
             document.addEventListener('keydown', handleKeyboard);
         }
-        
+
         // 이미지 드래그 기능
         function initImageDrag() {
             if (!zoomedImage || !overlay) return;
-            
+
             // 기존 이벤트 리스너 제거 (중복 방지)
             zoomedImage.removeEventListener('mousedown', handleMouseDown);
             document.removeEventListener('mousemove', handleMouseMove);
             document.removeEventListener('mouseup', handleMouseUp);
             zoomedImage.removeEventListener('mouseleave', handleMouseLeave);
-            
+
             // 새 이벤트 리스너 추가
             zoomedImage.addEventListener('mousedown', handleMouseDown);
             zoomedImage.addEventListener('mouseleave', handleMouseLeave);
         }
-        
+
         function handleMouseDown(e) {
             if (!overlay || !zoomedImage) return;
-            
+
             isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
@@ -956,22 +983,22 @@
             zoomedImage.style.cursor = 'grabbing';
             e.preventDefault();
             e.stopPropagation();
-            
+
             document.addEventListener('mousemove', handleMouseMove);
             document.addEventListener('mouseup', handleMouseUp);
         }
-        
+
         function handleMouseMove(e) {
             if (!isDragging || !overlay) return;
             e.preventDefault();
-            
+
             const walkX = (e.clientX - startX) * 1.5; // 드래그 속도 조절
             const walkY = (e.clientY - startY) * 1.5;
-            
+
             overlay.scrollLeft = scrollLeft - walkX;
             overlay.scrollTop = scrollTop - walkY;
         }
-        
+
         function handleMouseUp() {
             if (isDragging) {
                 isDragging = false;
@@ -982,7 +1009,7 @@
                 document.removeEventListener('mouseup', handleMouseUp);
             }
         }
-        
+
         function handleMouseLeave() {
             if (!isDragging) {
                 zoomedImage.style.cursor = 'grab';
@@ -993,16 +1020,16 @@
         function loadImageWithOrientation(imageSrc, orientation) {
             // 스크롤 위치 초기화
             overlay.scrollTop = 0;
-            
+
             const container = document.querySelector('.image-zoom-container');
             const isMobile = window.innerWidth <= 768;
-            
+
             // 이미지 방향 클래스 제거 후 새로 추가
             zoomedImage.classList.remove('portrait', 'landscape', 'square');
-            
+
             if (orientation) {
                 zoomedImage.classList.add(orientation);
-                
+
                 // 모바일에서만 정방형/가로형 이미지는 컨테이너를 중앙 정렬로 변경
                 if ((orientation === 'landscape' || orientation === 'square') && isMobile) {
                     container.classList.add('centered');
@@ -1012,14 +1039,14 @@
             } else {
                 container.classList.remove('centered');
             }
-            
+
             // 이미지 로드 후 컨테이너 높이 조정
             const adjustContainerHeight = () => {
                 if (container && zoomedImage) {
                     requestAnimationFrame(() => {
                         const viewportHeight = window.innerHeight;
                         const imageHeight = zoomedImage.offsetHeight || zoomedImage.naturalHeight;
-                        
+
                         // 이미지가 뷰포트 높이보다 작으면 위아래로 균등하게 마진 추가
                         if (imageHeight < viewportHeight) {
                             const remainingHeight = viewportHeight - imageHeight;
@@ -1032,15 +1059,15 @@
                             container.style.paddingTop = '';
                             container.style.paddingBottom = '';
                         }
-                        
+
                         if (isMobile) {
                             container.style.minHeight = 'auto';
                             container.style.height = 'auto';
-                            
+
                             const imageWidth = zoomedImage.offsetWidth || zoomedImage.naturalWidth;
                             const imageAspectRatio = imageWidth / imageHeight;
                             const isPortrait = imageAspectRatio < 1;
-                            
+
                             if (isPortrait && imageHeight < viewportHeight * 0.7) {
                                 zoomedImage.style.minHeight = viewportHeight * 0.7 + 'px';
                                 zoomedImage.style.width = 'auto';
@@ -1048,21 +1075,21 @@
                                 zoomedImage.style.minHeight = '';
                                 zoomedImage.style.width = '100%';
                             }
-                            
+
                             if (imageHeight > viewportHeight) {
                                 container.style.minHeight = imageHeight + 'px';
                             }
                         } else {
                             container.style.minHeight = '100vh';
                         }
-                        
+
                         requestAnimationFrame(() => {
                             overlay.scrollTop = 0;
                         });
                     });
                 }
             };
-            
+
             // 이미지 로드 처리
             if (zoomedImage.complete && zoomedImage.naturalWidth > 0 && zoomedImage.src === imageSrc) {
                 adjustContainerHeight();
@@ -1072,21 +1099,21 @@
                     console.error('이미지 로드 실패:', imageSrc);
                 };
             }
-            
+
             zoomedImage.src = imageSrc;
-            
+
             // 이미지 로드 후 드래그 기능 초기화
             const initDragAfterLoad = () => {
                 initImageDrag();
             };
-            
+
             if (zoomedImage.complete && zoomedImage.naturalWidth > 0 && zoomedImage.src === imageSrc) {
                 initDragAfterLoad();
             } else {
                 zoomedImage.addEventListener('load', initDragAfterLoad, { once: true });
             }
         }
-        
+
         function closeImageZoom() {
             overlay.classList.remove('active');
             closeBtn.style.display = 'none';
@@ -1094,14 +1121,14 @@
             document.body.style.position = '';
             document.body.style.width = '';
             overlay.scrollTop = 0;
-            
+
             const container = document.querySelector('.image-zoom-container');
             if (container) {
                 container.style.minHeight = '';
                 container.style.height = '';
                 container.classList.remove('centered');
             }
-            
+
             zoomedImage.classList.remove('portrait', 'landscape', 'square');
             isDragging = false;
             zoomedImage.style.cursor = 'grab';
@@ -1119,7 +1146,7 @@
                     closeImageZoom();
                 }
             });
-            
+
             // 이미지나 컨테이너 내부 요소 클릭 시 이벤트 전파 방지
             const container = document.querySelector('.image-zoom-container');
             if (container) {
@@ -1144,4 +1171,5 @@
         });
     </script>
 </body>
+
 </html>
