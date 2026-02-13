@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <link rel="icon" type="image/svg+xml" href="../../../../favicon.svg">
     <meta charset="UTF-8">
@@ -22,7 +23,8 @@
             --color-text: #000000;
         }
 
-        html, body {
+        html,
+        body {
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -51,7 +53,8 @@
         /* 포스터 모드 - 단일 이미지 */
         body.poster-mode .gallery-container {
             overflow: hidden;
-            justify-content: center; /* 포스터 모드: 중앙 정렬 */
+            justify-content: center;
+            /* 포스터 모드: 중앙 정렬 */
         }
 
         body.poster-mode .gallery-wrapper {
@@ -60,7 +63,8 @@
             width: 100%;
             height: 100%;
             padding: 0;
-            margin: 0; /* 포스터 모드에서는 margin 제거 */
+            margin: 0;
+            /* 포스터 모드에서는 margin 제거 */
         }
 
         body.poster-mode .gallery-item {
@@ -127,11 +131,12 @@
         .gallery-wrapper {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             height: 100%;
-            padding: 0 20px; /* 첫 번째와 마지막 썸네일의 좌우 마진 */
+            padding: 0 20px;
+            /* 첫 번째와 마지막 썸네일의 좌우 마진 */
         }
-        
+
         /* 포스터 모드에서는 중앙 정렬 */
         body.poster-mode .gallery-wrapper {
             justify-content: center;
@@ -166,9 +171,10 @@
                 -webkit-overflow-scrolling: touch;
                 touch-action: pan-x;
             }
-            
+
             .gallery-wrapper {
-                padding: 0 20px; /* 모바일에서도 20px 마진 유지 */
+                padding: 0 20px;
+                /* 모바일에서도 20px 마진 유지 */
             }
 
             .gallery-item {
@@ -203,6 +209,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- 포스터 모드: 단일 포스터 이미지 표시 -->
     <div class="gallery-container">
@@ -216,7 +223,7 @@
         // 테마 적용 (홈 화면 테마 동기화)
         function applyTheme() {
             let savedTheme = null;
-            
+
             // 부모 창에서 테마를 받아오기 시도
             try {
                 savedTheme = localStorage.getItem('theme');
@@ -224,28 +231,28 @@
                 // localStorage 접근 불가 시 부모 창에서 받은 테마 사용
                 console.log('localStorage 접근 불가, 부모 창 테마 사용');
             }
-            
+
             if (savedTheme === 'light') {
                 document.body.classList.add('light-mode');
             } else {
                 document.body.classList.remove('light-mode');
             }
         }
-        
+
         // 페이지 로드 시 테마 적용
         applyTheme();
-        
+
         // 테마 변경 감지 (localStorage 변경 감지 - 다른 탭에서의 변경)
         window.addEventListener('storage', (e) => {
             if (e.key === 'theme') {
                 applyTheme();
             }
         });
-        
+
         // iframe인 경우 부모 창의 테마 변경 메시지 수신
         if (window.parent !== window) {
             let parentTheme = null;
-            
+
             window.addEventListener('message', (e) => {
                 if (e.data && e.data.type === 'themeChange') {
                     parentTheme = e.data.theme;
@@ -256,16 +263,16 @@
                     }
                 }
             });
-            
+
             // 부모 창에 테마 요청
             window.parent.postMessage({ type: 'requestTheme' }, '*');
-            
+
             // 주기적으로 테마 확인 (같은 탭에서의 변경 감지)
             setInterval(() => {
                 applyTheme();
             }, 500);
         }
-        
+
         // 로딩 완료 알림
         function notifyLoaded() {
             if (window.parent !== window) {
@@ -313,30 +320,30 @@
         function createBrandingImage(width, height, aspectRatio, index) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // 비율에 맞게 크기 조정
             const aspect = aspectRatio.w / aspectRatio.h;
             let imgWidth = width;
             let imgHeight = height;
-            
+
             if (aspect > 1) {
                 imgHeight = width / aspect;
             } else {
                 imgWidth = height * aspect;
             }
-            
+
             canvas.width = imgWidth;
             canvas.height = imgHeight;
-            
+
             // 배경색 (각 썸네일마다 다른 배경 컬러)
             const bgColor = thumbnailBgColors[index % thumbnailBgColors.length];
             ctx.fillStyle = bgColor;
             ctx.fillRect(0, 0, imgWidth, imgHeight);
-            
+
             // ARCHIVE 브랜딩 가이드 타입별 생성
             const designType = index % 10;
-            
-            switch(designType) {
+
+            switch (designType) {
                 case 0: // 로고 가이드
                     createLogoGuide(ctx, imgWidth, imgHeight);
                     break;
@@ -368,7 +375,7 @@
                     createIdentityGuide(ctx, imgWidth, imgHeight);
                     break;
             }
-            
+
             return canvas.toDataURL('image/png');
         }
 
@@ -377,14 +384,14 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const fontSize = Math.min(w, h) * 0.12;
-            
+
             // 로고 텍스트
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(brandName, centerX, centerY - fontSize * 0.2);
-            
+
             // 로고 심볼 (A 문자 기반)
             ctx.strokeStyle = brandColors.accent;
             ctx.lineWidth = fontSize * 0.08;
@@ -393,7 +400,7 @@
             ctx.lineTo(centerX, centerY - fontSize * 0.3);
             ctx.lineTo(centerX + fontSize * 0.3, centerY + fontSize * 0.3);
             ctx.stroke();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${fontSize * 0.25}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -408,14 +415,14 @@
                 { color: brandColors.accent, name: 'ACCENT' },
                 { color: brandColors.gray2, name: 'GRAY' }
             ];
-            
+
             const rectHeight = h / colors.length;
             const padding = w * 0.05;
-            
+
             colors.forEach((item, i) => {
                 ctx.fillStyle = item.color;
                 ctx.fillRect(padding, i * rectHeight + padding, w - padding * 2, rectHeight - padding * 2);
-                
+
                 // 컬러 이름
                 ctx.fillStyle = i === 0 ? brandColors.secondary : brandColors.primary;
                 ctx.font = `${Math.min(w, h) * 0.04}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -431,7 +438,7 @@
             const centerX = w / 2;
             const padding = h * 0.1;
             let yPos = padding;
-            
+
             // 헤딩
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${Math.min(w, h) * 0.1}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -439,20 +446,20 @@
             ctx.textBaseline = 'top';
             ctx.fillText(brandName, centerX, yPos);
             yPos += Math.min(w, h) * 0.15;
-            
+
             // 서브헤딩
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.06}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.fillText('SUBTITLE TEXT', centerX, yPos);
             yPos += Math.min(w, h) * 0.12;
-            
+
             // 본문
             ctx.fillStyle = brandColors.gray2;
             ctx.font = `${Math.min(w, h) * 0.035}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.fillText('Body text for descriptions', centerX, yPos);
             yPos += Math.min(w, h) * 0.08;
             ctx.fillText('and longer content blocks', centerX, yPos);
-            
+
             // 가이드 라벨
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -464,7 +471,7 @@
             const gridSize = Math.min(w, h) / 12;
             ctx.strokeStyle = brandColors.gray1;
             ctx.lineWidth = 1;
-            
+
             // 그리드 라인
             for (let x = gridSize; x < w; x += gridSize) {
                 ctx.beginPath();
@@ -472,20 +479,20 @@
                 ctx.lineTo(x, h);
                 ctx.stroke();
             }
-            
+
             for (let y = gridSize; y < h; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(w, y);
                 ctx.stroke();
             }
-            
+
             // 포인트 영역 표시
             ctx.fillStyle = brandColors.accent;
             ctx.globalAlpha = 0.3;
             ctx.fillRect(gridSize * 2, gridSize * 2, gridSize * 4, gridSize * 4);
             ctx.globalAlpha = 1;
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -498,27 +505,27 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const fontSize = Math.min(w, h) * 0.08;
-            
+
             // 로고 표시
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(brandName, centerX, centerY);
-            
+
             // 사용 영역 표시
             ctx.strokeStyle = brandColors.gray2;
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.strokeRect(centerX - fontSize * 2, centerY - fontSize * 0.6, fontSize * 4, fontSize * 1.2);
             ctx.setLineDash([]);
-            
+
             // 최소 간격 표시
             ctx.strokeStyle = brandColors.gray3;
             ctx.lineWidth = 1;
             const spacing = fontSize * 0.5;
             ctx.strokeRect(centerX - fontSize * 2 - spacing, centerY - fontSize * 0.6 - spacing, fontSize * 4 + spacing * 2, fontSize * 1.2 + spacing * 2);
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -531,12 +538,12 @@
             const spacing = Math.min(w, h) * 0.08;
             let xPos = padding;
             const yPos = h / 2;
-            
+
             // 스페이싱 예시
             for (let i = 0; i < 4; i++) {
                 ctx.fillStyle = brandColors.accent;
                 ctx.fillRect(xPos, yPos - spacing / 2, spacing, spacing);
-                
+
                 // 간격 표시
                 if (i < 3) {
                     ctx.strokeStyle = brandColors.gray2;
@@ -548,10 +555,10 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
                 }
-                
+
                 xPos += spacing * 1.5;
             }
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -565,19 +572,19 @@
             const centerY = h / 2;
             const iconSize = Math.min(w, h) * 0.15;
             const spacing = iconSize * 1.5;
-            
+
             // 아이콘들 표시
             const icons = [
                 { type: 'circle', x: centerX - spacing },
                 { type: 'square', x: centerX },
                 { type: 'triangle', x: centerX + spacing }
             ];
-            
+
             icons.forEach(icon => {
                 ctx.strokeStyle = brandColors.accent;
                 ctx.fillStyle = brandColors.accent;
                 ctx.lineWidth = iconSize * 0.1;
-                
+
                 if (icon.type === 'circle') {
                     ctx.beginPath();
                     ctx.arc(icon.x, centerY, iconSize * 0.4, 0, Math.PI * 2);
@@ -593,7 +600,7 @@
                     ctx.stroke();
                 }
             });
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -605,29 +612,29 @@
         function createMinimalPrincipleGuide(ctx, w, h) {
             const centerX = w / 2;
             const centerY = h / 2;
-            
+
             // 미니멀 라인
             ctx.strokeStyle = brandColors.secondary;
             ctx.lineWidth = Math.min(w, h) * 0.015;
-            
+
             // 수평선
             ctx.beginPath();
             ctx.moveTo(w * 0.2, centerY);
             ctx.lineTo(w * 0.8, centerY);
             ctx.stroke();
-            
+
             // 수직선
             ctx.beginPath();
             ctx.moveTo(centerX, h * 0.2);
             ctx.lineTo(centerX, h * 0.8);
             ctx.stroke();
-            
+
             // 포인트
             ctx.fillStyle = brandColors.accent;
             ctx.beginPath();
             ctx.arc(centerX, centerY, Math.min(w, h) * 0.02, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -640,12 +647,12 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const size = Math.min(w, h) * 0.4;
-            
+
             // 브랜드 마크 (A 기반)
             ctx.strokeStyle = brandColors.accent;
             ctx.fillStyle = brandColors.accent;
             ctx.lineWidth = size * 0.08;
-            
+
             // A 형태
             ctx.beginPath();
             ctx.moveTo(centerX, centerY - size * 0.3);
@@ -655,7 +662,7 @@
             ctx.lineTo(centerX + size * 0.25, centerY + size * 0.3);
             ctx.closePath();
             ctx.stroke();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -668,25 +675,25 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const fontSize = Math.min(w, h) * 0.08;
-            
+
             // 브랜드명
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(brandName, centerX, centerY - fontSize * 0.3);
-            
+
             // 서브텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${fontSize * 0.4}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.fillText('BRAND IDENTITY', centerX, centerY + fontSize * 0.2);
-            
+
             // 포인트 컬러 표시
             ctx.fillStyle = brandColors.accent;
             ctx.beginPath();
             ctx.arc(centerX, centerY + fontSize * 0.6, fontSize * 0.15, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -728,23 +735,23 @@
         async function checkAvailableImages() {
             const availableImages = [];
             let index = 1;
-            
+
             // 최대 100개까지 확인 (충분히 큰 범위)
             while (index <= 100) {
                 // 두 가지 형식 모두 확인: img01.png, img1.png
                 const imagePathPadded = `img/img${String(index).padStart(2, '0')}.png`;
                 const imagePathUnpadded = `img/img${index}.png`;
-                
+
                 // 패딩된 형식 먼저 확인
                 let exists = await checkImageExists(imagePathPadded);
                 let imagePath = imagePathPadded;
-                
+
                 // 패딩된 형식이 없으면 패딩 없는 형식 확인
                 if (!exists) {
                     exists = await checkImageExists(imagePathUnpadded);
                     imagePath = imagePathUnpadded;
                 }
-                
+
                 if (exists) {
                     availableImages.push(imagePath);
                     index++;
@@ -753,23 +760,23 @@
                     break;
                 }
             }
-            
+
             return availableImages;
         }
-        
+
         // 이미지 존재 여부 확인
         function checkImageExists(imagePath) {
             return new Promise((resolve) => {
                 const img = new Image();
                 let resolved = false;
-                
+
                 const timeout = setTimeout(() => {
                     if (!resolved) {
                         resolved = true;
                         resolve(false);
                     }
                 }, 2000); // 2초 타임아웃
-                
+
                 img.onload = () => {
                     if (!resolved) {
                         resolved = true;
@@ -777,7 +784,7 @@
                         resolve(true);
                     }
                 };
-                
+
                 img.onerror = () => {
                     if (!resolved) {
                         resolved = true;
@@ -785,10 +792,10 @@
                         resolve(false);
                     }
                 };
-                
+
                 // 이미지가 이미 로드되어 있는 경우 처리
                 img.src = imagePath + '?t=' + Date.now(); // 캐시 방지
-                
+
                 // 이미 완료된 경우 (캐시된 이미지)
                 if (img.complete) {
                     if (img.naturalWidth > 0 && img.naturalHeight > 0) {
@@ -807,71 +814,71 @@
                 }
             });
         }
-        
+
         // 갤러리 렌더링 (공통 규칙 적용)
         async function renderGallery() {
             const galleryWrapper = document.getElementById('gallery-wrapper');
             const isMobile = window.innerWidth <= 768;
-            
+
             // 기본 크기 설정
             const baseHeight = isMobile ? window.innerHeight * 0.5 : window.innerHeight * 0.6;
             const baseWidth = isMobile ? window.innerHeight * 0.5 : baseHeight;
-            
+
             // img 폴더에서 존재하는 이미지 확인
             const availableImages = await checkAvailableImages();
             const totalImages = availableImages.length;
-            
+
             console.log('Available images:', availableImages);
-            
+
             if (totalImages === 0) {
                 console.warn('No images found in img folder');
                 notifyLoaded();
                 return;
             }
-            
+
             // 이미지 개수에 따라 모드 결정 (공통 규칙)
             // 1개만 있으면 포스터 모드, 2개 이상이면 갤러리 모드
             const displayMode = getDisplayMode(totalImages);
             const isPosterMode = displayMode === 'poster';
-            
+
             // 포스터 모드일 경우 body에 클래스 추가
             if (isPosterMode) {
                 document.body.classList.add('poster-mode');
             } else {
                 document.body.classList.remove('poster-mode');
             }
-            
+
             let loadedCount = 0;
-            
+
             // 존재하는 모든 이미지 로드
             for (let i = 0; i < totalImages; i++) {
                 const item = document.createElement('div');
                 item.className = 'gallery-item';
-                
+
                 const img = document.createElement('img');
                 img.src = availableImages[i];
                 img.alt = `Image ${i + 1}`;
-                
+
                 // 이미지 로드 완료 시 비율 정보 계산
-                img.addEventListener('load', function() {
+                img.addEventListener('load', function () {
                     // 실제 이미지 비율 계산
                     const naturalAspect = img.naturalWidth / img.naturalHeight;
                     const aspectRatio = { w: img.naturalWidth, h: img.naturalHeight };
-                    
+
                     // 이미지 방향에 따른 클래스 추가
                     const orientation = getImageOrientation(aspectRatio);
                     if (isPosterMode) {
                         item.classList.add(orientation);
                     }
-                    
+
                     // 비율 정보를 data 속성에 저장
                     item.setAttribute('data-aspect', naturalAspect);
                     item.setAttribute('data-orientation', orientation);
-                    
+
                     // 배경 컬러 적용
                     const bgColor = thumbnailBgColors[i % thumbnailBgColors.length];
                     item.style.backgroundColor = bgColor;
-                    
+
                     // 모드에 따라 크기 설정
                     if (isPosterMode) {
                         // 포스터 모드: CSS에서 처리하므로 스타일 제거
@@ -883,7 +890,7 @@
                         item.style.width = '';
                         item.style.height = '';
                     }
-                    
+
                     loadedCount++;
                     if (loadedCount === totalImages) {
                         // 모든 이미지 로드 완료 후 갤러리 모드일 경우 초기 스크롤 위치를 중앙으로 설정
@@ -893,7 +900,7 @@
                         notifyLoaded();
                     }
                 });
-                
+
                 // 이미지 로드 실패 처리
                 img.addEventListener('error', () => {
                     console.warn(`Failed to load ${availableImages[i]}`);
@@ -906,14 +913,14 @@
                         notifyLoaded();
                     }
                 });
-                
+
                 // 이미지 클릭 시 확대 기능
                 img.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const orientation = item.getAttribute('data-orientation') || 'portrait';
                     openImageZoom(img.src, orientation);
                 });
-                
+
                 item.appendChild(img);
                 galleryWrapper.appendChild(item);
             }
@@ -923,8 +930,8 @@
         function openImageZoom(imageSrc, orientation) {
             if (window.parent !== window) {
                 // iframe인 경우 부모 창에 메시지 전송
-                window.parent.postMessage({ 
-                    type: 'openImageZoom', 
+                window.parent.postMessage({
+                    type: 'openImageZoom',
                     imageSrc: imageSrc,
                     orientation: orientation || 'portrait'
                 }, '*');
@@ -932,7 +939,7 @@
                 // 직접 열린 경우 (개발용)
                 const overlay = document.getElementById('image-zoom-overlay');
                 const zoomedImage = document.getElementById('zoomed-image');
-                
+
                 if (overlay && zoomedImage) {
                     zoomedImage.src = imageSrc;
                     overlay.classList.add('active');
@@ -946,29 +953,29 @@
         function centerGalleryOnLoad() {
             const galleryContainer = document.querySelector('.gallery-container');
             const galleryWrapper = document.querySelector('.gallery-wrapper');
-            
+
             if (!galleryContainer || !galleryWrapper || document.body.classList.contains('poster-mode')) {
                 return;
             }
-            
+
             const isMobile = window.innerWidth <= 768;
             const isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
             const isMobileOrTablet = isMobile || isTablet;
-            
+
             // 이미지 개수에 따라 대기 시간 조정 (이미지가 많을수록 더 긴 대기 시간 필요)
             const imageItems = galleryWrapper.querySelectorAll('.gallery-item');
             const imageCount = imageItems.length;
             const baseDelay = 500;
             const additionalDelay = Math.min(imageCount * 50, 1000); // 이미지당 50ms, 최대 1초 추가
             const totalDelay = baseDelay + additionalDelay;
-            
+
             // 레이아웃이 안정화될 때까지 대기 (scrollWidth가 변경되지 않을 때까지)
             let lastScrollWidth = 0;
             let stableCount = 0;
             const checkStability = () => {
                 requestAnimationFrame(() => {
                     const currentScrollWidth = galleryWrapper.scrollWidth;
-                    
+
                     if (currentScrollWidth === lastScrollWidth && currentScrollWidth > 0) {
                         stableCount++;
                         // 3번 연속 동일한 값이면 안정화된 것으로 간주
@@ -984,34 +991,34 @@
                     }
                 });
             };
-            
+
             const applyScrollPosition = () => {
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
                         const containerWidth = galleryContainer.clientWidth;
                         const wrapperWidth = galleryWrapper.scrollWidth;
-                        
+
                         console.log('Container width:', containerWidth);
                         console.log('Wrapper scrollWidth:', wrapperWidth);
                         console.log('Image count:', imageCount);
                         console.log('Is mobile:', isMobile);
                         console.log('Is tablet:', isTablet);
-                        
+
                         // 모든 디바이스에서 첫 번째 이미지(왼쪽 끝)부터 시작
                         galleryWrapper.style.marginLeft = '';
                         galleryWrapper.style.marginRight = '';
                         galleryContainer.scrollLeft = 0;
-                        
+
                         console.log('Setting scroll position to start (scrollLeft = 0)');
-                        
+
                         // 스크롤 위치 확인 및 재시도 (여러 번)
                         setTimeout(() => {
                             let attempts = 0;
                             const maxAttempts = 10;
-                            
+
                             const checkAndRetry = () => {
                                 const actualScroll = galleryContainer.scrollLeft;
-                                
+
                                 // 스크롤 위치가 제대로 설정되지 않았으면 재시도
                                 if (actualScroll > 5 && attempts < maxAttempts) {
                                     attempts++;
@@ -1021,13 +1028,13 @@
                                     console.log('Scroll position set to start successfully');
                                 }
                             };
-                            
+
                             checkAndRetry();
                         }, 100);
                     });
                 });
             };
-            
+
             // 초기 대기 후 안정성 확인 시작
             setTimeout(() => {
                 lastScrollWidth = galleryWrapper.scrollWidth;
@@ -1042,7 +1049,7 @@
         function updateGalleryItemSizes() {
             const items = document.querySelectorAll('.gallery-item');
             const isPosterMode = document.body.classList.contains('poster-mode');
-            
+
             items.forEach((item) => {
                 // 포스터 모드는 CSS에서 처리하므로 스타일 제거
                 if (isPosterMode) {
@@ -1051,7 +1058,7 @@
                     return;
                 }
             });
-            
+
             // 갤러리 모드에서 중앙 정렬 재적용
             if (!isPosterMode) {
                 centerGalleryOnLoad();
@@ -1066,4 +1073,5 @@
         });
     </script>
 </body>
+
 </html>

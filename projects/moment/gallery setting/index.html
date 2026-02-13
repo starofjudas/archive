@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
     <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
     <meta charset="UTF-8">
@@ -22,7 +23,8 @@
             --color-text: #000000;
         }
 
-        html, body {
+        html,
+        body {
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -126,9 +128,10 @@
         .gallery-wrapper {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             height: 100%;
-            padding: 0 20px; /* 첫 번째와 마지막 썸네일의 좌우 마진 */
+            padding: 0 20px;
+            /* 첫 번째와 마지막 썸네일의 좌우 마진 */
         }
 
         /* 갤러리 아이템 */
@@ -154,7 +157,8 @@
         /* 모바일: 썸네일 크기를 브라우저 높이의 50%로 변경 */
         @media (max-width: 768px) {
             .gallery-wrapper {
-                padding: 0 20px; /* 모바일에서도 20px 마진 유지 */
+                padding: 0 20px;
+                /* 모바일에서도 20px 마진 유지 */
             }
 
             .gallery-item {
@@ -189,6 +193,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- 
     사용 방법:
@@ -208,7 +213,7 @@
         // 테마 적용 (홈 화면 테마 동기화)
         function applyTheme() {
             let savedTheme = null;
-            
+
             // 부모 창에서 테마를 받아오기 시도
             try {
                 savedTheme = localStorage.getItem('theme');
@@ -216,28 +221,28 @@
                 // localStorage 접근 불가 시 부모 창에서 받은 테마 사용
                 console.log('localStorage 접근 불가, 부모 창 테마 사용');
             }
-            
+
             if (savedTheme === 'light') {
                 document.body.classList.add('light-mode');
             } else {
                 document.body.classList.remove('light-mode');
             }
         }
-        
+
         // 페이지 로드 시 테마 적용
         applyTheme();
-        
+
         // 테마 변경 감지 (localStorage 변경 감지 - 다른 탭에서의 변경)
         window.addEventListener('storage', (e) => {
             if (e.key === 'theme') {
                 applyTheme();
             }
         });
-        
+
         // iframe인 경우 부모 창의 테마 변경 메시지 수신
         if (window.parent !== window) {
             let parentTheme = null;
-            
+
             window.addEventListener('message', (e) => {
                 if (e.data && e.data.type === 'themeChange') {
                     parentTheme = e.data.theme;
@@ -248,16 +253,16 @@
                     }
                 }
             });
-            
+
             // 부모 창에 테마 요청
             window.parent.postMessage({ type: 'requestTheme' }, '*');
-            
+
             // 주기적으로 테마 확인 (같은 탭에서의 변경 감지)
             setInterval(() => {
                 applyTheme();
             }, 500);
         }
-        
+
         // 로딩 완료 알림
         function notifyLoaded() {
             if (window.parent !== window) {
@@ -305,30 +310,30 @@
         function createBrandingImage(width, height, aspectRatio, index) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
+
             // 비율에 맞게 크기 조정
             const aspect = aspectRatio.w / aspectRatio.h;
             let imgWidth = width;
             let imgHeight = height;
-            
+
             if (aspect > 1) {
                 imgHeight = width / aspect;
             } else {
                 imgWidth = height * aspect;
             }
-            
+
             canvas.width = imgWidth;
             canvas.height = imgHeight;
-            
+
             // 배경색 (각 썸네일마다 다른 배경 컬러)
             const bgColor = thumbnailBgColors[index % thumbnailBgColors.length];
             ctx.fillStyle = bgColor;
             ctx.fillRect(0, 0, imgWidth, imgHeight);
-            
+
             // ARCHIVE 브랜딩 가이드 타입별 생성
             const designType = index % 10;
-            
-            switch(designType) {
+
+            switch (designType) {
                 case 0: // 로고 가이드
                     createLogoGuide(ctx, imgWidth, imgHeight);
                     break;
@@ -360,7 +365,7 @@
                     createIdentityGuide(ctx, imgWidth, imgHeight);
                     break;
             }
-            
+
             return canvas.toDataURL('image/png');
         }
 
@@ -369,14 +374,14 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const fontSize = Math.min(w, h) * 0.12;
-            
+
             // 로고 텍스트
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(brandName, centerX, centerY - fontSize * 0.2);
-            
+
             // 로고 심볼 (A 문자 기반)
             ctx.strokeStyle = brandColors.accent;
             ctx.lineWidth = fontSize * 0.08;
@@ -385,7 +390,7 @@
             ctx.lineTo(centerX, centerY - fontSize * 0.3);
             ctx.lineTo(centerX + fontSize * 0.3, centerY + fontSize * 0.3);
             ctx.stroke();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${fontSize * 0.25}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -400,14 +405,14 @@
                 { color: brandColors.accent, name: 'ACCENT' },
                 { color: brandColors.gray2, name: 'GRAY' }
             ];
-            
+
             const rectHeight = h / colors.length;
             const padding = w * 0.05;
-            
+
             colors.forEach((item, i) => {
                 ctx.fillStyle = item.color;
                 ctx.fillRect(padding, i * rectHeight + padding, w - padding * 2, rectHeight - padding * 2);
-                
+
                 // 컬러 이름
                 ctx.fillStyle = i === 0 ? brandColors.secondary : brandColors.primary;
                 ctx.font = `${Math.min(w, h) * 0.04}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -423,7 +428,7 @@
             const centerX = w / 2;
             const padding = h * 0.1;
             let yPos = padding;
-            
+
             // 헤딩
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${Math.min(w, h) * 0.1}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -431,20 +436,20 @@
             ctx.textBaseline = 'top';
             ctx.fillText(brandName, centerX, yPos);
             yPos += Math.min(w, h) * 0.15;
-            
+
             // 서브헤딩
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.06}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.fillText('SUBTITLE TEXT', centerX, yPos);
             yPos += Math.min(w, h) * 0.12;
-            
+
             // 본문
             ctx.fillStyle = brandColors.gray2;
             ctx.font = `${Math.min(w, h) * 0.035}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.fillText('Body text for descriptions', centerX, yPos);
             yPos += Math.min(w, h) * 0.08;
             ctx.fillText('and longer content blocks', centerX, yPos);
-            
+
             // 가이드 라벨
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -456,7 +461,7 @@
             const gridSize = Math.min(w, h) / 12;
             ctx.strokeStyle = brandColors.gray1;
             ctx.lineWidth = 1;
-            
+
             // 그리드 라인
             for (let x = gridSize; x < w; x += gridSize) {
                 ctx.beginPath();
@@ -464,20 +469,20 @@
                 ctx.lineTo(x, h);
                 ctx.stroke();
             }
-            
+
             for (let y = gridSize; y < h; y += gridSize) {
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(w, y);
                 ctx.stroke();
             }
-            
+
             // 포인트 영역 표시
             ctx.fillStyle = brandColors.accent;
             ctx.globalAlpha = 0.3;
             ctx.fillRect(gridSize * 2, gridSize * 2, gridSize * 4, gridSize * 4);
             ctx.globalAlpha = 1;
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -490,27 +495,27 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const fontSize = Math.min(w, h) * 0.08;
-            
+
             // 로고 표시
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(brandName, centerX, centerY);
-            
+
             // 사용 영역 표시
             ctx.strokeStyle = brandColors.gray2;
             ctx.lineWidth = 2;
             ctx.setLineDash([5, 5]);
             ctx.strokeRect(centerX - fontSize * 2, centerY - fontSize * 0.6, fontSize * 4, fontSize * 1.2);
             ctx.setLineDash([]);
-            
+
             // 최소 간격 표시
             ctx.strokeStyle = brandColors.gray3;
             ctx.lineWidth = 1;
             const spacing = fontSize * 0.5;
             ctx.strokeRect(centerX - fontSize * 2 - spacing, centerY - fontSize * 0.6 - spacing, fontSize * 4 + spacing * 2, fontSize * 1.2 + spacing * 2);
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -523,12 +528,12 @@
             const spacing = Math.min(w, h) * 0.08;
             let xPos = padding;
             const yPos = h / 2;
-            
+
             // 스페이싱 예시
             for (let i = 0; i < 4; i++) {
                 ctx.fillStyle = brandColors.accent;
                 ctx.fillRect(xPos, yPos - spacing / 2, spacing, spacing);
-                
+
                 // 간격 표시
                 if (i < 3) {
                     ctx.strokeStyle = brandColors.gray2;
@@ -540,10 +545,10 @@
                     ctx.stroke();
                     ctx.setLineDash([]);
                 }
-                
+
                 xPos += spacing * 1.5;
             }
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -557,19 +562,19 @@
             const centerY = h / 2;
             const iconSize = Math.min(w, h) * 0.15;
             const spacing = iconSize * 1.5;
-            
+
             // 아이콘들 표시
             const icons = [
                 { type: 'circle', x: centerX - spacing },
                 { type: 'square', x: centerX },
                 { type: 'triangle', x: centerX + spacing }
             ];
-            
+
             icons.forEach(icon => {
                 ctx.strokeStyle = brandColors.accent;
                 ctx.fillStyle = brandColors.accent;
                 ctx.lineWidth = iconSize * 0.1;
-                
+
                 if (icon.type === 'circle') {
                     ctx.beginPath();
                     ctx.arc(icon.x, centerY, iconSize * 0.4, 0, Math.PI * 2);
@@ -585,7 +590,7 @@
                     ctx.stroke();
                 }
             });
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -597,29 +602,29 @@
         function createMinimalPrincipleGuide(ctx, w, h) {
             const centerX = w / 2;
             const centerY = h / 2;
-            
+
             // 미니멀 라인
             ctx.strokeStyle = brandColors.secondary;
             ctx.lineWidth = Math.min(w, h) * 0.015;
-            
+
             // 수평선
             ctx.beginPath();
             ctx.moveTo(w * 0.2, centerY);
             ctx.lineTo(w * 0.8, centerY);
             ctx.stroke();
-            
+
             // 수직선
             ctx.beginPath();
             ctx.moveTo(centerX, h * 0.2);
             ctx.lineTo(centerX, h * 0.8);
             ctx.stroke();
-            
+
             // 포인트
             ctx.fillStyle = brandColors.accent;
             ctx.beginPath();
             ctx.arc(centerX, centerY, Math.min(w, h) * 0.02, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -632,12 +637,12 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const size = Math.min(w, h) * 0.4;
-            
+
             // 브랜드 마크 (A 기반)
             ctx.strokeStyle = brandColors.accent;
             ctx.fillStyle = brandColors.accent;
             ctx.lineWidth = size * 0.08;
-            
+
             // A 형태
             ctx.beginPath();
             ctx.moveTo(centerX, centerY - size * 0.3);
@@ -647,7 +652,7 @@
             ctx.lineTo(centerX + size * 0.25, centerY + size * 0.3);
             ctx.closePath();
             ctx.stroke();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -660,25 +665,25 @@
             const centerX = w / 2;
             const centerY = h / 2;
             const fontSize = Math.min(w, h) * 0.08;
-            
+
             // 브랜드명
             ctx.fillStyle = brandColors.secondary;
             ctx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(brandName, centerX, centerY - fontSize * 0.3);
-            
+
             // 서브텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${fontSize * 0.4}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
             ctx.fillText('BRAND IDENTITY', centerX, centerY + fontSize * 0.2);
-            
+
             // 포인트 컬러 표시
             ctx.fillStyle = brandColors.accent;
             ctx.beginPath();
             ctx.arc(centerX, centerY + fontSize * 0.6, fontSize * 0.15, 0, Math.PI * 2);
             ctx.fill();
-            
+
             // 가이드 텍스트
             ctx.fillStyle = brandColors.gray3;
             ctx.font = `${Math.min(w, h) * 0.025}px -apple-system, BlinkMacSystemFont, system-ui, sans-serif`;
@@ -720,58 +725,58 @@
         function renderGallery() {
             const galleryWrapper = document.getElementById('gallery-wrapper');
             const isMobile = window.innerWidth <= 768;
-            
+
             // 기본 크기 설정
             const baseHeight = isMobile ? window.innerHeight * 0.5 : window.innerHeight * 0.6;
             const baseWidth = isMobile ? window.innerHeight * 0.5 : baseHeight;
-            
+
             // 실제 이미지 개수 설정 (예: API에서 가져오거나 설정값)
             // 여기서는 예시로 1개 또는 10개를 선택할 수 있도록 변수로 설정
             // 실제 사용 시에는 이미지 데이터 배열의 길이로 설정하면 됨
             const totalImages = 1; // 포스터 모드 (1개 이미지)
-            
+
             // 이미지 개수에 따라 모드 결정
             const displayMode = getDisplayMode(totalImages);
             const isPosterMode = displayMode === 'poster';
-            
+
             // 포스터 모드일 경우 body에 클래스 추가
             if (isPosterMode) {
                 document.body.classList.add('poster-mode');
             } else {
                 document.body.classList.remove('poster-mode');
             }
-            
+
             let loadedCount = 0;
-            
+
             for (let i = 0; i < totalImages; i++) {
                 const item = document.createElement('div');
                 item.className = 'gallery-item';
-                
+
                 // 브랜딩 비율 선택 (순환)
                 const aspectRatio = brandAspectRatios[i % brandAspectRatios.length];
-                
+
                 // 이미지 방향에 따른 클래스 추가 (포스터 모드용)
                 const orientation = getImageOrientation(aspectRatio);
                 if (isPosterMode) {
                     item.classList.add(orientation);
                 }
-                
+
                 // 브랜딩 이미지 생성
                 const imageDataUrl = createBrandingImage(baseWidth, baseHeight, aspectRatio, i);
-                
+
                 const img = document.createElement('img');
                 img.src = imageDataUrl;
                 img.alt = isPosterMode ? 'Poster image' : `Gallery image ${i + 1}`;
-                
+
                 // 비율 정보를 data 속성에 저장
                 const aspect = aspectRatio.w / aspectRatio.h;
                 item.setAttribute('data-aspect', aspect);
                 item.setAttribute('data-orientation', orientation);
-                
+
                 // 배경 컬러 적용
                 const bgColor = thumbnailBgColors[i % thumbnailBgColors.length];
                 item.style.backgroundColor = bgColor;
-                
+
                 // 포스터 모드와 갤러리 모드에 따라 크기 조정
                 if (isPosterMode) {
                     // 포스터 모드: 이미지 방향에 따라 크기 설정
@@ -788,7 +793,7 @@
                         item.style.width = `${60 * aspect}vh`;
                     }
                 }
-                
+
                 // 이미지 로드 완료 처리
                 img.addEventListener('load', () => {
                     loadedCount++;
@@ -796,7 +801,7 @@
                         notifyLoaded();
                     }
                 });
-                
+
                 item.appendChild(img);
                 galleryWrapper.appendChild(item);
             }
@@ -810,7 +815,7 @@
             const items = document.querySelectorAll('.gallery-item');
             const isMobile = window.innerWidth <= 768;
             const isPosterMode = document.body.classList.contains('poster-mode');
-            
+
             items.forEach((item) => {
                 // 포스터 모드는 CSS에서 처리하므로 스타일 제거
                 if (isPosterMode) {
@@ -818,11 +823,11 @@
                     item.style.height = 'auto';
                     return;
                 }
-                
+
                 // 갤러리 모드: 저장된 비율 정보 가져오기
                 const aspect = parseFloat(item.getAttribute('data-aspect'));
                 if (!aspect) return;
-                
+
                 if (isMobile) {
                     item.style.height = '50vh';
                     item.style.width = `${50 * aspect}vh`;
@@ -843,8 +848,8 @@
         // 드래그 스크롤 지원 (휠 스크롤과 동일한 속도/ease 적용)
         // 포스터 모드에서는 드래그 스크롤 비활성화
         const galleryContainer = document.querySelector('.gallery-container');
-        const isPosterMode = document.body.classList.contains('poster-mode') || 
-                            document.body.getAttribute('data-mode') === 'poster';
+        const isPosterMode = document.body.classList.contains('poster-mode') ||
+            document.body.getAttribute('data-mode') === 'poster';
         let isDragging = false;
         let startX = 0;
         let scrollLeft = 0;
@@ -863,10 +868,10 @@
         // 부드러운 스크롤 애니메이션 (휠 스크롤과 유사)
         function smoothScroll() {
             if (!isAnimating) return;
-            
+
             const currentScroll = galleryContainer.scrollLeft;
             const diff = velocity;
-            
+
             // 속도가 매우 작으면 정지
             if (Math.abs(velocity) < 0.1) {
                 velocity = 0;
@@ -877,148 +882,149 @@
                 }
                 return;
             }
-            
+
             // 브라우저 기본 감속 계수 (약 0.92-0.95)
             velocity *= 0.92;
             galleryContainer.scrollLeft += velocity;
-            
+
             animationFrame = requestAnimationFrame(smoothScroll);
         }
 
         // 마우스 이벤트 (포스터 모드에서는 비활성화)
         if (!isPosterMode) {
-        galleryContainer.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            galleryContainer.style.cursor = 'grabbing';
-            startX = e.pageX - galleryContainer.offsetLeft;
-            scrollLeft = galleryContainer.scrollLeft;
-            lastX = e.pageX;
-            lastTime = Date.now();
-            velocity = 0;
-            isAnimating = false;
-            
-            // 기존 애니메이션 취소
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-            
-            e.preventDefault();
-        });
+            galleryContainer.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                galleryContainer.style.cursor = 'grabbing';
+                startX = e.pageX - galleryContainer.offsetLeft;
+                scrollLeft = galleryContainer.scrollLeft;
+                lastX = e.pageX;
+                lastTime = Date.now();
+                velocity = 0;
+                isAnimating = false;
 
-        galleryContainer.addEventListener('mouseleave', () => {
-            if (isDragging) {
-                isDragging = false;
-                galleryContainer.style.cursor = 'grab';
-                
-                // 드래그 종료 시 관성 스크롤 시작
-                if (Math.abs(velocity) > 0.1) {
-                    isAnimating = true;
-                    smoothScroll();
+                // 기존 애니메이션 취소
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                    animationFrame = null;
                 }
-            }
-        });
 
-        galleryContainer.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                galleryContainer.style.cursor = 'grab';
-                
-                // 드래그 종료 시 관성 스크롤 시작
-                if (Math.abs(velocity) > 0.1) {
-                    isAnimating = true;
-                    smoothScroll();
+                e.preventDefault();
+            });
+
+            galleryContainer.addEventListener('mouseleave', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    galleryContainer.style.cursor = 'grab';
+
+                    // 드래그 종료 시 관성 스크롤 시작
+                    if (Math.abs(velocity) > 0.1) {
+                        isAnimating = true;
+                        smoothScroll();
+                    }
                 }
+            });
+
+            galleryContainer.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    galleryContainer.style.cursor = 'grab';
+
+                    // 드래그 종료 시 관성 스크롤 시작
+                    if (Math.abs(velocity) > 0.1) {
+                        isAnimating = true;
+                        smoothScroll();
+                    }
+                }
+            });
+
+            galleryContainer.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                e.preventDefault();
+
+                const x = e.pageX - galleryContainer.offsetLeft;
+                const currentTime = Date.now();
+                const timeDiff = currentTime - lastTime;
+
+                // 즉시 스크롤 (드래그 중에는 즉각 반응)
+                const walk = (x - startX) * 1; // 휠 스크롤과 유사한 감도
+                galleryContainer.scrollLeft = scrollLeft - walk;
+
+                // 속도 계산 (관성 스크롤용)
+                if (timeDiff > 0) {
+                    const deltaX = e.pageX - lastX;
+                    velocity = -deltaX * (16 / timeDiff); // 60fps 기준 정규화
+                }
+
+                lastX = e.pageX;
+                lastTime = currentTime;
+            });
+
+            // 기본 커서 설정
+            galleryContainer.style.cursor = 'grab';
+
+            // 휠 이벤트 (기본 휠 스크롤 동작 유지, 포스터 모드에서는 비활성화)
+            if (!isPosterMode) {
+                galleryContainer.addEventListener('wheel', (e) => {
+                    // 기본 휠 스크롤 동작을 그대로 사용
+                    // 브라우저의 기본 ease-out 효과가 자동 적용됨
+                }, { passive: true });
             }
-        });
-
-        galleryContainer.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            
-            const x = e.pageX - galleryContainer.offsetLeft;
-            const currentTime = Date.now();
-            const timeDiff = currentTime - lastTime;
-            
-            // 즉시 스크롤 (드래그 중에는 즉각 반응)
-            const walk = (x - startX) * 1; // 휠 스크롤과 유사한 감도
-            galleryContainer.scrollLeft = scrollLeft - walk;
-            
-            // 속도 계산 (관성 스크롤용)
-            if (timeDiff > 0) {
-                const deltaX = e.pageX - lastX;
-                velocity = -deltaX * (16 / timeDiff); // 60fps 기준 정규화
-            }
-            
-            lastX = e.pageX;
-            lastTime = currentTime;
-        });
-
-        // 기본 커서 설정
-        galleryContainer.style.cursor = 'grab';
-
-        // 휠 이벤트 (기본 휠 스크롤 동작 유지, 포스터 모드에서는 비활성화)
-        if (!isPosterMode) {
-            galleryContainer.addEventListener('wheel', (e) => {
-                // 기본 휠 스크롤 동작을 그대로 사용
-                // 브라우저의 기본 ease-out 효과가 자동 적용됨
-            }, { passive: true });
-        }
         }
 
         // 터치 이벤트 (모바일, 포스터 모드에서는 비활성화)
         if (!isPosterMode) {
-        let touchStartX = 0;
-        let touchScrollLeft = 0;
-        let touchVelocity = 0;
-        let lastTouchX = 0;
-        let lastTouchTime = 0;
-        let touchIsAnimating = false;
+            let touchStartX = 0;
+            let touchScrollLeft = 0;
+            let touchVelocity = 0;
+            let lastTouchX = 0;
+            let lastTouchTime = 0;
+            let touchIsAnimating = false;
 
-        galleryContainer.addEventListener('touchstart', (e) => {
-            touchStartX = e.touches[0].pageX - galleryContainer.offsetLeft;
-            touchScrollLeft = galleryContainer.scrollLeft;
-            lastTouchX = e.touches[0].pageX;
-            lastTouchTime = Date.now();
-            touchVelocity = 0;
-            touchIsAnimating = false;
-            
-            // 기존 애니메이션 취소
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
-        }, { passive: true });
+            galleryContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].pageX - galleryContainer.offsetLeft;
+                touchScrollLeft = galleryContainer.scrollLeft;
+                lastTouchX = e.touches[0].pageX;
+                lastTouchTime = Date.now();
+                touchVelocity = 0;
+                touchIsAnimating = false;
 
-        galleryContainer.addEventListener('touchmove', (e) => {
-            if (!touchStartX) return;
-            const x = e.touches[0].pageX - galleryContainer.offsetLeft;
-            const walk = (x - touchStartX) * 1; // 휠 스크롤과 유사한 감도
-            galleryContainer.scrollLeft = touchScrollLeft - walk;
-            
-            // 속도 계산
-            const currentTime = Date.now();
-            const timeDiff = currentTime - lastTouchTime;
-            if (timeDiff > 0) {
-                const deltaX = e.touches[0].pageX - lastTouchX;
-                touchVelocity = -deltaX * (16 / timeDiff); // 60fps 기준 정규화
-            }
-            lastTouchX = e.touches[0].pageX;
-            lastTouchTime = currentTime;
-        }, { passive: true });
-
-        galleryContainer.addEventListener('touchend', () => {
-            if (touchStartX) {
-                // 관성 스크롤 시작
-                velocity = touchVelocity;
-                if (Math.abs(velocity) > 0.1) {
-                    isAnimating = true;
-                    smoothScroll();
+                // 기존 애니메이션 취소
+                if (animationFrame) {
+                    cancelAnimationFrame(animationFrame);
+                    animationFrame = null;
                 }
-                touchStartX = 0;
-            }
-        });
+            }, { passive: true });
+
+            galleryContainer.addEventListener('touchmove', (e) => {
+                if (!touchStartX) return;
+                const x = e.touches[0].pageX - galleryContainer.offsetLeft;
+                const walk = (x - touchStartX) * 1; // 휠 스크롤과 유사한 감도
+                galleryContainer.scrollLeft = touchScrollLeft - walk;
+
+                // 속도 계산
+                const currentTime = Date.now();
+                const timeDiff = currentTime - lastTouchTime;
+                if (timeDiff > 0) {
+                    const deltaX = e.touches[0].pageX - lastTouchX;
+                    touchVelocity = -deltaX * (16 / timeDiff); // 60fps 기준 정규화
+                }
+                lastTouchX = e.touches[0].pageX;
+                lastTouchTime = currentTime;
+            }, { passive: true });
+
+            galleryContainer.addEventListener('touchend', () => {
+                if (touchStartX) {
+                    // 관성 스크롤 시작
+                    velocity = touchVelocity;
+                    if (Math.abs(velocity) > 0.1) {
+                        isAnimating = true;
+                        smoothScroll();
+                    }
+                    touchStartX = 0;
+                }
+            });
         }
     </script>
 </body>
+
 </html>

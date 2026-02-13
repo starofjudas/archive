@@ -156,24 +156,15 @@
             margin-bottom: calc(1vw - 5px);
             white-space: nowrap;
             line-height: 1.2;
-        }
-
-        .title .char {
-            display: inline-block;
             opacity: 0;
-            animation: charRevealUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(20px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes charRevealUp {
-            from {
-                transform: translateY(110%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+        .title.animate {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .description {
@@ -183,34 +174,20 @@
             color: rgba(255, 255, 255, 0.6);
             letter-spacing: -0.01em;
             margin-top: -0.3vw;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+        }
+
+        .description.animate {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .description .desc-line {
             display: block;
             white-space: nowrap;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: descLineReveal 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .description .desc-line:nth-child(1) {
-            animation-delay: 0.3s;
-        }
-
-        .description .desc-line:nth-child(2) {
-            animation-delay: 0.4s;
-        }
-
-        @keyframes descLineReveal {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         /* Loading Progress Bar */
@@ -471,12 +448,7 @@
     <iframe src="index.html" class="project-frame" allowfullscreen></iframe>
 
     <script>
-        // Character animation for title
-        const title = document.getElementById('page-title');
-        const text = title.textContent;
-        title.innerHTML = text.split('').map((char, i) =>
-            `<span class="char" style="animation-delay: ${i * 0.03}s">${char === ' ' ? '&nbsp;' : char}</span>`
-        ).join('');
+        // Character animation removed to match standard style
 
         const navBack = document.querySelector('.nav-back');
         const topBar = document.querySelector('.top-bar');
@@ -578,6 +550,23 @@
             setTimeout(() => {
                 document.body.classList.remove('is-loading');
                 document.body.classList.add('loaded');
+
+                // Trigger title/description animation
+                const titleElement = document.querySelector('.title-container .title');
+                const descriptionElement = document.querySelector('.title-container .description');
+
+                if (titleElement) {
+                    requestAnimationFrame(() => {
+                        titleElement.classList.add('animate');
+                    });
+                }
+
+                if (descriptionElement) {
+                    requestAnimationFrame(() => {
+                        descriptionElement.classList.add('animate');
+                    });
+                }
+
                 setTimeout(() => {
                     loading.style.display = 'none';
                 }, 500);
