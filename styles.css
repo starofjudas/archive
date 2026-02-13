@@ -617,7 +617,7 @@ body.light-mode .cover-section.visible {
     }
     
     .site-footer {
-        margin-top: 0 !important;
+        margin-top: -2.5vw !important;
     }
 }
 
