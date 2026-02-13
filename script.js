@@ -3,96 +3,96 @@
 // Loading Progress Bar - Wait for all resources
 let loadingFinished = false;
 
-(function() {
+(function () {
     const progressFill = document.querySelector('.progress-fill');
     const particleContainer = document.querySelector('.particle-container');
     let progress = 0;
     let lastParticleTime = 0;
-    
+
     // Create particle
     const shapes = ['circle', 'square', 'triangle', 'star', 'diamond'];
-    
+
     function createParticle(x) {
         if (!particleContainer) return;
-        
+
         const particle = document.createElement('div');
         particle.className = 'particle';
-        
+
         // Random size
         const rand = Math.random();
         if (rand > 0.8) particle.classList.add('large');
         else if (rand < 0.3) particle.classList.add('small');
-        
+
         // Random shape
         const shape = shapes[Math.floor(Math.random() * shapes.length)];
         particle.classList.add(shape);
-        
+
         // Full opacity
         const opacity = 1;
-        
+
         // Position at progress bar edge
         particle.style.left = x + 'px';
         particle.style.top = '2px';
-        
+
         // Random velocity
         const vx = (Math.random() - 0.5) * 8;
         const vy = Math.random() * 6 + 2;
         const rotation = Math.random() * 360;
         const scale = 0.5 + Math.random() * 1;
         const lifetime = 800 + Math.random() * 1200;
-        
+
         particle.style.transform = `scale(${scale}) rotate(${rotation}deg)`;
         particleContainer.appendChild(particle);
-        
+
         // Animate particle
         let startTime = Date.now();
         let posX = x;
         let posY = 2;
         let velocityX = vx;
         let velocityY = vy;
-        
+
         function animateParticle() {
             const elapsed = Date.now() - startTime;
             const prog = elapsed / lifetime;
-            
+
             if (prog >= 1) {
                 particle.remove();
                 return;
             }
-            
+
             // Physics
             velocityY += 0.15;
             posX += velocityX;
             posY += velocityY;
-            
+
             // Fade out
             const fadeOpacity = (1 - prog) * opacity;
             const currentScale = scale * (1 - prog * 0.5);
-            
+
             particle.style.left = posX + 'px';
             particle.style.top = posY + 'px';
             particle.style.opacity = fadeOpacity;
             particle.style.transform = `scale(${currentScale}) rotate(${rotation + elapsed * 0.2}deg)`;
-            
+
             requestAnimationFrame(animateParticle);
         }
-        
+
         requestAnimationFrame(animateParticle);
     }
-    
+
     // Create burst of particles
     function createParticleBurst(x, count) {
         for (let i = 0; i < count; i++) {
             setTimeout(() => createParticle(x), i * 20);
         }
     }
-    
+
     // Update progress
     function updateProgress(value) {
         progress = Math.min(value, 100);
         if (progressFill) {
             progressFill.style.width = progress + '%';
-            
+
             // Create particles at the edge
             const now = Date.now();
             if (now - lastParticleTime > 15) {
@@ -104,38 +104,38 @@ let loadingFinished = false;
             }
         }
     }
-    
+
     // Gradual progress while loading
     let progressInterval = setInterval(() => {
         if (progress < 90 && !loadingFinished) {
             updateProgress(progress + 1);
         }
     }, 30);
-    
+
     // When all resources are loaded
     window.addEventListener('load', () => {
         clearInterval(progressInterval);
-        
+
         // Complete to 100%
         const completeInterval = setInterval(() => {
             if (progress < 100) {
                 updateProgress(progress + 2);
             } else {
                 clearInterval(completeInterval);
-                
+
                 // Final burst of particles
                 createParticleBurst(window.innerWidth, 20);
-                
+
                 // Reveal content
                 setTimeout(() => {
                     document.body.classList.remove('is-loading');
                     document.body.classList.add('loaded');
                     loadingFinished = true;
-                    
+
                     if (typeof startEntranceAnimations === 'function') {
                         startEntranceAnimations();
                     }
-                    
+
                     setTimeout(() => {
                         const loading = document.querySelector('.loading');
                         if (loading) loading.style.display = 'none';
@@ -160,16 +160,16 @@ document.addEventListener('DOMContentLoaded', () => {
         // 리사이즈 시 가림 영역 높이도 재조정
         setTimeout(() => adjustFooterMaskHeight(), 100);
     });
-    
+
     // Load projects (스크롤 위치 복원은 프로젝트 로드 완료 후)
     loadProjects();
-    
+
     // Cover section fade in on scroll
     initCoverFade();
-    
+
     // Theme toggle
     initThemeToggle();
-    
+
     // Smooth scroll implementation
     initSmoothScroll();
 });
@@ -195,14 +195,14 @@ function initThemeToggle() {
     const themeToggle = document.querySelector('.theme-toggle');
     const themeLabel = document.querySelector('.theme-label');
     if (!themeToggle || !themeLabel) return;
-    
+
     // Check saved theme
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') {
         document.body.classList.add('light-mode');
         themeLabel.textContent = 'light';
     }
-    
+
     themeToggle.addEventListener('click', () => {
         const isLight = document.body.classList.toggle('light-mode');
         themeLabel.textContent = isLight ? 'light' : 'dark';
@@ -214,19 +214,19 @@ function initThemeToggle() {
 function initSmoothScroll() {
     // Skip on touch devices to avoid conflicts
     if (isTouchDevice) return;
-    
+
     let currentScroll = 0;
     let targetScroll = 0;
     let ease = 0.08; // Easing factor (lower = smoother, slower)
     let isScrolling = false;
-    
+
     // Update current scroll position
     function updateScroll() {
         currentScroll += (targetScroll - currentScroll) * ease;
-        
+
         // Apply scroll
         window.scrollTo(0, currentScroll);
-        
+
         // Continue animation if not close enough
         if (Math.abs(targetScroll - currentScroll) > 0.5) {
             requestAnimationFrame(updateScroll);
@@ -236,27 +236,27 @@ function initSmoothScroll() {
             isScrolling = false;
         }
     }
-    
+
     // Handle wheel events
     let wheelTimeout;
     window.addEventListener('wheel', (e) => {
         e.preventDefault();
-        
+
         // Calculate scroll delta
         const delta = e.deltaY;
         targetScroll += delta;
-        
+
         // Clamp scroll position
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
         targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
-        
+
         // Start animation if not already running
         if (!isScrolling) {
             isScrolling = true;
             currentScroll = window.scrollY;
             updateScroll();
         }
-        
+
         // Clear timeout
         clearTimeout(wheelTimeout);
         wheelTimeout = setTimeout(() => {
@@ -264,7 +264,7 @@ function initSmoothScroll() {
             targetScroll = window.scrollY;
         }, 150);
     }, { passive: false });
-    
+
     // Handle scroll events (for programmatic scrolling)
     window.addEventListener('scroll', () => {
         if (!isScrolling) {
@@ -272,18 +272,18 @@ function initSmoothScroll() {
             targetScroll = window.scrollY;
         }
     });
-    
+
     // Handle keyboard scrolling
     window.addEventListener('keydown', (e) => {
         if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' '].includes(e.key)) {
             e.preventDefault();
             const scrollAmount = e.key === 'ArrowUp' ? -100 :
-                                e.key === 'ArrowDown' ? 100 :
-                                e.key === 'PageUp' ? -window.innerHeight * 0.8 :
-                                e.key === 'PageDown' ? window.innerHeight * 0.8 :
-                                e.key === 'Home' ? -Infinity :
+                e.key === 'ArrowDown' ? 100 :
+                    e.key === 'PageUp' ? -window.innerHeight * 0.8 :
+                        e.key === 'PageDown' ? window.innerHeight * 0.8 :
+                            e.key === 'Home' ? -Infinity :
                                 e.key === 'End' ? Infinity : 0;
-            
+
             if (scrollAmount === -Infinity) {
                 targetScroll = 0;
             } else if (scrollAmount === Infinity) {
@@ -291,10 +291,10 @@ function initSmoothScroll() {
             } else {
                 targetScroll += scrollAmount;
             }
-            
+
             const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
             targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
-            
+
             if (!isScrolling) {
                 isScrolling = true;
                 currentScroll = window.scrollY;
@@ -308,9 +308,9 @@ function initSmoothScroll() {
 function initCoverFade() {
     const coverSection = document.querySelector('.cover-section');
     const scrollSpacer = document.querySelector('.scroll-spacer');
-    
+
     if (!coverSection || !scrollSpacer) return;
-    
+
     // PC and tablet: no cover section effect, keep transparent
     // Mobile: keep existing behavior
     const isMobile = window.innerWidth <= 768;
@@ -325,19 +325,19 @@ function startEntranceAnimations() {
     // Enable top bar transitions
     const topBar = document.querySelector('.top-bar');
     if (topBar) topBar.classList.add('ready');
-    
+
     // Mark sub-text-wrapper as loaded for line animations (first)
     const subTextWrapper = document.querySelector('.sub-text-wrapper');
     if (subTextWrapper) {
         subTextWrapper.classList.add('loaded');
     }
-    
+
     // Animate title
     animateTitle();
-    
+
     // Animate footer title
     animateFooterTitle();
-    
+
     // Animate sub text
     const subLines = document.querySelectorAll('.sub-line');
     subLines.forEach((line, index) => {
@@ -345,7 +345,7 @@ function startEntranceAnimations() {
             line.classList.add('animate');
         }, 300 + (index * 150));
     });
-    
+
     // Animate mobile sub text (same animation as PC)
     const mobileSubLines = document.querySelectorAll('.sub-text-mobile p');
     mobileSubLines.forEach((line, index) => {
@@ -353,7 +353,7 @@ function startEntranceAnimations() {
             line.classList.add('animate');
         }, 300 + (index * 150));
     });
-    
+
     // Animate filter menu
     const filterMenu = document.querySelector('.filter-menu');
     if (filterMenu) {
@@ -361,13 +361,13 @@ function startEntranceAnimations() {
             filterMenu.classList.add('animate');
         }, 800);
     }
-    
+
     // Animate project list
     const projectList = document.querySelector('.project-list');
     if (projectList) {
         setTimeout(() => {
             projectList.classList.add('animate');
-            
+
             // Animate each project item with stagger (after filter menu appears)
             const projectItems = projectList.querySelectorAll('.project-item');
             projectItems.forEach((item, index) => {
@@ -377,7 +377,7 @@ function startEntranceAnimations() {
             });
         }, 1000);
     }
-    
+
     // Mark SVG as loaded
     const svg = document.querySelector('.sub-text-svg');
     if (svg) svg.classList.add('loaded');
@@ -387,37 +387,37 @@ function startEntranceAnimations() {
 function adjustTitleSize(shouldAnimate = false) {
     const titleWrapper = document.querySelector('.title-wrapper');
     const chars = document.querySelectorAll('.char');
-    
+
     if (!titleWrapper || chars.length === 0) return;
-    
+
     document.fonts.ready.then(() => {
         const targetWidth = window.innerWidth * 0.975; // 100vw - 2.5vw (1.25vw each side)
-        
+
         // Set a base font size for measurement
         const baseFontSize = 100;
         chars.forEach(char => {
             char.style.fontSize = baseFontSize + 'px';
         });
-        
+
         // Force reflow
         titleWrapper.offsetWidth;
-        
+
         // Calculate total width of all characters
         let totalWidth = 0;
         const charContainers = document.querySelectorAll('.char-container');
         charContainers.forEach(container => {
             totalWidth += container.getBoundingClientRect().width;
         });
-        
+
         // Calculate the ratio and adjust font size
         const ratio = targetWidth / totalWidth;
         const newFontSize = Math.floor(baseFontSize * ratio);
-        
+
         // Apply calculated font size
         chars.forEach(char => {
             char.style.fontSize = newFontSize + 'px';
         });
-        
+
         // Set scroll spacer height to match title height
         const scrollSpacer = document.querySelector('.scroll-spacer');
         if (scrollSpacer) {
@@ -433,7 +433,7 @@ function adjustSubTextSize(shouldAnimate = false) {
     const line1 = document.querySelector('.sub-line-1');
     const line2 = document.querySelector('.sub-line-2');
     if (!svg || !line1 || !line2) return;
-    
+
     document.fonts.ready.then(() => {
         requestAnimationFrame(() => {
             requestAnimationFrame(() => {
@@ -442,21 +442,21 @@ function adjustSubTextSize(shouldAnimate = false) {
                 const fontSize = isMobile ? 117 : 107;
                 line1.setAttribute('font-size', fontSize);
                 line2.setAttribute('font-size', fontSize);
-                
+
                 // Get bounding boxes
                 const bbox1 = line1.getBBox();
                 const bbox2 = line2.getBBox();
-                
+
                 // Second line is the reference for width (longer line)
                 const totalWidth = bbox2.width;
-                
+
                 // Position first line at 35% indent
                 const indent = totalWidth * 0.35;
                 line1.setAttribute('x', indent);
-                
+
                 // Recalculate bbox after repositioning first line
                 const newBbox1 = line1.getBBox();
-                
+
                 // Adjust second line y position based on first line y coordinate
                 // Mobile: 120px spacing, PC/Tablet: 4px spacing
                 const spacing = isMobile ? 120 : 4;
@@ -464,20 +464,20 @@ function adjustSubTextSize(shouldAnimate = false) {
                 const line2NewY = line1Y + newBbox1.height + spacing; // First line y + height + spacing
                 line2.setAttribute('y', line2NewY);
                 line2.removeAttribute('dy'); // Remove dy if exists, use y instead
-                
+
                 // Recalculate bbox after repositioning second line
                 const newBbox2 = line2.getBBox();
-                
+
                 // Calculate viewBox dimensions
                 const padding = 5;
                 const minX = 0 - padding;
                 const minY = Math.min(newBbox1.y, newBbox2.y) - padding;
                 const maxX = Math.max(newBbox1.x + newBbox1.width, newBbox2.x + newBbox2.width) + padding;
                 const maxY = Math.max(newBbox1.y + newBbox1.height, newBbox2.y + newBbox2.height) + padding;
-                
+
                 const width = maxX - minX;
                 const height = maxY - minY;
-                
+
                 // Set viewBox
                 svg.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
             });
@@ -489,16 +489,16 @@ function adjustSubTextSize(shouldAnimate = false) {
 function adjustMobileSubTextSize() {
     const isMobile = window.innerWidth <= 768;
     if (!isMobile) return;
-    
+
     const line1 = document.querySelector('.sub-text-line-1');
     const line2 = document.querySelector('.sub-text-line-2');
     const wrapper = document.querySelector('.sub-text-wrapper');
     if (!line1 || !line2 || !wrapper) return;
-    
+
     // Get actual container width
     const wrapperRect = wrapper.getBoundingClientRect();
     const availableWidth = wrapperRect.width - 5; // Subtract small safety margin
-    
+
     // Create a temporary element to measure text width
     const temp = document.createElement('span');
     temp.style.visibility = 'hidden';
@@ -508,18 +508,18 @@ function adjustMobileSubTextSize() {
     temp.style.whiteSpace = 'nowrap';
     temp.style.fontSize = '26px';
     document.body.appendChild(temp);
-    
+
     // Binary search to find the right font size
     let minSize = 10;
     let maxSize = 100;
     let bestSize = 26;
-    
+
     for (let i = 0; i < 30; i++) {
         const testSize = (minSize + maxSize) / 2;
         temp.style.fontSize = testSize + 'px';
         temp.textContent = line2.textContent;
         const textWidth = temp.offsetWidth;
-        
+
         if (textWidth <= availableWidth) {
             bestSize = testSize;
             minSize = testSize;
@@ -527,12 +527,12 @@ function adjustMobileSubTextSize() {
             maxSize = testSize;
         }
     }
-    
+
     // Apply the calculated font size to both lines (with slight reduction for safety)
     const finalSize = Math.floor(bestSize * 0.95); // 5% safety margin
     line1.style.fontSize = finalSize + 'px';
     line2.style.fontSize = finalSize + 'px';
-    
+
     document.body.removeChild(temp);
 }
 
@@ -541,7 +541,7 @@ function animateTitle() {
     const titleWrapper = document.querySelector('.title-wrapper');
     if (!titleWrapper) return;
     const chars = titleWrapper.querySelectorAll('.char');
-    
+
     chars.forEach((char, index) => {
         setTimeout(() => {
             char.classList.add('animate');
@@ -553,9 +553,9 @@ function animateTitle() {
 function adjustFooterTitleSize() {
     const wrapper = document.querySelector('.footer-title-wrapper');
     const chars = document.querySelectorAll('.footer-char');
-    
+
     if (!wrapper || chars.length === 0) return;
-    
+
     document.fonts.ready.then(() => {
         const targetWidth = window.innerWidth * 0.975;
         const baseFontSize = 100;
@@ -563,19 +563,19 @@ function adjustFooterTitleSize() {
             char.style.fontSize = baseFontSize + 'px';
         });
         wrapper.offsetWidth;
-        
+
         let totalWidth = 0;
         const containers = document.querySelectorAll('.footer-char-container');
         containers.forEach(container => {
             totalWidth += container.getBoundingClientRect().width;
         });
-        
+
         const ratio = targetWidth / totalWidth;
         const newFontSize = Math.floor(baseFontSize * ratio);
         chars.forEach(char => {
             char.style.fontSize = newFontSize + 'px';
         });
-        
+
         // 폰트 크기 조정 후 가림 영역 높이 조정
         adjustFooterMaskHeight();
     });
@@ -587,7 +587,7 @@ function adjustFooterMaskHeight() {
     const footerCreateBlock = document.querySelector('.footer-create-block');
     const footerTitleWrapper = document.querySelector('.footer-title-wrapper');
     if (!footerCreateBlock || !footerTitleWrapper) return;
-    
+
     // 폰트 크기 조정 후 실제 렌더링이 완료될 때까지 충분한 지연
     // 실제 디바이스에서는 폰트 렌더링이 더 오래 걸릴 수 있음
     requestAnimationFrame(() => {
@@ -597,18 +597,18 @@ function adjustFooterMaskHeight() {
                 // 실제 렌더링된 높이 측정
                 const actualHeight = footerCreateBlock.getBoundingClientRect().height;
                 const wrapperHeight = footerTitleWrapper.getBoundingClientRect().height;
-                
+
                 // 실제 텍스트 높이를 기준으로 계산 (더 정확함)
                 // wrapperHeight가 있으면 그것을 사용, 없으면 actualHeight 사용
                 const baseHeight = wrapperHeight > 0 ? wrapperHeight : actualHeight;
-                
+
                 if (baseHeight > 0) {
                     // 높이의 44% 계산 (모든 화면 크기 공통)
                     const maskHeight = baseHeight * 0.44;
-                    
+
                     // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
                     footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
-                    
+
                     // 디버깅: 실제 디바이스에서 문제 파악을 위한 로그
                     if (window.innerWidth <= 1366) {
                         console.log('[Footer Mask Debug]', {
@@ -638,12 +638,12 @@ function animateFooterTitle() {
     const wrapper = document.querySelector('.footer-title-wrapper');
     if (!wrapper) return;
     const chars = wrapper.querySelectorAll('.footer-char');
-    
+
     // 애니메이션 완료 후 가림 영역 높이 조정 (애니메이션 시간 1.2초 + 약간의 여유)
     setTimeout(() => {
         adjustFooterMaskHeight();
     }, 1500);
-    
+
     chars.forEach((char, index) => {
         setTimeout(() => {
             char.classList.add('animate');
@@ -718,7 +718,7 @@ function rgbToString(rgb) {
 // Update color smoothly
 function updateColor() {
     colorTransition += 0.01; // Smooth transition speed
-    
+
     if (colorTransition >= 1) {
         colorTransition = 0;
         currentColorIndex = targetColorIndex;
@@ -727,9 +727,9 @@ function updateColor() {
             targetColorIndex = Math.floor(Math.random() * vividColors.length);
         } while (targetColorIndex === currentColorIndex);
     }
-    
+
     currentRGB = lerpColor(vividColors[currentColorIndex], vividColors[targetColorIndex], colorTransition);
-    
+
     if (cursorDot) {
         cursorDot.style.backgroundColor = rgbToString(currentRGB);
     }
@@ -750,26 +750,26 @@ if (cursorDot && ctx) {
     document.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
         mouseY = e.clientY;
-        
+
         // Move cursor dot immediately (no smoothing)
         cursorDot.style.left = mouseX + 'px';
         cursorDot.style.top = mouseY + 'px';
     });
-    
+
     document.addEventListener('mouseenter', () => {
         cursorDot.classList.remove('hidden');
     });
-    
+
     document.addEventListener('mouseleave', () => {
         cursorDot.classList.add('hidden');
     });
-    
+
     // Animation loop for trail
     function animateTrail() {
         // Smooth line position (lagging behind cursor)
         smoothX += (mouseX - smoothX) * smoothing;
         smoothY += (mouseY - smoothY) * smoothing;
-        
+
         // Add point for trail with smoothed position
         if (Math.abs(mouseX - smoothX) > 0.1 || Math.abs(mouseY - smoothY) > 0.1) {
             points.push({
@@ -778,23 +778,23 @@ if (cursorDot && ctx) {
                 life: trailLife,
                 color: [...currentRGB]
             });
-            
+
             // Limit points
             if (points.length > maxPoints) {
                 points.shift();
             }
         }
-        
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Draw continuous line with color gradient
         if (points.length > 2) {
             for (let i = 1; i < points.length; i++) {
                 const point = points[i];
                 const prevPoint = points[i - 1];
-                
+
                 ctx.beginPath();
-                
+
                 if (i === 1) {
                     ctx.moveTo(prevPoint.x, prevPoint.y);
                     ctx.lineTo(point.x, point.y);
@@ -803,7 +803,7 @@ if (cursorDot && ctx) {
                     ctx.moveTo((prevPrevPoint.x + prevPoint.x) / 2, (prevPrevPoint.y + prevPoint.y) / 2);
                     ctx.quadraticCurveTo(prevPoint.x, prevPoint.y, (prevPoint.x + point.x) / 2, (prevPoint.y + point.y) / 2);
                 }
-                
+
                 ctx.strokeStyle = rgbToString(point.color);
                 ctx.lineWidth = 4;
                 ctx.lineCap = 'round';
@@ -811,30 +811,34 @@ if (cursorDot && ctx) {
                 ctx.stroke();
             }
         }
-        
+
         // Update color smoothly
         updateColor();
-        
+
         // Decrease life and remove dead points
         points = points.filter(point => {
             point.life -= 1;
             return point.life > 0;
         });
-        
+
         requestAnimationFrame(animateTrail);
     }
-    
+
     animateTrail();
 }
 
-// Load projects from JSON
-let projectsData = [];
+// Load projects (Hardcoded for local file access)
+const projectsData = [
+    { "id": "1", "title": "boo 3d character", "category": "vibe", "size": "large", "thumbnail": "images/thumbnails/p1_boo.png", "link": "projects/vibe/boo3d/page.html" },
+    { "id": "2", "title": "tokyo", "category": "moment", "size": "large", "thumbnail": "images/thumbnails/p3_poster.png", "link": "projects/moment/tokyo/page.html" },
+    { "id": "3", "title": "chzzk logo glass effect", "category": "vibe", "size": "large", "thumbnail": "images/thumbnails/p2_logo.png", "link": "projects/vibe/chzzkcup/page.html" },
+    { "id": "4", "title": "emoji event horizon", "category": "vibe", "size": "large", "thumbnail": "images/thumbnails/p4_emoji.png", "link": "projects/vibe/emoji/page.html" }
+];
 
-async function loadProjects() {
+function loadProjects() {
     try {
-        const response = await fetch('data/projects.json');
-        projectsData = await response.json();
-        // 나중에 추가한 프로젝트가 앞에 오도록 역순 렌더
+        // projectsData is already defined above
+        // Reverse order for rendering (newest first)
         renderProjects(projectsData.slice().reverse());
         initProjectFeatures();
     } catch (error) {
@@ -846,7 +850,7 @@ async function loadProjects() {
 function renderProjects(projects) {
     const projectList = document.getElementById('project-list');
     if (!projectList) return;
-    
+
     if (!projects || projects.length === 0) {
         projectList.innerHTML = '';
         projectList.classList.remove('is-empty', 'is-filter-empty');
@@ -857,7 +861,7 @@ function renderProjects(projects) {
         restoreScrollPosition();
         return;
     }
-    
+
     projectList.classList.remove('is-empty', 'is-filter-empty');
     // 레이아웃: 큰-작은 / 작은-큰 반복 (인덱스 0,3=large / 1,2=small)
     projectList.innerHTML = projects.map((project, index) => {
@@ -878,10 +882,10 @@ function renderProjects(projects) {
         </article>
     `;
     }).join('');
-    
+
     // Animate project items after rendering
     animateProjectItems();
-    
+
     // 프로젝트 렌더링 완료 후 스크롤 위치 복원
     // 레이아웃이 완전히 계산되고 이미지 로딩이 시작된 후 복원
     // 여러 번의 requestAnimationFrame으로 레이아웃 계산 완료 보장
@@ -899,12 +903,12 @@ function renderProjects(projects) {
 function animateProjectItems() {
     const projectList = document.querySelector('.project-list');
     if (!projectList) return;
-    
+
     // Add animate class to list if not already animated
     if (!projectList.classList.contains('animate')) {
         projectList.classList.add('animate');
     }
-    
+
     // Animate each visible project item
     const visibleItems = projectList.querySelectorAll('.project-item:not(.hidden)');
     visibleItems.forEach((item, index) => {
@@ -927,22 +931,22 @@ function initProjectFeatures() {
 // Handle project click with navigation
 function initProjectNavigation() {
     const projectLinks = document.querySelectorAll('.project-link');
-    
+
     projectLinks.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             const href = link.getAttribute('href');
-            
+
             // Save scroll position before navigating
             const scrollY = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
             sessionStorage.setItem('scrollPosition', scrollY.toString());
-            
+
             // 디버깅용 (필요시 제거)
             console.log('스크롤 위치 저장:', scrollY);
-            
+
             // Mark that we're coming from home (for subpage header animation)
             sessionStorage.setItem('fromHome', 'true');
-            
+
             // Navigate immediately without header animation
             window.location.href = href;
         });
@@ -954,7 +958,7 @@ function restoreScrollPosition() {
     const savedPosition = sessionStorage.getItem('scrollPosition');
     if (savedPosition !== null && savedPosition !== '') {
         const position = parseInt(savedPosition, 10);
-        
+
         if (!isNaN(position) && position >= 0) {
             // 스크롤 위치 복원 (여러 방법 시도)
             if (window.scrollTo) {
@@ -969,10 +973,10 @@ function restoreScrollPosition() {
                 document.documentElement.scrollTop = position;
                 document.body.scrollTop = position;
             }
-            
+
             // 디버깅용 (필요시 제거)
             console.log('스크롤 위치 복원:', position);
-            
+
             // 복원 후 확인 (약간의 지연 후 실제 위치 확인)
             setTimeout(() => {
                 const actualPosition = window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
@@ -985,7 +989,7 @@ function restoreScrollPosition() {
                     });
                 }
             }, 200);
-            
+
             sessionStorage.removeItem('scrollPosition');
         } else {
             console.warn('유효하지 않은 스크롤 위치:', savedPosition);
@@ -998,21 +1002,21 @@ function restoreScrollPosition() {
 function initFilterMenu() {
     const filterBtns = document.querySelectorAll('.filter-btn');
     const projectList = document.getElementById('project-list');
-    
+
     filterBtns.forEach(btn => {
         btn.addEventListener('click', (e) => {
             e.preventDefault();
-            
+
             // Prevent layout shift by maintaining scroll position
             const scrollY = window.scrollY;
-            
+
             // Update active button
             filterBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
+
             const filter = btn.dataset.filter;
             const projectItems = projectList.querySelectorAll('.project-item');
-            
+
             // Record which items were visible and their positions
             const wasVisible = new Map();
             const positions = new Map();
@@ -1024,14 +1028,14 @@ function initFilterMenu() {
                     positions.set(item, { top: rect.top, left: rect.left });
                 }
             });
-            
+
             // 필터링 전: 보이는 아이템들의 크기와 위치 저장
             const visibleItemsBefore = Array.from(projectList.querySelectorAll('.project-item:not(.hidden)'));
             const oldSizes = new Map();
             visibleItemsBefore.forEach(item => {
                 oldSizes.set(item, item.getAttribute('data-size'));
             });
-            
+
             // Apply filter - 기존 아이템 유지하고 hidden만 토글
             projectItems.forEach(item => {
                 const shouldShow = filter === 'all' || item.dataset.category === filter;
@@ -1040,14 +1044,14 @@ function initFilterMenu() {
                 } else {
                     item.classList.add('hidden');
                 }
-                
+
                 // Show/hide category meta
                 const meta = item.querySelector('.project-meta');
                 if (meta) {
                     meta.style.opacity = filter === 'all' ? '0.6' : '0';
                 }
             });
-            
+
             // 필터링 후 보이는 아이템들에 대해 리스트 규칙 재적용 (all과 동일한 규칙)
             const visibleItemsAfter = Array.from(projectList.querySelectorAll('.project-item:not(.hidden)'));
             const sizeChanges = new Map();
@@ -1057,32 +1061,32 @@ function initFilterMenu() {
                 const oldSize = oldSizes.get(item);
                 sizeChanges.set(item, { oldSize, newLayoutSize, willChange: oldSize !== newLayoutSize });
             });
-            
+
             // Restore scroll position to prevent layout shift
             window.scrollTo(0, scrollY);
-            
+
             // FLIP 애니메이션: 크기와 위치를 동시에 재조정
             requestAnimationFrame(() => {
                 visibleItemsAfter.forEach((item, visibleIndex) => {
                     const wasVis = wasVisible.get(item);
                     const oldPos = positions.get(item);
                     const sizeChange = sizeChanges.get(item);
-                    
+
                     if (!wasVis || !oldPos) {
                         // 이전에 보이지 않았던 아이템은 페이드인만
                         // 크기 설정은 먼저 적용
                         if (sizeChange && sizeChange.willChange) {
                             item.setAttribute('data-size', sizeChange.newLayoutSize);
                         }
-                        
+
                         item.style.opacity = '0';
                         item.style.transform = 'translateY(20px)';
                         item.style.transition = 'opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
-                        
+
                         requestAnimationFrame(() => {
                             item.style.opacity = '1';
                             item.style.transform = '';
-                            
+
                             const thumb = item.querySelector('.project-thumb');
                             const info = item.querySelector('.project-info');
                             setTimeout(() => {
@@ -1096,35 +1100,35 @@ function initFilterMenu() {
                         });
                         return;
                     }
-                    
+
                     // 기존에 보이던 아이템: 크기와 위치를 동시에 FLIP 애니메이션
                     const hasSizeChange = sizeChange && sizeChange.willChange;
-                    
+
                     // 크기 변경을 먼저 적용하지 않고, 목표 크기로 변경한 상태에서 위치 계산
                     // 1단계: 목표 크기로 변경 (transition 없이, 레이아웃 재계산용)
                     if (hasSizeChange) {
                         item.style.transition = 'none';
                         item.setAttribute('data-size', sizeChange.newLayoutSize);
                     }
-                    
+
                     // 2단계: 크기 변경 후 새로운 위치 계산
                     const newRect = item.getBoundingClientRect();
                     const deltaX = oldPos.left - newRect.left;
                     const deltaY = oldPos.top - newRect.top;
                     const hasPositionChange = deltaX !== 0 || deltaY !== 0;
-                    
+
                     if (hasPositionChange || hasSizeChange) {
                         // 3단계: 크기를 원래대로 되돌리고, transform으로 이전 위치로 이동
                         if (hasSizeChange) {
                             // 크기를 원래 크기로 되돌림 (transition 없이)
                             item.setAttribute('data-size', sizeChange.oldSize);
                         }
-                        
+
                         // FLIP 애니메이션: 이전 위치에서 시작
                         item.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
                         item.style.transition = 'none';
                         item.style.opacity = '1';
-                        
+
                         requestAnimationFrame(() => {
                             requestAnimationFrame(() => {
                                 // 4단계: 목표 크기로 변경하고, transform을 제거하여 자연스럽게 이동
@@ -1143,7 +1147,7 @@ function initFilterMenu() {
                         item.style.transition = '';
                     }
                 });
-                
+
                 // 숨겨진 아이템 처리
                 projectItems.forEach(item => {
                     const shouldShow = filter === 'all' || item.dataset.category === filter;
@@ -1184,14 +1188,14 @@ function initThumbnailFallback() {
 // 3D Tilt + 그레이스케일→컬러 호버 효과 (모든 리스트 공통, desktop만)
 function initTiltEffect() {
     if (isTouchDevice) return;
-    
+
     const projectList = document.getElementById('project-list');
     if (!projectList) return;
-    
+
     const projectItems = projectList.querySelectorAll('.project-item');
     const easeSmooth = 'cubic-bezier(0.25, 0.1, 0.25, 1)';
     const grayscaleDefault = 'grayscale(0.4)';
-    
+
     // 다른 모든 썸네일을 그레이스케일로 (아웃 시 복원 누락 방지)
     function setOthersToGrayscale(exceptThumb) {
         projectItems.forEach((it) => {
@@ -1204,7 +1208,7 @@ function initTiltEffect() {
             }
         });
     }
-    
+
     function setAllToGrayscale() {
         projectItems.forEach((it) => {
             const t = it.querySelector('.project-thumb');
@@ -1216,13 +1220,13 @@ function initTiltEffect() {
             }
         });
     }
-    
+
     projectItems.forEach(item => {
         const thumb = item.querySelector('.project-thumb');
         if (!thumb) return;
         const isSmall = item.getAttribute('data-size') === 'small';
         const tiltStrength = isSmall ? 2.5 : 1.5;
-        
+
         item.addEventListener('mouseenter', () => {
             setOthersToGrayscale(thumb);
             thumb.style.animation = 'none';
@@ -1232,21 +1236,21 @@ function initTiltEffect() {
             thumb.style.transition = `transform 1s ${easeSmooth}, filter 1s ${easeSmooth}`;
             thumb.style.willChange = 'transform';
         });
-        
+
         item.addEventListener('mousemove', (e) => {
             const rect = thumb.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            
+
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            
+
             const rotateX = ((y - centerY) / centerY) * -tiltStrength;
             const rotateY = ((x - centerX) / centerX) * tiltStrength;
-            
+
             thumb.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
         });
-        
+
         item.addEventListener('mouseleave', () => {
             thumb.style.willChange = '';
             thumb.style.transition = `transform 1.2s ${easeSmooth}, filter 1.1s ${easeSmooth}`;
@@ -1254,7 +1258,7 @@ function initTiltEffect() {
             thumb.style.filter = grayscaleDefault;
         });
     });
-    
+
     // 커서가 문서 밖으로 나갔을 때도 전부 그레이스케일 복원
     document.body.addEventListener('mouseleave', setAllToGrayscale);
 }

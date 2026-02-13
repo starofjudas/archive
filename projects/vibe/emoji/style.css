@@ -1,0 +1,88 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;
+  /* 완전한 검정 배경 */
+  background: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 화면 중앙 SVG 로고 */
+.logo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: auto;
+  height: auto;
+  max-width: 90%;
+  z-index: 999;
+  /* 맨 위 레이어 */
+  pointer-events: none;
+}
+
+/* 별 요소 스타일 */
+.star {
+  position: fixed;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  animation: twinkle ease-in-out infinite;
+  filter: blur(0.3px);
+  /* 약간의 블러로 더 부드럽게 */
+}
+
+/* 별 깜빡임 애니메이션 - 부드러운 전환 */
+@keyframes twinkle {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  10% {
+    opacity: 0.2;
+    transform: scale(0.7);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  90% {
+    opacity: 0.2;
+    transform: scale(0.7);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+}
+
+canvas {
+  position: relative;
+  z-index: 0;
+}
+
+/* V5.0: 모바일 반응형 처리 */
+@media (max-width: 768px) {
+  .logo {
+    max-width: 95%;
+    /* 모바일에서는 더 넓게 */
+  }
+}
+
+/* UI Controls Removed for V4.0 Auto Outline Mode */
