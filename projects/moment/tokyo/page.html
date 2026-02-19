@@ -112,8 +112,8 @@
                 transform 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
 
-        body.loaded .nav-back,
-        body.header-ready .nav-back {
+        body.loaded.can-go-back .nav-back,
+        body.header-ready.can-go-back .nav-back {
             opacity: 1;
             width: auto;
             margin-right: 14px;
@@ -126,6 +126,15 @@
         .nav-back:hover {
             opacity: 1;
             text-decoration: line-through;
+        }
+
+        /* Hide back button by default if not from home */
+        .nav-back {
+            pointer-events: none;
+        }
+
+        body.can-go-back .nav-back {
+            pointer-events: auto;
         }
 
         .top-bar.transitioning .nav-back {
@@ -712,6 +721,7 @@
 
         if (fromHome) {
             sessionStorage.removeItem('fromHome');
+            document.body.classList.add('can-go-back');
         }
 
         if (skipHeaderAnimation) {

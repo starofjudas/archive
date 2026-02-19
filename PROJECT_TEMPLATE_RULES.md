@@ -227,3 +227,53 @@ function finishLoading() {
 - 로딩이 완료된 후(`finishLoading()` 함수 내)에 애니메이션을 트리거합니다.
 - 타이틀과 설명이 있는 모든 서브페이지에 적용됩니다.
 - 홈 화면의 프로젝트 아이템 등장 모션과 일관된 스타일을 유지합니다.
+
+## Smart Back Button 규칙
+
+서브페이지의 "BACK" 버튼은 홈 화면에서 진입했을 때만 노출합니다. 직접 URL로 접근하거나 새로고침한 경우에는 숨겨야 합니다.
+
+### 구현 방법
+
+#### CSS 템플릿
+```css
+/* 기본적으로 숨김 (pointer-events: none) */
+.nav-back {
+    /* ...기존 스타일... */
+    opacity: 0;
+    pointer-events: none;
+    /* ... */
+}
+
+/* loaded 또는 header-ready 상태이면서 can-go-back 클래스가 있어야 표시 */
+body.loaded.can-go-back .nav-back,
+body.header-ready.can-go-back .nav-back {
+    opacity: 1;
+    width: auto;
+    margin-right: 14px;
+}
+
+/* can-go-back 상태일 때만 클릭 허용 */
+body.can-go-back .nav-back {
+    pointer-events: auto;
+}
+```
+
+#### JavaScript 템플릿
+```javascript
+const fromHome = sessionStorage.getItem('fromHome');
+const skipHeaderAnimation = !fromHome;
+
+if (fromHome) {
+    sessionStorage.removeItem('fromHome');
+    document.body.classList.add('can-go-back'); // 플래그 클래스 추가
+}
+
+if (skipHeaderAnimation) {
+    document.body.classList.add('header-ready');
+}
+```
+
+### 중요 사항
+- `sessionStorage`의 `fromHome` 키를 사용하여 진입 경로를 확인합니다.
+- `body`에 `can-go-back` 클래스를 토글하여 CSS로 버튼 노출을 제어합니다.
+- 홈 화면(`archive/script.js`)에서는 프로젝트 클릭 시 `sessionStorage.setItem('fromHome', 'true')`를 실행해야 합니다.

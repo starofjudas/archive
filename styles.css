@@ -657,7 +657,7 @@ body.light-mode .cover-section.visible {
     }
 
     .site-footer {
-        margin-top: -4vw !important;
+        margin-top: -6vw !important;
     }
 }
 
@@ -1244,7 +1244,7 @@ body.light-mode .cover-section.visible {
     }
 
     .site-footer {
-        margin-top: 0 !important;
+        margin-top: -2vw !important;
         margin-bottom: 0 !important;
         padding: 0 !important;
         padding-bottom: 30px !important;

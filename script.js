@@ -96,7 +96,8 @@ let loadingFinished = false;
             // Create particles at the edge
             const now = Date.now();
             if (now - lastParticleTime > 15) {
-                const x = (window.innerWidth * progress) / 100;
+                // Use actual rendered width to sync with CSS transition
+                const x = progressFill.getBoundingClientRect().width;
                 createParticle(x);
                 createParticle(x);
                 if (Math.random() > 0.5) createParticle(x);
