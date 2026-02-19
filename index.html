@@ -1,23 +1,31 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
-    <script>document.title='archive';</script>
+    <script>document.title = 'archive';</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>archive</title>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Portfolio Archive">
+    <meta property="og:title" content="archive">
+    <meta property="og:description" content="Portfolio Archive">
+    <meta property="og:image" content="./og-image.png">
+    <meta property="og:url" content="./">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
+
 <body class="is-loading">
     <!-- Grain Effect -->
     <div class="grain"></div>
     <svg style="display: none;">
         <filter id="grain-filter">
-            <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch"/>
-            <feColorMatrix type="saturate" values="0"/>
+            <feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="4" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
         </filter>
     </svg>
 
@@ -32,28 +40,31 @@
     <!-- Custom Cursor -->
     <div class="cursor-dot"></div>
     <canvas class="cursor-trail"></canvas>
-    
+
     <!-- Top Navigation Bar -->
     <header class="top-bar">
         <div class="nav-left">
             <span class="nav-back">back</span>
-            <a href="/" class="logo" onclick="window.location.href = window.location.pathname + '?t=' + Date.now(); return false;">home</a>
+            <a href="/" class="logo"
+                onclick="window.location.href = window.location.pathname + '?t=' + Date.now(); return false;">home</a>
         </div>
         <button class="theme-toggle">
             <span class="theme-label">dark</span>
-            <svg class="theme-icon theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            <svg class="theme-icon theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
-            <svg class="theme-icon theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <circle cx="12" cy="12" r="5"/>
-                <line x1="12" y1="1" x2="12" y2="3"/>
-                <line x1="12" y1="21" x2="12" y2="23"/>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                <line x1="1" y1="12" x2="3" y2="12"/>
-                <line x1="21" y1="12" x2="23" y2="12"/>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+            <svg class="theme-icon theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
             </svg>
         </button>
     </header>
@@ -79,26 +90,27 @@
         <div class="sub-text-wrapper">
             <svg class="sub-text-svg" viewBox="0 0 1111 236" preserveAspectRatio="xMinYMin meet">
                 <text class="sub-line sub-line-1" x="0" y="94">there is no such thing as small change.</text>
-                <text class="sub-line sub-line-2" x="0" y="208">everything begins with a single, intentional line.</text>
+                <text class="sub-line sub-line-2" x="0" y="208">everything begins with a single, intentional
+                    line.</text>
             </svg>
             <div class="sub-text-mobile">
                 <p class="sub-text-line-1">there is no such thing as small change.</p>
                 <p class="sub-text-line-2">everything begins with a single, intentional line.</p>
             </div>
         </div>
-        
+
         <!-- Filter Menu -->
         <nav class="filter-menu">
             <button class="filter-btn active" data-filter="all">all</button>
             <button class="filter-btn" data-filter="vibe">vibe</button>
             <button class="filter-btn" data-filter="moment">moment</button>
         </nav>
-        
+
         <!-- Project List (loaded from JSON) -->
         <div class="project-list" id="project-list">
             <!-- Projects will be loaded dynamically -->
         </div>
-        
+
         <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-create-block">
@@ -120,4 +132,5 @@
 
     <script src="script.js"></script>
 </body>
+
 </html>

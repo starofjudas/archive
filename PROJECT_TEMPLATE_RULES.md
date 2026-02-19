@@ -277,3 +277,41 @@ if (skipHeaderAnimation) {
 - `sessionStorage`의 `fromHome` 키를 사용하여 진입 경로를 확인합니다.
 - `body`에 `can-go-back` 클래스를 토글하여 CSS로 버튼 노출을 제어합니다.
 - 홈 화면(`archive/script.js`)에서는 프로젝트 클릭 시 `sessionStorage.setItem('fromHome', 'true')`를 실행해야 합니다.
+
+## Open Graph (OG) 태그 규칙
+
+모든 페이지에서 사이트 공유 시 노출될 공통 정보(타이틀, 설명, 이미지)를 설정합니다.
+
+### 이미지 사양
+- **권장 사이즈:** 1200 x 630 픽셀 (1.91:1 비율)
+- **최소 사이즈:** 600 x 315 픽셀
+- **파일 위치:** archive 루트의 `og-image.png`
+
+### 구현 방법
+
+#### archive 루트 (index.html)
+```html
+<title>archive</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Portfolio Archive">
+<meta property="og:title" content="archive">
+<meta property="og:description" content="Portfolio Archive">
+<meta property="og:image" content="./og-image.png">
+<meta property="og:url" content="./">
+```
+
+#### 서브페이지 (page.html / index.html)
+`<head>` 태그 내에 다음 메타 태그를 포함합니다. 이미지 경로는 상대 경로를 사용합니다.
+
+```html
+<title>archive</title>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Portfolio Archive">
+<meta property="og:title" content="archive">
+<meta property="og:description" content="Portfolio Archive">
+<meta property="og:image" content="../../../og-image.png">
+```
+
+### 중요 사항
+- 모든 페이지에 동일한 `og:image` 경로(`og-image.png`)를 연결합니다.
+- 실제 배포 시에는 `og:image` 및 `og:url`에 절대 경로(도메인 포함)를 사용하는 것이 좋습니다.
