@@ -826,13 +826,13 @@ body.light-mode .cover-section.visible {
     display: none;
 }
 
-/* 큰-작은 / 작은-큰 번갈아 오는 그리드 (12칸 기준) */
+/* 큰-작은 / 작은-큰 번갈아 오는 그리드 (12칸 기준), 크기 차이 완화 */
 .project-item[data-size="large"] {
-    grid-column: span 8;
+    grid-column: span 7;
 }
 
 .project-item[data-size="small"] {
-    grid-column: span 4;
+    grid-column: span 5;
 }
 
 .project-item[data-size="medium"] {

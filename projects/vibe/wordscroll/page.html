@@ -1224,10 +1224,36 @@
                 analyser.connect(audioCtx.destination);
             }
 
+            function ensureAudioElement(preset) {
+                if (!preset.audio || audioElements[preset.audio]) return;
+                const url = getAudioUrl(preset.audio);
+                const el = new Audio(url);
+                el.crossOrigin = 'anonymous';
+                el.loop = false;
+                el.preload = 'auto';
+                el.addEventListener('error', () => { console.warn('오디오 로드 실패:', url); });
+                el.addEventListener('canplaythrough', () => {
+                    const g = document.getElementById('playGate');
+                    if (currentAudioEl === el && soundOn && (!g || g.classList.contains('is-dismissed'))) el.play().catch(() => {});
+                });
+                el.addEventListener('ended', () => {
+                    if (currentIndex < totalItems - 1) moveWords();
+                    else {
+                        currentIndex = 0;
+                        gsap.to(wordList, { yPercent: 0, duration: 0.6, ease: 'power3.out', onStart: () => updateEdgeWidth(0) });
+                    }
+                });
+                audioElements[preset.audio] = el;
+            }
+
+            function preloadAllGenreAudio() {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                Object.values(genrePresets).forEach(ensureAudioElement);
+            }
+
             function playGenreAudio(preset) {
                 if (!preset.audio) return;
-                const gate = document.getElementById('playGate');
-                if (gate && !gate.classList.contains('is-dismissed')) return;
 
                 audioReady = false;
                 if (currentAudioEl) {
@@ -1240,34 +1266,7 @@
                 initAudio();
                 if (audioCtx.state === 'suspended') audioCtx.resume();
 
-                if (!audioElements[preset.audio]) {
-                    const url = getAudioUrl(preset.audio);
-                    const el = new Audio(url);
-                    el.crossOrigin = 'anonymous';
-                    el.loop = false;
-                    el.preload = 'auto';
-                    el.addEventListener('error', () => {
-                        console.warn('오디오 로드 실패:', url);
-                    });
-                    el.addEventListener('canplaythrough', () => {
-                        const g = document.getElementById('playGate');
-                        if (currentAudioEl === el && soundOn && (!g || g.classList.contains('is-dismissed'))) el.play().catch(() => {});
-                    });
-                    el.addEventListener('ended', () => {
-                        if (currentIndex < totalItems - 1) {
-                            moveWords();
-                        } else {
-                            currentIndex = 0;
-                            gsap.to(wordList, {
-                                yPercent: 0,
-                                duration: 0.6,
-                                ease: 'power3.out',
-                                onStart: () => updateEdgeWidth(0),
-                            });
-                        }
-                    });
-                    audioElements[preset.audio] = el;
-                }
+                ensureAudioElement(preset);
 
                 currentAudioEl = audioElements[preset.audio];
                 currentAudioEl.volume = volumeLevel;
@@ -1279,11 +1278,18 @@
 
                 const g2 = document.getElementById('playGate');
                 if (!g2 || g2.classList.contains('is-dismissed')) {
-                    currentAudioEl.play().then(() => {
-                        audioReady = true;
-                    }).catch(() => {
-                        audioReady = false;
-                    });
+                    if (audioCtx.state === 'suspended') audioCtx.resume();
+                    let retries = 0;
+                    const maxRetries = 3;
+                    const tryPlay = () => {
+                        currentAudioEl.play().then(() => {
+                            audioReady = true;
+                        }).catch(() => {
+                            audioReady = false;
+                            if (retries < maxRetries) { retries++; setTimeout(tryPlay, 200); }
+                        });
+                    };
+                    tryPlay();
                 }
             }
 
@@ -1532,6 +1538,7 @@
             function unlockAudio() {
                 if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
                 if (soundOn && currentPreset.audio) playGenreAudio(currentPreset);
+                preloadAllGenreAudio();
             }
 
             // Play gate: 클릭 시 딤 제거 + 바로 재생
