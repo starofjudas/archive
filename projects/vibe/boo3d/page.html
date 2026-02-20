@@ -482,13 +482,28 @@
 
                 const now = Date.now();
                 if (now - lastParticleTime > 15) {
-                    const x = (window.innerWidth * currentProgress) / 100;
+                    const x = progressFill.getBoundingClientRect().width;
                     createParticle(x);
                     createParticle(x);
                     if (Math.random() > 0.5) createParticle(x);
                     lastParticleTime = now;
                 }
             }
+        }
+
+        let completionStarted = false;
+        function runCompleteTo100() {
+            if (completionStarted) return;
+            completionStarted = true;
+            clearInterval(progressInterval);
+            const completeInterval = setInterval(() => {
+                if (currentProgress < 100) {
+                    updateProgress(currentProgress + 2);
+                } else {
+                    clearInterval(completeInterval);
+                    finishLoading();
+                }
+            }, 20);
         }
 
         function finishLoading() {
@@ -507,27 +522,16 @@
             }, 300);
         }
 
-        // Gradual progress while loading
+        // Gradual progress (홈과 동일), load 또는 iframe 메시지 시 100% 완료
         let progressInterval = setInterval(() => {
             if (currentProgress < 90 && !loadingFinished) {
                 updateProgress(currentProgress + 1);
             }
         }, 30);
 
-        // Listen for loading complete message from iframe
+        window.addEventListener('load', runCompleteTo100);
         window.addEventListener('message', (e) => {
-            if (e.data.type === 'loadingComplete') {
-                clearInterval(progressInterval);
-
-                const completeInterval = setInterval(() => {
-                    if (currentProgress < 100) {
-                        updateProgress(currentProgress + 2);
-                    } else {
-                        clearInterval(completeInterval);
-                        finishLoading();
-                    }
-                }, 20);
-            }
+            if (e.data.type === 'loadingComplete') runCompleteTo100();
         });
 
         // Navigation - both back and home links

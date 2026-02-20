@@ -12,7 +12,10 @@
     <meta property="og:description" content="Portfolio Archive">
     <meta property="og:image" content="../../../og-image.png">
     <link rel="icon" type="image/svg+xml" href="../../../favicon.svg">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
         * {
             margin: 0;
             padding: 0;
@@ -22,21 +25,19 @@
         :root {
             --color-bg: #000000;
             --color-text: #ffffff;
-            --font-primary: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+            --color-accent: #00FFA3;
+            --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+            --bg-transition: 0.8s;
         }
 
         html {
             font-size: 16px;
-            /* 브라우저 스크롤바 숨김 (그라운드룰) */
             scrollbar-width: none;
-            /* Firefox */
             -ms-overflow-style: none;
-            /* IE and Edge */
         }
 
         html::-webkit-scrollbar {
             display: none;
-            /* Chrome, Safari, Opera */
         }
 
         body {
@@ -47,19 +48,52 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
-            /* 브라우저 스크롤바 숨김 (그라운드룰) */
             scrollbar-width: none;
-            /* Firefox */
             -ms-overflow-style: none;
-            /* IE and Edge */
         }
 
         body::-webkit-scrollbar {
             display: none;
-            /* Chrome, Safari, Opera */
         }
 
-        /* Navigation Bar - matches main page exactly */
+        /* ===== Background Image Layers ===== */
+        .bg-images {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .bg-images__layer {
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity var(--bg-transition) ease;
+
+        }
+
+        .bg-images__layer.active {
+            opacity: 1;
+        }
+
+        .bg-images__overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: -1;
+        }
+
+        /* ===== Navigation Bar ===== */
         .top-bar {
             position: fixed;
             top: 0;
@@ -90,6 +124,7 @@
             width: 0;
             margin-right: 0;
             overflow: hidden;
+            pointer-events: none;
             transition: opacity 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
                 width 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
                 margin-right 0.8s cubic-bezier(0.25, 0.1, 0.25, 1),
@@ -110,11 +145,6 @@
         .nav-back:hover {
             opacity: 1;
             text-decoration: line-through;
-        }
-
-        /* Hide back button by default if not from home */
-        .nav-back {
-            pointer-events: none;
         }
 
         body.can-go-back .nav-back {
@@ -141,7 +171,7 @@
             text-decoration: line-through;
         }
 
-        /* Title & Description - boo3d와 동일 위치/간격 */
+        /* ===== Title & Description ===== */
         .title-container {
             position: fixed;
             top: 5vw;
@@ -158,7 +188,6 @@
             color: inherit;
             margin-bottom: calc(1vw - 5px);
             line-height: 1.2;
-            /* 등장 모션 초기 상태 */
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
@@ -177,7 +206,6 @@
             color: rgba(255, 255, 255, 0.6);
             letter-spacing: -0.01em;
             margin-top: -0.3vw;
-            /* 등장 모션 초기 상태 */
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
@@ -193,33 +221,139 @@
             display: block;
         }
 
-        body.light-mode .title-container .description {
-            color: rgba(0, 0, 0, 0.6);
+        .title-container .hint {
+            font-size: max(11px, 0.6vw);
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.3);
+            letter-spacing: 0.05em;
+            margin-top: 1.2vw;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s,
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s;
         }
 
-        /* Light mode theme */
-        body.light-mode {
-            background-color: #ffffff;
-            color: #000000;
+        .title-container .hint.animate {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        body.light-mode .nav-back,
-        body.light-mode .nav-home {
-            color: #000000;
+        .hint--mobile {
+            display: none;
         }
 
-        /* Project Frame */
-        .project-frame {
+        @media (max-width: 768px) {
+            .hint--desktop {
+                display: none;
+            }
+
+            .hint--mobile {
+                display: block;
+            }
+        }
+
+        /* ===== Word Scroll Main ===== */
+        .looping-words-wrapper {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: none;
-            z-index: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: -1;
         }
 
-        /* Loading Progress Bar */
+        .looping-words {
+            height: 0.9em;
+            padding-left: 0.1em;
+            padding-right: 0.1em;
+            font-size: 11vw;
+            line-height: 0.9;
+            position: relative;
+        }
+
+        .looping-words__containers {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            overflow: visible;
+        }
+
+        .looping-words__list {
+            text-align: center;
+            text-transform: uppercase;
+            white-space: nowrap;
+            flex-flow: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            font-weight: 900;
+            list-style: none;
+            display: flex;
+            position: relative;
+        }
+
+        .looping-words__item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: default;
+        }
+
+        .looping-words__p {
+            margin: 0;
+            line-height: 0.9;
+        }
+
+        /* Fade gradient mask (비활성) */
+        .looping-words__fade {
+            display: none;
+        }
+
+        /* Corner selector frame */
+        .looping-words__selector {
+            pointer-events: none;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+        }
+
+        .looping-words__edge {
+            border-top: 0.035em solid var(--color-accent);
+            border-left: 0.035em solid var(--color-accent);
+            width: 0.125em;
+            height: 0.125em;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .looping-words__edge.is--2 {
+            left: auto;
+            right: 0;
+            transform: rotate(90deg);
+        }
+
+        .looping-words__edge.is--3 {
+            inset: auto 0 0 auto;
+            transform: rotate(180deg);
+        }
+
+        .looping-words__edge.is--4 {
+            top: auto;
+            bottom: 0;
+            transform: rotate(270deg);
+        }
+
+        /* ===== Loading ===== */
         .loading {
             position: fixed;
             top: 0;
@@ -314,27 +448,7 @@
             clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
         }
 
-        body.light-mode .loading {
-            background: #ffffff;
-        }
-
-        body.light-mode .progress-bar {
-            background: rgba(0, 0, 0, 0.1);
-        }
-
-        body.light-mode .progress-fill {
-            background: #000000;
-        }
-
-        body.light-mode .particle {
-            background: #000000 !important;
-        }
-
-        body.light-mode .particle.triangle {
-            border-bottom-color: #000000 !important;
-        }
-
-        body.is-loading .project-frame {
+        body.is-loading .looping-words-wrapper {
             opacity: 0;
         }
 
@@ -344,7 +458,12 @@
             pointer-events: none;
         }
 
-        /* Responsive - Tablet */
+        body.loaded .looping-words-wrapper {
+            opacity: 1;
+            transition: opacity 0.6s ease 0.2s;
+        }
+
+        /* ===== Responsive - Tablet ===== */
         @media (max-width: 1024px) {
             .top-bar {
                 padding: 3vw;
@@ -367,9 +486,13 @@
             .title-container .title {
                 white-space: normal;
             }
+
+            .looping-words {
+                font-size: 14vw;
+            }
         }
 
-        /* Responsive - Mobile */
+        /* ===== Responsive - Mobile ===== */
         @media (max-width: 768px) {
             .top-bar {
                 padding: 4vw;
@@ -396,9 +519,13 @@
             .nav-home:hover {
                 text-decoration: none !important;
             }
+
+            .looping-words {
+                font-size: 16vw;
+            }
         }
 
-        /* Responsive - Small Mobile */
+        /* ===== Responsive - Small Mobile ===== */
         @media (max-width: 480px) {
             .top-bar {
                 padding: 5vw;
@@ -421,11 +548,30 @@
             .nav-home:hover {
                 text-decoration: none !important;
             }
+
+            .looping-words {
+                font-size: 18vw;
+            }
         }
     </style>
 </head>
 
 <body class="is-loading">
+    <!-- Background Images -->
+    <div class="bg-images" data-bg-container>
+        <div class="bg-images__layer active" data-bg-index="0"></div>
+        <div class="bg-images__layer" data-bg-index="1"></div>
+        <div class="bg-images__layer" data-bg-index="2"></div>
+        <div class="bg-images__layer" data-bg-index="3"></div>
+        <div class="bg-images__layer" data-bg-index="4"></div>
+        <div class="bg-images__layer" data-bg-index="5"></div>
+        <div class="bg-images__layer" data-bg-index="6"></div>
+        <div class="bg-images__layer" data-bg-index="7"></div>
+        <div class="bg-images__layer" data-bg-index="8"></div>
+        <div class="bg-images__layer" data-bg-index="9"></div>
+    </div>
+    <div class="bg-images__overlay"></div>
+    <!-- Loading -->
     <div class="loading">
         <div class="progress-bar">
             <div class="progress-fill"></div>
@@ -433,6 +579,7 @@
         <div class="particle-container"></div>
     </div>
 
+    <!-- Navigation -->
     <header class="top-bar">
         <div class="nav-left">
             <a href="/" class="nav-back">← back</a>
@@ -440,17 +587,66 @@
         </div>
     </header>
 
+    <!-- Title & Description -->
     <div class="title-container">
-        <h1 class="title">chzzk logo glass effect</h1>
+        <h1 class="title">looping words</h1>
         <p class="description">
-            <span class="desc-line">three.js webgl transmission material.</span>
-            <span class="desc-line">interactive 3d glass refraction effect.</span>
+            <span class="desc-line">gsap vertical word loop animation.</span>
+            <span class="desc-line">elastic easing with corner frame selector.</span>
         </p>
+        <p class="hint hint--desktop">scroll or ↑↓ to navigate</p>
+        <p class="hint hint--mobile">swipe to navigate</p>
     </div>
 
-    <iframe src="index.html" class="project-frame" allowfullscreen></iframe>
+    <!-- Word Scroll Content -->
+    <div class="looping-words-wrapper">
+        <section class="looping-words">
+            <div class="looping-words__containers">
+                <ul data-looping-words-list class="looping-words__list">
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">GSAP</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Looping</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Words</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Selector</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Elastic</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Frame</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Motion</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Scroll</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Archive</p>
+                    </li>
+                    <li class="looping-words__item">
+                        <p class="looping-words__p">Design</p>
+                    </li>
+                </ul>
+            </div>
+            <div class="looping-words__fade"></div>
+            <div data-looping-words-selector class="looping-words__selector">
+                <div class="looping-words__edge"></div>
+                <div class="looping-words__edge is--2"></div>
+                <div class="looping-words__edge is--3"></div>
+                <div class="looping-words__edge is--4"></div>
+            </div>
+        </section>
+    </div>
 
     <script>
+        // ===== Smart Back Button (그라운드룰) =====
         const navBack = document.querySelector('.nav-back');
         const topBar = document.querySelector('.top-bar');
         const loading = document.querySelector('.loading');
@@ -472,6 +668,7 @@
             document.body.classList.add('header-ready');
         }
 
+        // ===== Particle System =====
         const shapes = ['circle', 'square', 'triangle', 'star', 'diamond'];
 
         function createParticle(x) {
@@ -487,10 +684,7 @@
             const shape = shapes[Math.floor(Math.random() * shapes.length)];
             particle.classList.add(shape);
 
-            const opacity = 1;
-            const isLight = document.body.classList.contains('light-mode');
-            particle.style.background = isLight ? '#000000' : '#ffffff';
-
+            particle.style.background = '#ffffff';
             particle.style.left = x + 'px';
             particle.style.top = '2px';
 
@@ -522,7 +716,7 @@
                 posX += velocityX;
                 posY += velocityY;
 
-                const fadeOpacity = (1 - prog) * opacity;
+                const fadeOpacity = (1 - prog);
                 const currentScale = scale * (1 - prog * 0.5);
 
                 particle.style.left = posX + 'px';
@@ -547,8 +741,10 @@
             if (progressFill) {
                 progressFill.style.width = currentProgress + '%';
 
+                // Create particles at the edge
                 const now = Date.now();
                 if (now - lastParticleTime > 15) {
+                    // Use actual rendered width to sync with CSS transition
                     const x = progressFill.getBoundingClientRect().width;
                     createParticle(x);
                     createParticle(x);
@@ -558,21 +754,7 @@
             }
         }
 
-        let completionStarted = false;
-        function runCompleteTo100() {
-            if (completionStarted) return;
-            completionStarted = true;
-            clearInterval(progressInterval);
-            const completeInterval = setInterval(() => {
-                if (currentProgress < 100) {
-                    updateProgress(currentProgress + 2);
-                } else {
-                    clearInterval(completeInterval);
-                    finishLoading();
-                }
-            }, 20);
-        }
-
+        // ===== Loading Flow =====
         function finishLoading() {
             if (loadingFinished) return;
             loadingFinished = true;
@@ -601,26 +783,45 @@
                     });
                 }
 
+                const hintElements = document.querySelectorAll('.title-container .hint');
+                hintElements.forEach(hint => {
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            hint.classList.add('animate');
+                        }, 300);
+                    });
+                });
+
+                // Word loop 시작
+                initLoopingWords();
+
                 setTimeout(() => {
                     loading.style.display = 'none';
                 }, 500);
             }, 300);
         }
 
+        // 자동 로딩 시뮬레이션 (iframe 없으므로)
         let progressInterval = setInterval(() => {
             if (currentProgress < 90 && !loadingFinished) {
                 updateProgress(currentProgress + 1);
+            } else {
+                clearInterval(progressInterval);
+                // 90% 이후 가속 완료
+                const completeInterval = setInterval(() => {
+                    if (currentProgress < 100) {
+                        updateProgress(currentProgress + 2);
+                    } else {
+                        clearInterval(completeInterval);
+                        finishLoading();
+                    }
+                }, 20);
             }
         }, 30);
 
-        window.addEventListener('load', runCompleteTo100);
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'loadingComplete') runCompleteTo100();
-        });
-
+        // ===== Navigation =====
         const navHome = document.querySelector('.nav-home');
 
-        // GitHub Pages 호환을 위한 홈 경로 계산
         function getHomePath() {
             const currentPath = window.location.pathname;
             const pathParts = currentPath.split('/').filter(p => p);
@@ -631,21 +832,14 @@
             return '/';
         }
 
-        // 백/홈 버튼 링크 설정
         const homePath = getHomePath();
-        if (navBack) {
-            navBack.setAttribute('href', homePath);
-        }
-        if (navHome) {
-            navHome.setAttribute('href', homePath);
-        }
+        if (navBack) navBack.setAttribute('href', homePath);
+        if (navHome) navHome.setAttribute('href', homePath);
 
         function navigateBack(e) {
             e.preventDefault();
             const homePath = getHomePath();
-
             topBar.classList.add('transitioning');
-
             setTimeout(() => {
                 window.location.href = homePath;
             }, 600);
@@ -654,26 +848,118 @@
         navBack.addEventListener('click', navigateBack);
         navHome.addEventListener('click', navigateBack);
 
-        window.addEventListener('message', (e) => {
-            if (e.data.type === 'theme') {
-                if (e.data.mode === 'light') {
-                    document.body.classList.add('light-mode');
-                } else {
-                    document.body.classList.remove('light-mode');
-                }
+        // ===== Looping Words Animation (GSAP) =====
+        function initLoopingWords() {
+            const wordList = document.querySelector('[data-looping-words-list]');
+            const edgeElement = document.querySelector('[data-looping-words-selector]');
+            const allItems = Array.from(wordList.children);
+            const totalItems = allItems.length;
+            const wordHeight = 100 / totalItems;
+            let currentIndex = 0;
+
+            // 배경 이미지 초기화 (랜덤 placeholder)
+            const bgLayers = document.querySelectorAll('.bg-images__layer');
+            bgLayers.forEach((layer, i) => {
+                layer.style.backgroundImage = `url('https://picsum.photos/1920/1080?random=${i + 1}')`;
+            });
+
+            // 배경 이미지 전환
+            function switchBackground(idx) {
+                bgLayers.forEach(layer => layer.classList.remove('active'));
+                if (bgLayers[idx]) bgLayers[idx].classList.add('active');
             }
-        });
 
-        const savedTheme = localStorage.getItem('theme');
-        const iframe = document.querySelector('.project-frame');
+            function updateEdgeWidth(targetIdx) {
+                const idx = (targetIdx !== undefined ? targetIdx : currentIndex) % totalItems;
+                const centerWord = allItems[idx];
+                const centerWordWidth = centerWord.getBoundingClientRect().width;
+                const listWidth = wordList.getBoundingClientRect().width;
+                const percentageWidth = (centerWordWidth / listWidth) * 100;
+                gsap.to(edgeElement, {
+                    width: `${percentageWidth}%`,
+                    duration: 0.5,
+                    ease: 'expo.out',
+                });
+                switchBackground(idx);
+            }
 
-        if (savedTheme === 'light') {
-            document.body.classList.add('light-mode');
-            iframe.addEventListener('load', () => {
-                if (iframe.contentWindow) {
-                    iframe.contentWindow.postMessage({ type: 'themeChange', mode: 'light' }, '*');
+            let isAnimating = false;
+
+            function moveWords() {
+                if (isAnimating || currentIndex >= totalItems - 1) return;
+                isAnimating = true;
+                currentIndex++;
+
+                gsap.to(wordList, {
+                    yPercent: -wordHeight * currentIndex,
+                    duration: 0.6,
+                    ease: 'power3.out',
+                    onStart: () => updateEdgeWidth(currentIndex),
+                    onComplete: () => { isAnimating = false; },
+                });
+            }
+
+            function moveWordsUp() {
+                if (isAnimating || currentIndex <= 0) return;
+                isAnimating = true;
+                currentIndex--;
+
+                gsap.to(wordList, {
+                    yPercent: -wordHeight * currentIndex,
+                    duration: 0.6,
+                    ease: 'power3.out',
+                    onStart: () => updateEdgeWidth(currentIndex),
+                    onComplete: () => { isAnimating = false; },
+                });
+            }
+
+            // 마우스 휠로 조작
+            document.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (e.deltaY > 0) {
+                    moveWords();
+                } else {
+                    moveWordsUp();
+                }
+            }, { passive: false });
+
+            // 키보드로 조작 (ArrowDown/ArrowUp)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown' || e.key === ' ') {
+                    e.preventDefault();
+                    moveWords();
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    moveWordsUp();
                 }
             });
+
+            // 모바일 터치 스와이프
+            let touchStartY = 0;
+            let touchStartTime = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+                touchStartTime = Date.now();
+            }, { passive: true });
+
+            document.addEventListener('touchend', (e) => {
+                const deltaY = touchStartY - e.changedTouches[0].clientY;
+                const deltaTime = Date.now() - touchStartTime;
+                const minDistance = 30;
+                const maxTime = 500;
+
+                if (Math.abs(deltaY) > minDistance && deltaTime < maxTime) {
+                    if (deltaY > 0) {
+                        moveWords();
+                    } else {
+                        moveWordsUp();
+                    }
+                }
+            }, { passive: true });
+
+            // 초기 프레임 너비 설정
+            updateEdgeWidth();
         }
     </script>
 </body>

@@ -549,13 +549,28 @@
                 progressFill.style.width = currentProgress + '%';
                 const now = Date.now();
                 if (now - lastParticleTime > 15) {
-                    const x = (window.innerWidth * currentProgress) / 100;
+                    const x = progressFill.getBoundingClientRect().width;
                     createParticle(x);
                     createParticle(x);
                     if (Math.random() > 0.5) createParticle(x);
                     lastParticleTime = now;
                 }
             }
+        }
+
+        let completionStarted = false;
+        function runCompleteTo100() {
+            if (completionStarted) return;
+            completionStarted = true;
+            clearInterval(progressInterval);
+            const completeInterval = setInterval(() => {
+                if (currentProgress < 100) {
+                    updateProgress(currentProgress + 2);
+                } else {
+                    clearInterval(completeInterval);
+                    finishLoading();
+                }
+            }, 20);
         }
 
         function finishLoading() {
@@ -594,19 +609,9 @@
             }
         }, 30);
 
-        // Listen for iframe loading
+        window.addEventListener('load', runCompleteTo100);
         const iframe = document.querySelector('.project-frame');
-        iframe.onload = function () {
-            clearInterval(progressInterval);
-            const completeInterval = setInterval(() => {
-                if (currentProgress < 100) {
-                    updateProgress(currentProgress + 2);
-                } else {
-                    clearInterval(completeInterval);
-                    finishLoading();
-                }
-            }, 20);
-        };
+        if (iframe) iframe.onload = runCompleteTo100;
 
         const navHome = document.querySelector('.nav-home');
         function getHomePath() {

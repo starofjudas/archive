@@ -591,13 +591,28 @@
 
                 const now = Date.now();
                 if (now - lastParticleTime > 15) {
-                    const x = (window.innerWidth * currentProgress) / 100;
+                    const x = progressFill.getBoundingClientRect().width;
                     createParticle(x);
                     createParticle(x);
                     if (Math.random() > 0.5) createParticle(x);
                     lastParticleTime = now;
                 }
             }
+        }
+
+        let completionStarted = false;
+        function runCompleteTo100() {
+            if (completionStarted) return;
+            completionStarted = true;
+            clearInterval(progressInterval);
+            const completeInterval = setInterval(() => {
+                if (currentProgress < 100) {
+                    updateProgress(currentProgress + 2);
+                } else {
+                    clearInterval(completeInterval);
+                    finishLoading();
+                }
+            }, 20);
         }
 
         function finishLoading() {
@@ -640,19 +655,9 @@
             }
         }, 30);
 
+        window.addEventListener('load', runCompleteTo100);
         window.addEventListener('message', (e) => {
-            if (e.data.type === 'loadingComplete') {
-                clearInterval(progressInterval);
-
-                const completeInterval = setInterval(() => {
-                    if (currentProgress < 100) {
-                        updateProgress(currentProgress + 2);
-                    } else {
-                        clearInterval(completeInterval);
-                        finishLoading();
-                    }
-                }, 20);
-            }
+            if (e.data.type === 'loadingComplete') runCompleteTo100();
         });
 
         const navHome = document.querySelector('.nav-home');
