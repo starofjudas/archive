@@ -744,7 +744,7 @@
             }
 
             .looping-words {
-                font-size: 14vw;
+                font-size: min(14vw, 11.5vw + 1rem); /* 긴 단어 수용 */
             }
         }
 
@@ -777,7 +777,7 @@
             }
 
             .looping-words {
-                font-size: 16vw;
+                font-size: min(16vw, 12vw + 0.5rem); /* 모바일 긴 단어 */
             }
         }
 
@@ -806,7 +806,7 @@
             }
 
             .looping-words {
-                font-size: 18vw;
+                font-size: min(18vw, 10.5vw + 0.25rem); /* 소형 모바일 */
             }
         }
     </style>
@@ -1341,6 +1341,7 @@
                 const w = window.innerWidth;
                 const h = window.innerHeight;
                 const centerY = h / 2;
+                const waveAmpScale = w <= 768 ? 0.45 : 1;
                 ctx.clearRect(0, 0, w, h);
 
                 const [tr, tg, tb] = hexToRgb(currentPreset.color || '#00FFA3');
@@ -1467,7 +1468,7 @@
 
                     const points = [];
                     for (let i = 0; i <= POINTS; i++) {
-                        points.push({ x: (i / POINTS) * w, y: centerY + (pv[i] - mean) * 1.2 });
+                        points.push({ x: (i / POINTS) * w, y: centerY + (pv[i] - mean) * 1.2 * waveAmpScale });
                     }
 
                     if (points.length) {
