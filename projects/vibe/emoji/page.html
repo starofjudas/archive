@@ -610,8 +610,9 @@
         }, 30);
 
         window.addEventListener('load', runCompleteTo100);
-        const iframe = document.querySelector('.project-frame');
-        if (iframe) iframe.onload = runCompleteTo100;
+        window.addEventListener('message', (e) => {
+            if (e.data && e.data.type === 'loadingComplete') runCompleteTo100();
+        });
 
         const navHome = document.querySelector('.nav-home');
         function getHomePath() {

@@ -461,11 +461,6 @@
             }
         });
 
-        // 주기적으로 테마 확인 (같은 탭에서의 변경 감지)
-        setInterval(() => {
-            applyTheme();
-        }, 500);
-
         // iframe에 테마 전달
         const iframe = document.querySelector('.project-frame');
         if (iframe) {

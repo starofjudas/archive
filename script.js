@@ -610,24 +610,7 @@ function adjustFooterMaskHeight() {
                     // CSS 변수로 설정 (CSS에서 var(--mask-height)로 사용)
                     footerCreateBlock.style.setProperty('--mask-height', maskHeight + 'px');
 
-                    // 디버깅: 실제 디바이스에서 문제 파악을 위한 로그
-                    if (window.innerWidth <= 1366) {
-                        console.log('[Footer Mask Debug]', {
-                            screenWidth: window.innerWidth,
-                            screenHeight: window.innerHeight,
-                            viewportWidth: document.documentElement.clientWidth,
-                            viewportHeight: document.documentElement.clientHeight,
-                            actualHeight: actualHeight,
-                            wrapperHeight: wrapperHeight,
-                            baseHeight: baseHeight,
-                            maskHeight: maskHeight,
-                            percentage: (maskHeight / baseHeight * 100).toFixed(2) + '%',
-                            devicePixelRatio: window.devicePixelRatio,
-                            fontSize: window.getComputedStyle(footerTitleWrapper.querySelector('.footer-char')).fontSize,
-                            lineHeight: window.getComputedStyle(footerTitleWrapper.querySelector('.footer-char')).lineHeight,
-                            userAgent: navigator.userAgent
-                        });
-                    }
+
                 }
             }, 50); // 실제 디바이스에서 렌더링 완료를 위한 추가 지연
         });
@@ -828,24 +811,16 @@ if (cursorDot && ctx) {
     animateTrail();
 }
 
-// Load projects (Hardcoded for local file access)
-const projectsData = [
-    { "id": "1", "title": "boo 3d character", "category": "vibe", "size": "large", "thumbnail": "images/thumbnails/p1_boo.png", "link": "projects/vibe/boo3d/page.html" },
-    { "id": "2", "title": "tokyo", "category": "moment", "size": "large", "thumbnail": "images/thumbnails/p3_poster.png", "link": "projects/moment/tokyo/page.html" },
-    { "id": "3", "title": "chzzk logo glass effect", "category": "vibe", "size": "large", "thumbnail": "images/thumbnails/p2_logo.png", "link": "projects/vibe/chzzkcup/page.html" },
-    { "id": "4", "title": "emoji event horizon", "category": "vibe", "size": "large", "thumbnail": "images/thumbnails/p4_emoji.png", "link": "projects/vibe/emoji/page.html" },
-    { "id": "5", "title": "sound as shape", "category": "vibe", "size": "large", "thumbnail": "images/thumbnails/p5_soundasshape.png", "link": "projects/vibe/wordscroll/page.html" }
-];
-
 function loadProjects() {
-    try {
-        // projectsData is already defined above
-        // Reverse order for rendering (newest first)
-        renderProjects(projectsData.slice().reverse());
-        initProjectFeatures();
-    } catch (error) {
-        console.error('Failed to load projects:', error);
-    }
+    fetch('data/projects.json')
+        .then(res => res.json())
+        .then(data => {
+            renderProjects(data.slice().reverse());
+            initProjectFeatures();
+        })
+        .catch(error => {
+            console.error('Failed to load projects:', error);
+        });
 }
 
 // Render projects to DOM
@@ -1177,7 +1152,7 @@ function initFilterMenu() {
 function initThumbnailFallback() {
     const thumbs = document.querySelectorAll('.project-thumb:not([data-thumb="color"])');
     thumbs.forEach((thumb) => {
-        const bgImage = thumb.style.backgroundImage;
+        const bgImage = getComputedStyle(thumb).backgroundImage;
         if (!bgImage || bgImage === 'none' || bgImage.includes('undefined')) {
             const randomId = Math.floor(Math.random() * 1000);
             thumb.style.backgroundImage = `url('https://picsum.photos/seed/${randomId}/800/450?grayscale')`;
